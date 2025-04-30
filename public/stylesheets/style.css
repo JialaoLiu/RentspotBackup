@@ -96,6 +96,12 @@ input[type=text], input[type=password] {
   box-sizing: border-box;
 }
 
+input[type=radio], input[type=date] {
+  display: inline-block;
+  padding: 12px 200px;
+  margin: 8px 0;
+}
+
 button {
   background-color: #04AA6D;
   color: white;
@@ -135,6 +141,10 @@ img.avatar {
 
 /* The "Forgot password" text */
 span.psw {
+  float: right;
+}
+
+span.SI {
   float: right;
   padding-top: 16px;
 }
