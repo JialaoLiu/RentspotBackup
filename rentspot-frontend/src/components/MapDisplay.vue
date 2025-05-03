@@ -1,7 +1,7 @@
 <template>
   <div class="mt-8 px-4">
     <h2 class="text-xl font-semibold mb-4 text-gray-800">Map Preview</h2>
-    <div ref="mapContainer" class="w-full h-96 rounded-lg shadow-inner" />
+    <div ref="mapContainer" style="width: 600px; height: 400px; margin: 0 auto; border: 1px solid #ccc; border-radius: 8px;" />
   </div>
 </template>
 
