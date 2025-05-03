@@ -1,6 +1,10 @@
 
 /* main.html */
-
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fffeef;
+}
 /* ============================================== */
 /* Login */
 form {
