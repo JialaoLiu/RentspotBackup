@@ -50,7 +50,7 @@
 
 .connect {
   display: flex;
-  /* gap: 2rem; */
+  gap: 2rem;
   justify-content: flex-end;
 }
 
