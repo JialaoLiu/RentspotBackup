@@ -76,4 +76,107 @@ button:focus-visible {
   }
 }
 
-/* ===================Nabige Bar================ */
+/* Login-Signin */
+.login-form {
+  border: 3px solid #f1f1f1;
+  margin: 50px auto;
+  padding: 20px;
+  max-width: 600px;
+  width: 90%;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.signin-form {
+  border: 3px solid #f1f1f1;
+  margin: 50px auto;
+  padding: 20px;
+  max-width: 600px;
+  width: 90%;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+/* Full-width inputs */
+input[type=text], input[type=password], input[type=email] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+input[type=radio], input[type=date] {
+  display: inline-block;
+  padding: 12px 200px;
+  margin: 8px 0;
+}
+
+button {
+  background-color: #7195c5;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover{
+  opacity: 0.8;
+}
+
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+/* Center the avatar image inside this container */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+}
+
+/* Avatar image */
+img.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+/* Add padding to containers */
+.container {
+  padding: 16px;
+}
+
+/* The "Forgot password" text */
+span.psw {
+  float: right;
+}
+
+span.SI {
+  float: right;
+  padding-top: 16px;
+}
+
+.login.social {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  width: 100%;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  color: black;
+}
+
+.login.social i {
+  position: absolute;
+  left: 16px;
+  font-size: 20px;
+}
+
