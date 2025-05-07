@@ -12,8 +12,8 @@
         <li><a href="#">Feedback</a></li>
       </div>
       <div class="connect">
-        <li><a href="#">Login</a></li>
-        <li><a href="#">Register</a></li>
+        <li><router-link to="/login">Login</router-link></li>
+        <li><router-link to="/signin">Register</router-link></li>
       </div>
     </ul>
   </nav>
