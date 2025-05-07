@@ -17,3 +17,14 @@
 <script setup>
 // Footer component — static content
 </script>
+
+<style>
+footer {
+  background-color: black;
+  color: white;
+}
+
+.space-x-4 a {
+  margin-left: 1rem;
+}
+</style>
