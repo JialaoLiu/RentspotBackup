@@ -23,7 +23,7 @@
 
 <style scoped>
 .navbar {
-  background-color: #f8f8f8;
+  background-color: black;
   padding: 1rem;
 }
 
@@ -56,7 +56,7 @@
 
 .navbar a {
   text-decoration: none;
-  color: #333;
+  color: white;
   font-weight: 500;
 }
 
