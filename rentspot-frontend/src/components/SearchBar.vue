@@ -12,9 +12,8 @@
       />
 
       <div class="filter-buttons">
-        <button>Property type</button>
-        <button>Price</button>
-        <button>Filters</button>
+        <button >Filters</button>
+        <button id="search-button">Search</button>
       </div>
     </form>
   </div>
@@ -92,5 +91,19 @@ function handleSearch() {
 
 .filter-buttons button:hover {
   opacity: 0.8;
+}
+
+#search-button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#search-button:hover {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
 }
 </style>
