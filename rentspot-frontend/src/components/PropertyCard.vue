@@ -15,8 +15,11 @@ defineProps({
   title: String,
   address: String,
   price: Number,
-  image: String
+  image: String,
+  bedrooms: Number,
+  bathrooms: Number
 })
+
 </script>
 
 <style scoped>
@@ -62,3 +65,11 @@ defineProps({
   margin-top: 8px;
 }
 </style>
+=======
+
+function handleImageError(e) {
+  // Fallback image if the property image fails to load
+  e.target.src = 'https://via.placeholder.com/400x300?text=Property+Image'
+}
+</script>
+
