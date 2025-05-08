@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="property-list px-4 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <div
       v-for="(property, index) in properties"
       :key="index"
@@ -48,3 +48,12 @@ const properties = [
   }
 ]
 </script>
+
+<style scoped>
+.property-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+</style>
