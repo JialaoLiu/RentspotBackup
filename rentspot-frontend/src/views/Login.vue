@@ -17,7 +17,7 @@
           <input type="checkbox" checked="checked" name="remember"> Remember me
         </label>
 
-        <button type="submit">Login</button>
+        <router-link to="/User.vue"><button type="submit">Login</button></router-link>
 
         <div style="width: 100%; text-align: center; border-bottom: 1px solid #ccc; line-height: 0; margin: 20px 0;">
           <span style="background: white; padding: 0 10px;">or</span>
