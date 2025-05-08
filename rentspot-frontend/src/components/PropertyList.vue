@@ -1,50 +1,49 @@
 <template>
-  <div class="px-4 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div
-      v-for="(property, index) in properties"
-      :key="index"
-      @click="() => emit('focus-map', { lat: property.lat, lng: property.lng })"
-    >
-      <PropertyCard
-        :title="property.title"
-        :address="property.address"
-        :price="property.price"
-        :image="property.image"
-      />
+  <div style="padding: 0 20px; margin-top: 20px;">
+    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">Available Properties</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+      <div
+        v-for="(property, index) in properties"
+        :key="index"
+        @click="() => selectProperty(property)"
+        style="cursor: pointer; transition: transform 0.2s; border: 2px solid transparent;"
+        :style="property.id === selectedPropertyId ? 'border-color: #3b82f6; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);' : ''"
+      >
+        <PropertyCard
+          :title="property.title"
+          :address="property.address"
+          :price="property.price"
+          :image="property.image"
+          :bedrooms="property.bedrooms"
+          :bathrooms="property.bathrooms"
+        />
+      </div>
+    </div>
+
+    <div v-if="properties.length === 0" style="text-align: center; padding: 40px 0;">
+      <p style="color: #6b7280;">No properties found matching your criteria.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineEmits } from 'vue'
 import PropertyCard from './PropertyCard.vue'
+
+defineProps({
+  properties: {
+    type: Array,
+    default: () => []
+  },
+  selectedPropertyId: {
+    type: [Number, String],
+    default: null
+  }
+})
 
 const emit = defineEmits(['focus-map'])
 
-const properties = [
-  {
-    title: 'Modern Apartment in CBD',
-    address: '123 King William St, Adelaide',
-    price: 480,
-    image: 'https://source.unsplash.com/random/800x600/?apartment',
-    lat: -34.925,
-    lng: 138.6007
-  },
-  {
-    title: 'Spacious House with Garden',
-    address: '55 Greenhill Rd, Parkside',
-    price: 620,
-    image: 'https://source.unsplash.com/random/800x601/?house',
-    lat: -34.944,
-    lng: 138.618
-  },
-  {
-    title: 'Cozy Studio near Uni',
-    address: '8 Frome Rd, Adelaide',
-    price: 380,
-    image: 'https://source.unsplash.com/random/800x602/?studio',
-    lat: -34.917,
-    lng: 138.607
-  }
-]
+function selectProperty(property) {
+  emit('focus-map', property)
+}
 </script>
