@@ -1,7 +1,11 @@
-
 <template>
   <div class="property-card">
-    <img :src="image" alt="Property Image" class="property-image" />
+    <img
+      :src="image"
+      alt="Property Image"
+      class="property-image"
+      @error="handleImageError"
+    />
     <div class="property-details">
       <h3 class="property-title">{{ title }}</h3>
       <p class="property-address">{{ address }}</p>
@@ -20,6 +24,10 @@ defineProps({
   bathrooms: Number
 })
 
+function handleImageError(e) {
+  // Fallback image if the property image fails to load
+  e.target.src = 'https://via.placeholder.com/400x300?text=Property+Image'
+}
 </script>
 
 <style scoped>
@@ -34,7 +42,7 @@ defineProps({
 .property-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-  border: 1px solid black;;
+  border: 1px solid black;
 }
 
 .property-image {
@@ -65,11 +73,3 @@ defineProps({
   margin-top: 8px;
 }
 </style>
-=======
-
-function handleImageError(e) {
-  // Fallback image if the property image fails to load
-  e.target.src = 'https://via.placeholder.com/400x300?text=Property+Image'
-}
-</script>
-
