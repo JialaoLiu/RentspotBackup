@@ -2,11 +2,11 @@
   <nav class="navbar">
     <ul>
       <div class="logo">
-        <li><a href="#">RentSpot AU</a></li>
+        <li><router-link to="/">RentSpot AU</router-link></li>
       </div>
       <div class="menu">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Entire Rent</a></li>
+        <li><router-link to="/">Home</router-link></li>
+        <li><router-link to="/rentlist">Entire Rent</router-link></li>
         <li><a href="#">Shared Rent</a></li>
         <li><a href="#">News</a></li>
         <li><a href="#">Feedback</a></li>
@@ -18,8 +18,6 @@
     </ul>
   </nav>
 </template>
-
-
 
 <style scoped>
 .navbar {
@@ -34,7 +32,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  /* gap: 2rem; 你可以根据需要调整间距 */
 }
 
 .menu {
