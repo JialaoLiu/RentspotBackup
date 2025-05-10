@@ -21,6 +21,20 @@
       />
       -->
     </div>
+    
+    <!-- Blog Section -->
+    <div style="margin-top: 40px;">
+      <h2>Blogs</h2>
+      <div v-if="loadingBlogs" style="text-align: center; margin: 20px 0;">
+        <p>Loading blogs...</p>
+      </div>
+      <div v-else-if="errorBlogs" style="background-color: #ffebee; border: 1px solid #f44336; color: #b71c1c; padding: 12px; border-radius: 4px; margin: 20px 0;">
+        {{ errorBlogs }}
+      </div>
+      <div v-else>
+        <BlogList :blogs="blogs" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -33,6 +47,8 @@ import SearchBar from '../components/SearchBar.vue'
 import MapDisplay from '../components/MapDisplay.vue'
 // Keep the import but comment out its usage below
 import PropertyList from '../components/PropertyList.vue'
+import { fetchBlogs } from '../services/BlogService.js'
+import BlogList from '../components/BlogList.vue'
 
 const router = useRouter()
 const properties = ref([])
@@ -40,6 +56,11 @@ const loading = ref(false) // Changed to false since we're not loading propertie
 const error = ref(null)
 const mapRef = ref(null)
 const selectedPropertyId = ref(null)
+
+// States for managing blogs
+const blogs = ref([])
+const loadingBlogs = ref(false)
+const errorBlogs = ref(null)
 
 // Comment out this function instead of removing it
 /*
@@ -57,6 +78,20 @@ async function loadProperties() {
   }
 }
 */
+
+async function loadBlogs() {
+  loadingBlogs.value = true
+  errorBlogs.value = null
+
+  try {
+    blogs.value = await fetchBlogs()
+  } catch (err) {
+    errorBlogs.value = 'Failed to load blogs. Please try again later.'
+    console.error(err)
+  } finally {
+    loadingBlogs.value = false
+  }
+}
 
 function handleSearch(searchParams) {
   console.log('Search params:', searchParams)
@@ -84,6 +119,9 @@ function handleFocusMap(property) {
 onMounted(() => {
   // Remove the loadProperties call since we're not showing properties on home page anymore
   // loadProperties()
+  
+  // Load blogs on component mount
+  loadBlogs()
   
   // Initialize map if needed
   if (mapRef.value) {
