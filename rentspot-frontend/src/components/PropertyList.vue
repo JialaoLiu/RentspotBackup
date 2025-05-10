@@ -1,20 +1,4 @@
 <template>
-  <h2>Exploring Property:</h2>
-  <div class="property-list px-4 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div
-      v-for="(property, index) in properties"
-      :key="index"
-      @click="() => emit('focus-map', { lat: property.lat, lng: property.lng })"
-    >
-      <PropertyCard
-        :title="property.title"
-        :address="property.address"
-        :price="property.price"
-        :image="property.image"
-      />
-    </div>
-  </div>
-
   <div style="padding: 0 20px; margin-top: 20px;">
     <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">Available Properties</h2>
 
