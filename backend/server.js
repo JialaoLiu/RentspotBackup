@@ -26,11 +26,21 @@ app.use(cors(corsOptions));
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // Start the Server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+});
+
+// Root route
+app.get('/', (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  res.send(`
+    RentSpot API Server is running. Use the frontend application to access the user interface.
+    <br><br>
+    Frontend allowed origin: <a href="${frontendUrl}" style="color: blue; text-decoration: underline;">${frontendUrl}</a>
+  `);
 });
