@@ -12,12 +12,64 @@
         <li><a href="#">Feedback</a></li>
       </div>
       <div class="connect">
-        <li><router-link to="/login">Login</router-link></li>
-        <li><router-link to="/signin">Register</router-link></li>
+        <li v-if="!isLoggedIn">
+          <router-link to="/login">Login</router-link>
+        </li>
+        <li v-if="!isLoggedIn">
+          <router-link to="/signin">Register</router-link>
+        </li>
+        <li v-else>
+          <a href="#" @click="handleLogout">Logout</a>
+        </li>
+        <li v-else>
+          <router-link to="/profile">Profile</router-link>
+        </li>
       </div>
     </ul>
   </nav>
 </template>
+
+<script>
+import { ref, onMounted, watch } from 'vue';
+
+export default {
+  name: 'Navbar',
+  setup() {
+    const isLoggedIn = ref(false);
+
+    // Check login status
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem('token');
+      isLoggedIn.value = !!token; // If token exists, user is logged in
+    };
+
+    // Logout functionality
+    const handleLogout = () => {
+      localStorage.removeItem('token'); // Remove token from localStorage
+      isLoggedIn.value = false; // Update login state
+      alert('You have been logged out!');
+    };
+
+    // Watch for changes in localStorage (in case login state changes elsewhere)
+    watch(
+      () => localStorage.getItem('token'),
+      () => {
+        checkLoginStatus();
+      }
+    );
+
+    // Check login status on mount
+    onMounted(() => {
+      checkLoginStatus();
+    });
+
+    return {
+      isLoggedIn,
+      handleLogout,
+    };
+  },
+};
+</script>
 
 <style scoped>
 .navbar {
