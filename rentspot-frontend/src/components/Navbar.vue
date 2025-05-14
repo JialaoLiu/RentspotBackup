@@ -25,7 +25,8 @@
     <a href="#" @click="handleLogout">Logout</a>
   </li>
   <li>
-    <router-link to="/profile">Profile</router-link>
+    <router-link to="/userprofile:id',
+">Profile</router-link>
   </li>
 </template>
         <!-- <li v-if="!isLoggedIn">
