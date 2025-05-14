@@ -7,12 +7,28 @@
       <div class="menu">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/rentlist">Entire Rent</router-link></li>
-        <li><a href="#">Shared Rent</a></li>
+        <!-- <li><a href="#">Shared Rent</a></li> -->
         <li><a href="#">News</a></li>
         <li><a href="#">Feedback</a></li>
       </div>
       <div class="connect">
-        <li v-if="!isLoggedIn">
+        <template v-if="!isLoggedIn">
+        <li>
+    <router-link to="/login">Login</router-link>
+  </li>
+  <li>
+    <router-link to="/signin">Register</router-link>
+  </li>
+</template>
+<template v-else>
+  <li>
+    <a href="#" @click="handleLogout">Logout</a>
+  </li>
+  <li>
+    <router-link to="/profile">Profile</router-link>
+  </li>
+</template>
+        <!-- <li v-if="!isLoggedIn">
           <router-link to="/login">Login</router-link>
         </li>
         <li v-if="!isLoggedIn">
@@ -23,7 +39,7 @@
         </li>
         <li v-else>
           <router-link to="/profile">Profile</router-link>
-        </li>
+        </li> -->
       </div>
     </ul>
   </nav>
