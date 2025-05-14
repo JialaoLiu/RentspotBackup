@@ -10,7 +10,7 @@ const router = express.Router();
 // Helper function to verify CAPTCHA
 // [CAPTCHA ADDED]
 async function verifyCaptcha(captchaToken) {
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY; // Add this to your .env file
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
   const verificationUrl = `https://www.google.com/recaptcha/api/siteverify`;
 
   try {
@@ -21,12 +21,24 @@ async function verifyCaptcha(captchaToken) {
       },
     });
 
-    return response.data.success; // Returns true if CAPTCHA is valid
+    const result = response.data;
+
+    // log
+    console.log('reCAPTCHA result:', result);
+
+    // check score
+    if (!result.success || result.action !== 'login' || result.score < 0.5) {
+      console.warn('reCAPTCHA verification failed:', result);
+      return false;
+    }
+
+    return true;
   } catch (error) {
     console.error('Error verifying CAPTCHA:', error.message);
     return false;
   }
 }
+
 
 // Login an existing user
 router.post('/login', async (req, res) => {
