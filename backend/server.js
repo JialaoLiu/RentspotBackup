@@ -10,7 +10,7 @@ app.use(express.json());
 // CORS Configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173'];
+    const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:5173', 'https://dev.rentspot.com:5173'];
 
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -43,7 +43,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+  console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173', 'https://dev.rentspot.com:5173'}`);
 });
 
 // Root route
