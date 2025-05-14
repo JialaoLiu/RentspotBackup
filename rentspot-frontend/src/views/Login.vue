@@ -17,12 +17,12 @@
         <input type="checkbox" checked="checked" name="remember"> Remember me
       </label>
 
-      <!-- Add reCAPTCHA widget -->
-      <div class="g-recaptcha"
-           data-sitekey="YOUR_SITE_KEY"
+      <!-- Add reCAPTCHA widget  V2version -->
+      <!-- <div class="g-recaptcha"
+           data-sitekey="6Lc44TkrAAAAAOLwEP3GjcUW0bwVQBFkmWyJIu4N"
            data-callback="onCaptchaSuccess"
            data-expired-callback="onCaptchaExpired">
-      </div>
+      </div> -->
 
       <button type="submit">Login</button>
 
@@ -64,21 +64,24 @@ export default {
   },
   methods: {
     async handleLogin() {
-      if (!this.captchaResponse) {
-        alert('Please complete the CAPTCHA');
+      if (!this.user_email || !this.user_password) {
+        alert('Email and password are required');
         return;
       }
 
       try {
+        // 获取 reCAPTCHA token (v3)
+        const siteKey = '6Lc44TkrAAAAAOLwEP3GjcUW0bwVQBFkmWyJIu4N';
+        const token = await grecaptcha.execute(siteKey, { action: 'login' });
+
         const response = await api.post('/auth/login', {
           user_email: this.user_email,
           user_password: this.user_password,
-          captcha: this.captchaResponse, // Send CAPTCHA response to the backend
+          captcha: token // 将 token 发给后端
         });
+
         alert('Login successful');
         console.log(response.data);
-
-        // Save the token to localStorage
         localStorage.setItem('token', response.data.token);
       } catch (error) {
         console.error(error.response?.data?.message || error.message);
@@ -97,4 +100,3 @@ export default {
   },
 };
 </script>
-
