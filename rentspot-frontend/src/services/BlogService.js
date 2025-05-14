@@ -8,8 +8,8 @@ const mockBlogs = [
     images: [
       "https://picsum.photos/300/200?random=201",
       "https://picsum.photos/300/200?random=202",
-      "https://picsum.photos/300/200?random=203",
-    ],
+      "https://picsum.photos/300/200?random=203"
+    ]
   },
   {
     id: 2,
@@ -18,8 +18,8 @@ const mockBlogs = [
     caption: "Một ngày thật đẹp trời!",
     images: [
       "https://picsum.photos/300/200?random=204",
-      "https://picsum.photos/300/200?random=205",
-    ],
+      "https://picsum.photos/300/200?random=205"
+    ]
   },
   {
     id: 3,
@@ -27,9 +27,9 @@ const mockBlogs = [
     date: "7 tháng 5 lúc 14:15",
     caption: "Check out this amazing view!",
     images: [
-      "https://picsum.photos/300/200?random=206",
-    ],
-  },
+      "https://picsum.photos/300/200?random=206"
+    ]
+  }
 ];
 
 // Fetch all blogs
