@@ -1,7 +1,7 @@
 CREATE DATABASE Rent_database;
-USE Rent_database;  -- Database
+USE Rent_database;  -- Database 
 -- User Table
-CREATE TABLE `User` (
+CREATE TABLE User (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     user_name VARCHAR(100),
     user_email VARCHAR(150),

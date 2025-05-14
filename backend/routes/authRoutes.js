@@ -8,7 +8,9 @@ const router = express.Router();
 
 // Register a new user
 router.post('/register', async (req, res) => {
-  const { user_name, user_email, user_password, user_phone, user_role } = req.body;
+  const {
+ user_name, user_email, user_password, user_phone, user_role
+} = req.body;
 
   // Validate input
   if (!user_name || !user_email || !user_password) {
@@ -96,8 +98,8 @@ router.post('/login', (req, res) => {
           id: user.user_id,
           name: user.user_name,
           email: user.user_email,
-          role: user.user_role,
-        },
+          role: user.user_role
+        }
       });
     } catch (compareErr) {
       console.error(compareErr);
