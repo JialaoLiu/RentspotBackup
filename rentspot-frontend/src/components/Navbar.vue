@@ -38,7 +38,7 @@
           <a href="#" @click="handleLogout">Logout</a>
         </li>
         <li v-else>
-          <router-link to="/profile">Profile</router-link>
+          <router-link to="/userprofile:id">Profile</router-link>
         </li> -->
       </div>
     </ul>
