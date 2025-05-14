@@ -24,9 +24,20 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Default Route
+app.get('/', (req, res) => {
+  res.send('Welcome to the RentSpot API!');
+});
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal Server Error' });
+});
 
 // Start the Server
 const PORT = process.env.PORT || 8080;
