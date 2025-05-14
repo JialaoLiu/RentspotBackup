@@ -17,6 +17,13 @@
         <input type="checkbox" checked="checked" name="remember"> Remember me
       </label>
 
+      <!-- Add reCAPTCHA widget -->
+      <div class="g-recaptcha"
+           data-sitekey="YOUR_SITE_KEY"
+           data-callback="onCaptchaSuccess"
+           data-expired-callback="onCaptchaExpired">
+      </div>
+
       <button type="submit">Login</button>
 
       <div style="width: 100%; text-align: center; border-bottom: 1px solid #ccc; line-height: 0; margin: 20px 0;">
@@ -52,14 +59,21 @@ export default {
     return {
       user_email: '',
       user_password: '',
+      captchaResponse: '',
     };
   },
   methods: {
     async handleLogin() {
+      if (!this.captchaResponse) {
+        alert('Please complete the CAPTCHA');
+        return;
+      }
+
       try {
         const response = await api.post('/auth/login', {
           user_email: this.user_email,
           user_password: this.user_password,
+          captcha: this.captchaResponse, // Send CAPTCHA response to the backend
         });
         alert('Login successful');
         console.log(response.data);
@@ -73,6 +87,12 @@ export default {
     },
     socialLogin(provider) {
       alert(`Social login with ${provider} is not yet implemented.`);
+    },
+    onCaptchaSuccess(response) {
+      this.captchaResponse = response; // Set the CAPTCHA response
+    },
+    onCaptchaExpired() {
+      this.captchaResponse = ''; // Clear the CAPTCHA response
     },
   },
 };

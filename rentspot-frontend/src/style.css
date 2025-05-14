@@ -180,3 +180,9 @@ span.SI {
   font-size: 20px;
 }
 
+/* Ensure the reCAPTCHA widget is visible */
+.g-recaptcha {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
