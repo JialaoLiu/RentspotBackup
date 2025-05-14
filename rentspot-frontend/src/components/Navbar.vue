@@ -7,7 +7,7 @@
       <div class="menu">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/rentlist">Entire Rent</router-link></li>
-        <li><a href="#">Shared Rent</a></li>
+        <!-- <li><a href="#">Shared Rent</a></li> -->
         <li><a href="#">News</a></li>
         <li><a href="#">Feedback</a></li>
       </div>
