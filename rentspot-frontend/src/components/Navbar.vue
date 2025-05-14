@@ -29,3 +29,35 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex: 2;
+}
+
+.menu li, .Connect li {
+  display: inline-block;
+}
+
+.connect {
+  display: flex;
+  gap: 2rem;
+  justify-content: flex-end;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+}
+
+.navbar a:hover {
+  color: #646cff;
+}
+</style>
