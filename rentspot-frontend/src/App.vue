@@ -4,13 +4,29 @@ import Footer from './components/Footer.vue'
 </script>
 
 <template>
-  <div>
+  <div class="app-container">
     <NavBar />
-    <router-view />
+    <main class="main-content">
+      <router-view />
+    </main>
     <Footer />
   </div>
 </template>
 
-<style scoped>
-/* You can add global layout styles here if needed */
+<style>
+/* These styles should not be scoped so they can apply globally */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* This makes the container take at least the full viewport height */
+}
+
+.main-content {
+  flex: 1; /* This makes the content area expand to fill available space */
+}
 </style>
