@@ -1,34 +1,36 @@
 const express = require('express');
-const bcrypt = require('bcrypt'); // For hashing passwords
-const jwt = require('jsonwebtoken'); // For creating and verifying JWT tokens
-const axios = require('axios'); // For making HTTP requests
-const db = require('../config/db'); // Database connection
-require('dotenv').config(); // Load environment variables
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const db = require('../config/db');
+require('dotenv').config();
 
 const router = express.Router();
 
-// Helper function to verify CAPTCHA
-// [CAPTCHA ADDED]
-async function verifyCaptcha(captchaToken) {
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  const verificationUrl = `https://www.google.com/recaptcha/api/siteverify`;
+// Helper function to verify Cloudflare Turnstile
+async function verifyTurnstile(token) {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  const verificationUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
   try {
-    const response = await axios.post(verificationUrl, null, {
-      params: {
+    const response = await axios.post(
+      verificationUrl,
+      new URLSearchParams({
         secret: secretKey,
-        response: captchaToken,
-      },
-    });
+        response: token,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
 
     const result = response.data;
+    console.log('Turnstile verification result:', result);
 
-    // log
-    console.log('reCAPTCHA result:', result);
-
-    // check score
-    if (!result.success || result.action !== 'login' || result.score < 0.5) {
-      console.warn('reCAPTCHA verification failed:', result);
+    if (!result.success) {
+      console.warn('Turnstile verification failed:', result);
       return false;
     }
 
@@ -39,19 +41,17 @@ async function verifyCaptcha(captchaToken) {
   }
 }
 
-
 // Login an existing user
 router.post('/login', async (req, res) => {
-  const { user_email, user_password, captcha } = req.body; // [CAPTCHA ADDED]
+  const { user_email, user_password, captcha } = req.body;
 
   // Validate input
-  if (!user_email || !user_password || !captcha) { // [CAPTCHA ADDED]
-    return res.status(400).json({ message: 'Missing required fields or CAPTCHA' }); // [CAPTCHA ADDED]
+  if (!user_email || !user_password || !captcha) {
+    return res.status(400).json({ message: 'Missing required fields or CAPTCHA' });
   }
 
-  // Verify CAPTCHA
-  // [CAPTCHA ADDED]
-  const isCaptchaValid = await verifyCaptcha(captcha);
+  // Verify Turnstile CAPTCHA
+  const isCaptchaValid = await verifyTurnstile(captcha);
   if (!isCaptchaValid) {
     return res.status(400).json({ message: 'CAPTCHA verification failed' });
   }
@@ -97,7 +97,7 @@ router.post('/login', async (req, res) => {
   });
 });
 
-// Register a new user (No changes made here)
+// Register a new user
 router.post('/register', async (req, res) => {
   const { user_name, user_email, user_password, user_phone, user_role } = req.body;
 
