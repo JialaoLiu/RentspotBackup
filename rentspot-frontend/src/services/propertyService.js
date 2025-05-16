@@ -1,3 +1,20 @@
+import api from './apiService';
+
+/**
+ * Fetch properties with optional filters
+ * @param {Object} filters - Filter parameters (optional)
+ * @returns {Promise} - Properties list
+ */
+export function fetchProperties(filters = {}) {
+  return api.get('/properties', { params: filters })
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error fetching properties:', error);
+      // Return mock data in case of error (for development)
+      return getMockProperties();
+    });
+}
+
 /**
  * Get a property by ID
  * @param {number} id - Property ID
@@ -11,6 +28,70 @@ export function getPropertyById(id) {
       // Return mock property in case of error (for development)
       return getMockPropertyById(id);
     });
+}
+
+/**
+ * Create a new property
+ * @param {Object} property - Property data
+ * @returns {Promise} - Created property
+ */
+export function createProperty(property) {
+  return api.post('/properties', property)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error creating property:', error);
+      throw error;
+    });
+}
+
+/**
+ * Update an existing property
+ * @param {number} id - Property ID
+ * @param {Object} property - Updated property data
+ * @returns {Promise} - Updated property
+ */
+export function updateProperty(id, property) {
+  return api.put(`/properties/${id}`, property)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Error updating property ${id}:`, error);
+      throw error;
+    });
+}
+
+/**
+ * Delete a property
+ * @param {number} id - Property ID
+ * @returns {Promise} - Response
+ */
+export function deleteProperty(id) {
+  return api.delete(`/properties/${id}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Error deleting property ${id}:`, error);
+      throw error;
+    });
+}
+
+/**
+ * Upload a property image
+ * @param {File} file - Image file
+ * @returns {Promise} - Upload result
+ */
+export function uploadPropertyImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  return api.post('/properties/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    console.error('Error uploading image:', error);
+    throw error;
+  });
 }
 
 /**
@@ -81,8 +162,11 @@ function getMockPropertyById(id) {
   return properties.find(p => p.id === parseInt(id)) || null;
 }
 
-// The upload functions will be added in a later step when Cloudinary is fully integrated
 export default {
   fetchProperties,
-  getPropertyById
+  getPropertyById,
+  createProperty,
+  updateProperty,
+  deleteProperty,
+  uploadPropertyImage
 };

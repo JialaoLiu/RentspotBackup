@@ -17,12 +17,8 @@
         <input type="checkbox" checked="checked" name="remember"> Remember me
       </label>
 
-      <!-- Add reCAPTCHA widget  V2version -->
-      <!-- <div class="g-recaptcha"
-           data-sitekey="6Lc44TkrAAAAAOLwEP3GjcUW0bwVQBFkmWyJIu4N"
-           data-callback="onCaptchaSuccess"
-           data-expired-callback="onCaptchaExpired">
-      </div> -->
+      <!-- Cloudflare Turnstile Widget -->
+      <div id="cf-turnstile" class="turnstile-container" ref="turnstileContainer"></div>
 
       <button type="submit">Login</button>
 
@@ -52,58 +48,113 @@
 
 <script>
 import api from '../services/apiService'; // Axios instance
-import { useNotification } from '../composables/useNotification'; // New notification, Alerts are annoying
+import { useNotification } from '../composables/useNotification';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 
 export default {
   name: "Login",
+  setup() {
+    const toast = useNotification();
+    const turnstileContainer = ref(null);
+    let turnstileWidget = null;
+
+    onMounted(() => {
+      // Load Cloudflare Turnstile script
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        // Initialize Turnstile when script is loaded
+        if (window.turnstile) {
+          renderTurnstile();
+        } else {
+          // If turnstile is not available immediately, try again after a short delay
+          setTimeout(renderTurnstile, 1000);
+        }
+      };
+    });
+
+    onBeforeUnmount(() => {
+      // Clean up the Turnstile widget when component is unmounted
+      if (turnstileWidget) {
+        window.turnstile.reset(turnstileWidget);
+      }
+    });
+
+    function renderTurnstile() {
+      if (window.turnstile && turnstileContainer.value) {
+        turnstileWidget = window.turnstile.render('#cf-turnstile', {
+          sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
+          callback: function(token) {
+            // This function executes when the user completes the Turnstile challenge
+            // The token will be sent with the login request
+          }
+        });
+      }
+    }
+
+    return { 
+      turnstileContainer, 
+      toast,
+      renderTurnstile
+    };
+  },
   data() {
     return {
       user_email: '',
       user_password: '',
-      captchaResponse: '',
+      turnstileToken: ''
     };
   },
   methods: {
     async handleLogin() {
-      const toast = useNotification();
       if (!this.user_email || !this.user_password) {
-        // alert('Email and password are required');
-        toast.error('Email and password are required');
+        this.toast.error('Email and password are required');
+        return;
+      }
+
+      // Get the Turnstile token
+      this.turnstileToken = this.getTurnstileToken();
+      
+      if (!this.turnstileToken) {
+        this.toast.error('Please complete the CAPTCHA challenge');
         return;
       }
 
       try {
-        // 获取 reCAPTCHA token (v3)
-        const siteKey = '6Lc44TkrAAAAAOLwEP3GjcUW0bwVQBFkmWyJIu4N';
-        const token = await grecaptcha.execute(siteKey, { action: 'login' });
-
         const response = await api.post('/auth/login', {
           user_email: this.user_email,
           user_password: this.user_password,
-          captcha: token // 将 token 发给后端
+          captcha: this.turnstileToken // Send the Turnstile token instead of reCAPTCHA
         });
 
-        // alert('Login successful');
-        toast.success('Login successful!');
+        this.toast.success('Login successful!');
         console.log(response.data);
         localStorage.setItem('token', response.data.token);
         this.$router.push('/');
       } catch (error) {
         console.error(error.response?.data?.message || error.message);
-        // alert('Login failed: ' + (error.response?.data?.message || "Unknown error"));
-        toast.error(error.response?.data?.message || "Login failed");
+        this.toast.error(error.response?.data?.message || "Login failed");
       }
     },
+    getTurnstileToken() {
+      // Get the token from the Turnstile widget
+      return window.turnstile?.getResponse(this.turnstileWidget) || '';
+    },
     socialLogin(provider) {
-      // alert(`Social login with ${provider} is not yet implemented.`);
-      toast.info(`Social login with ${provider} is not yet implemented.`);
-    },
-    onCaptchaSuccess(response) {
-      this.captchaResponse = response; // Set the CAPTCHA response
-    },
-    onCaptchaExpired() {
-      this.captchaResponse = ''; // Clear the CAPTCHA response
-    },
-  },
+      this.toast.info(`Social login with ${provider} is not yet implemented.`);
+    }
+  }
 };
 </script>
+
+<style scoped>
+.turnstile-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+</style>

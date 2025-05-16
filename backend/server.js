@@ -1,6 +1,7 @@
 require('dotenv').config(); // Load environment variables
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -24,25 +25,21 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Test Cloudinary connection
-console.log('Testing Cloudinary connection...');
-
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
-const propertyRoutes = require('./routes/propertyRoutes');
+const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
 
-// Use Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/properties', propertyRoutes);
-
-// Default Route
-app.get('/', (req, res) => {
-  res.send('Welcome to the RentSpot API!');
-});
 // Test route
 app.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
+
+// Use Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/properties', workingPropertyRoutes);
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -59,14 +56,4 @@ app.listen(PORT, () => {
   console.log(`- http://localhost:${PORT}/test`);
   console.log(`- http://localhost:${PORT}/api/properties`);
   console.log(`- http://localhost:${PORT}/api/properties/101`);
-});
-
-// Root route
-app.get('/', (req, res) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  res.send(`
-    RentSpot API Server is running. Use the frontend application to access the user interface.
-    <br><br>
-    Frontend allowed origin: <a href="${frontendUrl}" style="color: blue; text-decoration: underline;">${frontendUrl}</a>
-  `);
 });

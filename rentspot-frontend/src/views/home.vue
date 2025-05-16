@@ -42,7 +42,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 // Keep the import but comment out its usage below
-import { fetchProperties } from '../services/propertyService'
+import { fetchProperties } from '../services/propertyService.js'
 import SearchBar from '../components/SearchBar.vue'
 import MapDisplay from '../components/MapDisplay.vue'
 // Keep the import but comment out its usage below
