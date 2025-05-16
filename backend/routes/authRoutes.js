@@ -9,6 +9,14 @@ const router = express.Router();
 
 // Helper function to verify Cloudflare Turnstile
 async function verifyTurnstile(token) {
+  // If token isn't provided, we'll need to decide how to handle it
+  // For development, you might want to bypass verification
+  if (!token) {
+    console.warn('No Turnstile token provided');
+    // Return true for development, false for production
+    return process.env.NODE_ENV === 'development';
+  }
+
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   const verificationUrl = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
@@ -46,14 +54,16 @@ router.post('/login', async (req, res) => {
   const { user_email, user_password, captcha } = req.body;
 
   // Validate input
-  if (!user_email || !user_password || !captcha) {
-    return res.status(400).json({ message: 'Missing required fields or CAPTCHA' });
+  if (!user_email || !user_password) {
+    return res.status(400).json({ message: 'Missing required fields' });
   }
 
-  // Verify Turnstile CAPTCHA
-  const isCaptchaValid = await verifyTurnstile(captcha);
-  if (!isCaptchaValid) {
-    return res.status(400).json({ message: 'CAPTCHA verification failed' });
+  // Verify Turnstile CAPTCHA if provided
+  if (captcha) {
+    const isCaptchaValid = await verifyTurnstile(captcha);
+    if (!isCaptchaValid) {
+      return res.status(400).json({ message: 'CAPTCHA verification failed' });
+    }
   }
 
   // Find the user in the database
@@ -99,11 +109,19 @@ router.post('/login', async (req, res) => {
 
 // Register a new user
 router.post('/register', async (req, res) => {
-  const { user_name, user_email, user_password, user_phone, user_role } = req.body;
+  const { user_name, user_email, user_password, user_phone, user_role, captcha } = req.body;
 
   // Validate input
   if (!user_name || !user_email || !user_password) {
     return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // Verify Turnstile CAPTCHA if provided
+  if (captcha) {
+    const isCaptchaValid = await verifyTurnstile(captcha);
+    if (!isCaptchaValid) {
+      return res.status(400).json({ message: 'CAPTCHA verification failed' });
+    }
   }
 
   try {
