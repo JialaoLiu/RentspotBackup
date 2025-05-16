@@ -52,6 +52,7 @@
 
 <script>
 import api from '../services/apiService'; // Axios instance
+import { useNotification } from '../composables/useNotification'; // New notification, Alerts are annoying
 
 export default {
   name: "Login",
@@ -64,8 +65,10 @@ export default {
   },
   methods: {
     async handleLogin() {
+      const toast = useNotification();
       if (!this.user_email || !this.user_password) {
-        alert('Email and password are required');
+        // alert('Email and password are required');
+        toast.error('Email and password are required');
         return;
       }
 
@@ -80,16 +83,20 @@ export default {
           captcha: token // 将 token 发给后端
         });
 
-        alert('Login successful');
+        // alert('Login successful');
+        toast.success('Login successful!');
         console.log(response.data);
         localStorage.setItem('token', response.data.token);
+        this.$router.push('/');
       } catch (error) {
         console.error(error.response?.data?.message || error.message);
-        alert('Login failed: ' + (error.response?.data?.message || "Unknown error"));
+        // alert('Login failed: ' + (error.response?.data?.message || "Unknown error"));
+        toast.error(error.response?.data?.message || "Login failed");
       }
     },
     socialLogin(provider) {
-      alert(`Social login with ${provider} is not yet implemented.`);
+      // alert(`Social login with ${provider} is not yet implemented.`);
+      toast.info(`Social login with ${provider} is not yet implemented.`);
     },
     onCaptchaSuccess(response) {
       this.captchaResponse = response; // Set the CAPTCHA response

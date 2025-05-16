@@ -1,37 +1,37 @@
-// Test script for Cloudinary integration
-require('dotenv').config();
-const cloudinary = require('./config/cloudinary');
+const multer = require('multer');
+const path = require('path');
 
-async function testCloudinaryConnection() {
-  console.log('Testing Cloudinary connection...');
-  
-  try {
-    // Simple ping test - just list one resource
-    const result = await cloudinary.api.ping();
-    console.log('Cloudinary connection successful!');
-    console.log('Response:', result);
-    
-    console.log('\nCloudinary configuration:');
-    console.log('Cloud name:', process.env.CLOUDINARY_CLOUD_NAME);
-    console.log('API Key:', process.env.CLOUDINARY_API_KEY);
-    console.log('API Secret:', `${process.env.CLOUDINARY_API_SECRET.substring(0, 3)}...` + '[HIDDEN]');
-    
-    return true;
-  } catch (error) {
-    console.error('Cloudinary connection failed:', error);
-    return false;
+// Set up disk storage for local testing (temporary solution before Cloudinary is fully integrated)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
   }
-}
+});
 
-// Run the test
-testCloudinaryConnection()
-  .then(success => {
-    if (success) {
-      console.log('\nAll tests passed! Cloudinary is properly configured.');
-    } else {
-      console.error('\nTests failed! Please check your Cloudinary configuration.');
-    }
-  })
-  .catch(error => {
-    console.error('Unexpected error during testing:', error);
-  });
+// File filter for images
+const fileFilter = (req, file, cb) => {
+  // Accept only image files
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
+};
+
+// Initialize multer with disk storage for now
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
+
+// Export middleware functions for routes
+module.exports = {
+  single: upload.single('image'),
+  multiple: upload.array('images', 5)
+};

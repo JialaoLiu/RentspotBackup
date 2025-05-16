@@ -48,11 +48,15 @@
 
 <script>
 import { ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router'; 
+import { useNotification } from '../composables/useNotification'; // New notification, Alerts are annoying
 
 export default {
   name: 'Navbar',
   setup() {
     const isLoggedIn = ref(false);
+    const route = useRoute();
+    const toast = useNotification();
 
     // Check login status
     const checkLoginStatus = () => {
@@ -64,7 +68,8 @@ export default {
     const handleLogout = () => {
       localStorage.removeItem('token'); // Remove token from localStorage
       isLoggedIn.value = false; // Update login state
-      alert('You have been logged out!');
+      toast.success('Logged out successful!');
+      // alert('You have been logged out!');
     };
 
     // Watch for changes in localStorage (in case login state changes elsewhere)
@@ -74,6 +79,9 @@ export default {
         checkLoginStatus();
       }
     );
+    watch(() => route.fullPath, () => {
+      checkLoginStatus();
+    });
 
     // Check login status on mount
     onMounted(() => {
