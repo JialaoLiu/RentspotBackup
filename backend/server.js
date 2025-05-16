@@ -39,6 +39,10 @@ app.use('/api/properties', propertyRoutes);
 app.get('/', (req, res) => {
   res.send('Welcome to the RentSpot API!');
 });
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -51,6 +55,10 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+  console.log('Try accessing:');
+  console.log(`- http://localhost:${PORT}/test`);
+  console.log(`- http://localhost:${PORT}/api/properties`);
+  console.log(`- http://localhost:${PORT}/api/properties/101`);
 });
 
 // Root route
