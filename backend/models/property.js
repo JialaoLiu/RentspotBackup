@@ -148,11 +148,7 @@ const Property = {
     }
   },
   
-  /**
-   * Get a single property by ID
-   * @param {number} id - Property ID
-   * @returns {Promise} - Property details
-   */
+  // Rest of the model methods...
   getById: async (id) => {
     try {
       const [properties] = await db.query(
@@ -193,11 +189,6 @@ const Property = {
     }
   },
   
-  /**
-   * Create a new property
-   * @param {Object} property - Property data
-   * @returns {Promise} - Created property
-   */
   create: async (property) => {
     try {
       const [result] = await db.query(
@@ -244,12 +235,6 @@ const Property = {
     }
   },
   
-  /**
-   * Update an existing property
-   * @param {number} id - Property ID
-   * @param {Object} property - Updated property data
-   * @returns {Promise} - Updated property
-   */
   update: async (id, property) => {
     try {
       await db.query(
@@ -295,11 +280,6 @@ const Property = {
     }
   },
   
-  /**
-   * Delete a property
-   * @param {number} id - Property ID
-   * @returns {Promise} - Result of deletion
-   */
   delete: async (id) => {
     try {
       // First check if property exists
@@ -322,11 +302,6 @@ const Property = {
     }
   },
   
-  /**
-   * Get properties by owner ID
-   * @param {number} ownerId - Owner user ID
-   * @returns {Promise} - Owner's properties
-   */
   getByOwnerId: async (ownerId) => {
     try {
       const [properties] = await db.query(

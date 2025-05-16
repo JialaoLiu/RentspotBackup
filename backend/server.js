@@ -24,14 +24,21 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Test Cloudinary connection
+console.log('Testing Cloudinary connection...');
+
+// Import Routes
+const authRoutes = require('./routes/authRoutes');
+const propertyRoutes = require('./routes/propertyRoutes');
+
+// Use Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/properties', propertyRoutes);
+
 // Default Route
 app.get('/', (req, res) => {
   res.send('Welcome to the RentSpot API!');
 });
-
-// Import Routes
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -43,7 +50,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173', 'https://dev.rentspot.com:5173'}`);
+  console.log(`Frontend allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
 });
 
 // Root route
