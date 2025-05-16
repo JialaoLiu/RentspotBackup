@@ -766,6 +766,7 @@ watch(viewMode, (newMode) => {
   align-items: center;
   gap: 5px;
   height: 36px;
+  color: #616771;
 }
 
 .filter-button:hover, .list-view-button:hover {
