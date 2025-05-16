@@ -1,7 +1,24 @@
-// src/services/propertyService.js
+/**
+ * Get a property by ID
+ * @param {number} id - Property ID
+ * @returns {Promise} - Property details
+ */
+export function getPropertyById(id) {
+  return api.get(`/properties/${id}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Error fetching property ${id}:`, error);
+      // Return mock property in case of error (for development)
+      return getMockPropertyById(id);
+    });
+}
 
-// Mock data to use while backend API is not available
-const mockProperties = [
+/**
+ * Get mock properties (as fallback)
+ * @returns {Object} - Mock properties data
+ */
+function getMockProperties() {
+  const mockProperties = [
     {
       id: 101,
       title: 'Modern 2-Bed Apartment in CBD',
@@ -13,8 +30,7 @@ const mockProperties = [
       lat: -34.92846,
       lng: 138.59593,
       image: 'https://picsum.photos/300/200?random=101',
-      status: 0,
-      owner_id: 3
+      status: 0
     },
     {
       id: 102,
@@ -27,8 +43,7 @@ const mockProperties = [
       lat: -34.90571,
       lng: 138.59544,
       image: 'https://picsum.photos/300/200?random=102',
-      status: 0,
-      owner_id: 2
+      status: 0
     },
     {
       id: 103,
@@ -41,19 +56,33 @@ const mockProperties = [
       lat: -34.92146,
       lng: 138.60745,
       image: 'https://picsum.photos/300/200?random=103',
-      status: 0,
-      owner_id: 1
+      status: 0
     }
   ];
 
-  export function fetchProperties() {
-    // You can replace this with a real API call when ready
-    // e.g., return fetch('/api/properties').then(res => res.json());
-    return Promise.resolve(mockProperties);
-  }
+  return {
+    properties: mockProperties,
+    pagination: {
+      page: 1,
+      limit: 10,
+      total: mockProperties.length,
+      pages: 1
+    }
+  };
+}
 
-  export function getPropertyById(id) {
-    // Similarly, replace with a real API call when ready
-    const property = mockProperties.find((p) => p.id === parseInt(id, 10));
-    return Promise.resolve(property || null);
-  }
+/**
+ * Get a mock property by ID (as fallback)
+ * @param {number} id - Property ID
+ * @returns {Object|null} - Mock property or null if not found
+ */
+function getMockPropertyById(id) {
+  const properties = getMockProperties().properties;
+  return properties.find(p => p.id === parseInt(id)) || null;
+}
+
+// The upload functions will be added in a later step when Cloudinary is fully integrated
+export default {
+  fetchProperties,
+  getPropertyById
+};

@@ -1,21 +1,78 @@
 const express = require('express');
 const router = express.Router();
-const propertyController = require('../controllers/propertyController');
-const authenticateToken = require('../middleware/authMiddleware');
-const uploadMiddleware = require('../middleware/uploadMiddleware');
 
-// Public routes - these don't require authentication
-router.get('/', propertyController.getAllProperties);
-router.get('/:id', propertyController.getPropertyById);
+// Mock data for testing
+const mockProperties = [
+    {
+        id: 101,
+        title: 'Modern 2-Bed Apartment in CBD',
+        address: '15 Grote St, Adelaide SA',
+        price: 620,
+        bedrooms: 2,
+        bathrooms: 1,
+        type: 1,
+        lat: -34.92846,
+        lng: 138.59593,
+        image: 'https://picsum.photos/300/200?random=101',
+        status: 0,
+        owner_id: 3
+    },
+    {
+        id: 102,
+        title: 'Spacious Family House -- North Adelaide',
+        address: '18 Jeffcott St, North Adelaide SA',
+        price: 890,
+        bedrooms: 4,
+        bathrooms: 2,
+        type: 0,
+        lat: -34.90571,
+        lng: 138.59544,
+        image: 'https://picsum.photos/300/200?random=102',
+        status: 0,
+        owner_id: 2
+    },
+    {
+        id: 103,
+        title: 'Cozy Studio near University',
+        address: '5 Frome Road, Adelaide SA',
+        price: 380,
+        bedrooms: 1,
+        bathrooms: 1,
+        type: 1,
+        lat: -34.92146,
+        lng: 138.60745,
+        image: 'https://picsum.photos/300/200?random=103',
+        status: 0,
+        owner_id: 1
+    }
+];
 
-// Protected routes - these require authentication
-router.post('/', authenticateToken, propertyController.createProperty);
-router.put('/:id', authenticateToken, propertyController.updateProperty);
-router.delete('/:id', authenticateToken, propertyController.deleteProperty);
-router.get('/user/me', authenticateToken, propertyController.getMyProperties);
+// GET all properties
+router.get('/', (req, res) => {
+    res.json({
+        properties: mockProperties,
+        pagination: {
+            page: 1,
+            limit: 10,
+            total: mockProperties.length,
+            pages: 1
+        }
+    });
+});
 
-// Upload routes - these also require authentication
-router.post('/upload', authenticateToken, uploadMiddleware.single, propertyController.uploadImage);
-router.post('/upload/multiple', authenticateToken, uploadMiddleware.multiple, propertyController.uploadMultipleImages);
+// GET property by ID
+router.get('/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const property = mockProperties.find(p => p.id === id);
+    
+    if (!property) {
+        return res.status(404).json({ message: 'Property not found' });
+    }
+    
+    res.json(property);
+});
+
+// All other routes will be added incrementally
+// POST, PUT, DELETE routes will be added later
 
 module.exports = router;
