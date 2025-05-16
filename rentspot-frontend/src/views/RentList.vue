@@ -177,7 +177,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchProperties } from '../services/propertyService'
+import { fetchProperties } from '../services/propertyService.js'
 import PropertyCard from '../components/PropertyCard.vue'
 import MapDisplay from '../components/MapDisplay.vue'
 
