@@ -60,6 +60,10 @@ button:focus-visible {
 
 #app {
   width: 100%;
+  /* no text-align: center */
+}
+
+.main-content {
   text-align: center;
 }
 
@@ -113,7 +117,8 @@ input[type=radio] {
   margin: 8px 0;
 }
 
-button {
+.login-form button,
+.signin-form button {
   background-color: #7195c5;
   color: white;
   padding: 14px 20px;
@@ -185,4 +190,25 @@ span.SI {
   margin-top: 16px;
   display: flex;
   justify-content: center;
+}
+
+/* Toast Notification */
+.rentspot-toast {
+  padding: 14px 18px;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  align-items: center;
+}
+
+/* Toast 内容字体 */
+
+.rentspot-toast-body {
+  white-space: nowrap; 
+  word-break: keep-all; 
+  display: inline-block;  
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  max-width: 100%;
 }
