@@ -8,7 +8,9 @@ CREATE TABLE User (
     user_password VARCHAR(255),
     user_phone VARCHAR(20),
     user_role TINYINT, -- 0 = renter, 1 = landlord, 2 = admin
-    user_registered_at DATETIME
+    user_registered_at DATETIME,
+    user_avatar_url TEXT,
+    user_date_of_birth DATE
 );
 
 -- Property Table
@@ -67,8 +69,17 @@ CREATE TABLE Application (
 );
 
 -- Sample insert for testing (1 user + 1 property + 1 favorite + 1 booking + 1 application)
-INSERT INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at)
-VALUES ('Jialao Liu', 'Jarvis@example.com', 'HashPassword', '0400000000', 0, NOW());
+I-- Renter user
+INSERT IGNORE INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at, user_avatar_url) 
+VALUES ('Jialao Liu', 'Jarvis@example.com', 'HashPassword', '0400000000', 0, NOW(), 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747484989/defaultavatar_eavhnz.png');
+
+-- Landlord user
+INSERT IGNORE INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at, user_avatar_url) 
+VALUES ('test', 'test@example.com', '11111111', '0400111000', 1, NOW(), 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747484989/defaultavatar_eavhnz.png');
+
+-- Admin user
+INSERT IGNORE INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at, user_avatar_url) 
+VALUES ('admin01', 'admin@example.com', '11111111', '0400222000', 2, NOW(), 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747484989/defaultavatar_eavhnz.png');
 
 INSERT INTO Property (property_owner_id, property_name, property_price, property_room, property_bathroom, property_garages, property_aircon, property_balcony, property_petsconsidered, property_furnished, property_type, property_status, property_latitude, property_longitude, property_img_url)
 VALUES (1, 'Modern City Apartment', 750, 2, 1, 1, 1, 1, 0, 0, 1, 0, -33.8679, 151.2073, 'https://example.com/property.jpg');
