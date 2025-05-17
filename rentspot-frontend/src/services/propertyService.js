@@ -1,83 +1,74 @@
 import api from './apiService';
 
-/**
- * Fetch properties with optional filters
- * @param {Object} filters - Filter parameters (optional)
- * @returns {Promise} - Properties list
- */
+// Get all properties
 export function fetchProperties(filters = {}) {
   return api.get('/properties', { params: filters })
-    .then(response => response.data)
+    .then(response => {
+      console.log('API response:', response.data);
+      // Handle different response formats
+      if (response.data && response.data.properties) {
+        return response.data.properties;
+      } else if (Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        console.error('Unexpected response format:', response.data);
+        return getMockProperties().properties;
+      }
+    })
     .catch(error => {
-      console.error('Error fetching properties:', error);
-      // Return mock data in case of error (for development)
-      return getMockProperties();
+      console.error('Failed to get properties:', error);
+      // Use mock data as fallback
+      return getMockProperties().properties;
     });
 }
 
-/**
- * Get a property by ID
- * @param {number} id - Property ID
- * @returns {Promise} - Property details
- */
+// Get property by ID
 export function getPropertyById(id) {
   return api.get(`/properties/${id}`)
-    .then(response => response.data)
+    .then(response => {
+      console.log(`Got property ${id}:`, response.data);
+      return response.data;
+    })
     .catch(error => {
-      console.error(`Error fetching property ${id}:`, error);
-      // Return mock property in case of error (for development)
-      return getMockPropertyById(id);
+      console.error(`Failed to get property ${id}:`, error);
+      // Use mock data as fallback
+      const mockProperty = getMockPropertyById(id);
+      console.log(`Using mock data:`, mockProperty);
+      return mockProperty;
     });
 }
 
-/**
- * Create a new property
- * @param {Object} property - Property data
- * @returns {Promise} - Created property
- */
+// Create new property
 export function createProperty(property) {
   return api.post('/properties', property)
     .then(response => response.data)
     .catch(error => {
-      console.error('Error creating property:', error);
+      console.error('Failed to create property:', error);
       throw error;
     });
 }
 
-/**
- * Update an existing property
- * @param {number} id - Property ID
- * @param {Object} property - Updated property data
- * @returns {Promise} - Updated property
- */
+// Update property
 export function updateProperty(id, property) {
   return api.put(`/properties/${id}`, property)
     .then(response => response.data)
     .catch(error => {
-      console.error(`Error updating property ${id}:`, error);
+      console.error(`Failed to update property ${id}:`, error);
       throw error;
     });
 }
 
-/**
- * Delete a property
- * @param {number} id - Property ID
- * @returns {Promise} - Response
- */
+// Delete property
 export function deleteProperty(id) {
   return api.delete(`/properties/${id}`)
     .then(response => response.data)
     .catch(error => {
-      console.error(`Error deleting property ${id}:`, error);
+      console.error(`Failed to delete property ${id}:`, error);
       throw error;
     });
 }
 
-/**
- * Upload a property image
- * @param {File} file - Image file
- * @returns {Promise} - Upload result
- */
+// Upload property image
 export function uploadPropertyImage(file) {
   const formData = new FormData();
   formData.append('image', file);
@@ -89,15 +80,12 @@ export function uploadPropertyImage(file) {
   })
   .then(response => response.data)
   .catch(error => {
-    console.error('Error uploading image:', error);
+    console.error('Failed to upload image:', error);
     throw error;
   });
 }
 
-/**
- * Get mock properties (as fallback)
- * @returns {Object} - Mock properties data
- */
+// Mock data for development
 function getMockProperties() {
   const mockProperties = [
     {
@@ -152,11 +140,6 @@ function getMockProperties() {
   };
 }
 
-/**
- * Get a mock property by ID (as fallback)
- * @param {number} id - Property ID
- * @returns {Object|null} - Mock property or null if not found
- */
 function getMockPropertyById(id) {
   const properties = getMockProperties().properties;
   return properties.find(p => p.id === parseInt(id)) || null;
