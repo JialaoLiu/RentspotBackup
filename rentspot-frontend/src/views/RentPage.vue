@@ -144,24 +144,29 @@ onMounted(async () => {
   }
   
   try {
-    // Fetch property details
+    // Get property details
+    console.log(`Getting property ${id}`)
     const data = await getPropertyById(id)
+    console.log('Property data:', data)
     
     if (!data) {
-      // Property not found
+      error.value = 'Property not found'
       loading.value = false
       return
     }
     
     property.value = data
     
-    // Fetch agent info (would be implemented in a real app)
-    // getAgentInfo(data.agentId).then(info => {
-    //   agentInfo.value = info
-    // })
+    // Default agent info
+    agentInfo.value = {
+      name: 'Property Manager',
+      email: 'agent@rentspot.com.au',
+      phone: '(08) 1234 5678',
+      photo: null
+    }
     
   } catch (err) {
-    console.error('Error fetching property:', err)
+    console.error('Error:', err)
     error.value = 'Failed to load property details. Please try again later.'
   } finally {
     loading.value = false
