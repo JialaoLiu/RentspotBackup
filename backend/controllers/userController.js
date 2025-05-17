@@ -20,6 +20,7 @@ const userController = {
           user_phone AS phone,
           user_role AS role,
           user_avatar_url AS avatarUrl,
+          user_date_of_birth AS dateOfBirth,
           user_registered_at AS registeredAt
         FROM User
         WHERE user_id = ?`,
@@ -69,16 +70,25 @@ const userController = {
       const updateData = {
         user_name: req.body.name || user.user_name,
         user_phone: req.body.phone || user.user_phone,
-        // Add additional fields as needed (but not password - that should be a separate endpoint)
+        user_avatar_url: req.body.avatarUrl || user.user_avatar_url,
+        user_date_of_birth: req.body.dateOfBirth || user.user_date_of_birth
       };
       
       // Update the user
       await db.query(
         `UPDATE User SET
           user_name = ?,
-          user_phone = ?
+          user_phone = ?,
+          user_avatar_url = ?,
+          user_date_of_birth = ?
         WHERE user_id = ?`,
-        [updateData.user_name, updateData.user_phone, userId]
+        [
+          updateData.user_name,
+          updateData.user_phone,
+          updateData.user_avatar_url,
+          updateData.user_date_of_birth,
+          userId
+        ]
       );
       
       res.status(200).json({
@@ -89,7 +99,8 @@ const userController = {
           phone: updateData.user_phone,
           email: user.user_email,
           role: user.user_role,
-          avatarUrl: user.user_avatar_url
+          avatarUrl: updateData.user_avatar_url,
+          dateOfBirth: updateData.user_date_of_birth
         }
       });
     } catch (error) {
