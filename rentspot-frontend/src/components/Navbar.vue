@@ -7,93 +7,96 @@
       <div class="menu">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/rentlist">Rent</router-link></li>
-        <!-- <li><a href="#">Shared Rent</a></li> -->
-        <li><a href="#">News</a></li>
+        <li><router-link to="/news">News</router-link></li>
         <li><a href="#">Feedback</a></li>
       </div>
       <div class="connect">
         <template v-if="!isLoggedIn">
-        <li>
-    <router-link to="/login">Login</router-link>
-  </li>
-  <li>
-    <router-link to="/signin">Register</router-link>
-  </li>
-</template>
-<template v-else>
-  <li>
-    <a href="#" @click="handleLogout">Logout</a>
-  </li>
-  <li>
-    <router-link to="/userprofile:id',
-">Profile</router-link>
-  </li>
-</template>
-        <!-- <li v-if="!isLoggedIn">
-          <router-link to="/login">Login</router-link>
-        </li>
-        <li v-if="!isLoggedIn">
-          <router-link to="/signin">Register</router-link>
-        </li>
-        <li v-else>
-          <a href="#" @click="handleLogout">Logout</a>
-        </li>
-        <li v-else>
-          <router-link to="/userprofile:id">Profile</router-link>
-        </li> -->
+          <li>
+            <router-link to="/login">Login</router-link>
+          </li>
+          <li>
+            <router-link to="/signin">Register</router-link>
+          </li>
+        </template>
+        <template v-else>
+          <li>
+            <a href="#" @click.prevent="handleLogout">Logout</a>
+          </li>
+          <li>
+            <router-link to="/userprofile" class="profile-link">
+              <img v-if="userAvatar" :src="userAvatar" alt="Profile" class="nav-avatar" />
+              <span v-else>Profile</span>
+            </router-link>
+          </li>
+        </template>
       </div>
     </ul>
   </nav>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router'; 
-import { useNotification } from '../composables/useNotification'; // New notification, Alerts are annoying
+import { useRoute, useRouter } from 'vue-router';
+import { useNotification } from '../composables/useNotification';
+import userService from '../services/userService';
 
-export default {
-  name: 'Navbar',
-  setup() {
-    const isLoggedIn = ref(false);
-    const route = useRoute();
-    const toast = useNotification();
+const isLoggedIn = ref(false);
+const userAvatar = ref(null);
+const route = useRoute();
+const router = useRouter();
+const toast = useNotification();
 
-    // Check login status
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem('token');
-      isLoggedIn.value = !!token; // If token exists, user is logged in
-    };
+// Check login status
+const checkLoginStatus = () => {
+  const token = localStorage.getItem('token');
+  isLoggedIn.value = !!token; // If token exists, user is logged in
 
-    // Logout functionality
-    const handleLogout = () => {
-      localStorage.removeItem('token'); // Remove token from localStorage
-      isLoggedIn.value = false; // Update login state
-      toast.success('Logged out successful!');
-      // alert('You have been logged out!');
-    };
-
-    // Watch for changes in localStorage (in case login state changes elsewhere)
-    watch(
-      () => localStorage.getItem('token'),
-      () => {
-        checkLoginStatus();
-      }
-    );
-    watch(() => route.fullPath, () => {
-      checkLoginStatus();
-    });
-
-    // Check login status on mount
-    onMounted(() => {
-      checkLoginStatus();
-    });
-
-    return {
-      isLoggedIn,
-      handleLogout,
-    };
-  },
+  // If logged in, try to get user profile for avatar
+  if (isLoggedIn.value) {
+    fetchUserAvatar();
+  } else {
+    userAvatar.value = null;
+  }
 };
+
+// Fetch user avatar
+const fetchUserAvatar = async () => {
+  try {
+    const profile = await userService.getUserProfile();
+    userAvatar.value = profile.avatarUrl;
+  } catch (error) {
+    console.error('Error fetching user avatar:', error);
+    // Don't show error toast as this is a background operation
+  }
+};
+
+// Logout functionality
+const handleLogout = () => {
+  localStorage.removeItem('token'); // Remove token from localStorage
+  isLoggedIn.value = false; // Update login state
+  userAvatar.value = null; // Clear avatar
+  toast.success('Logged out successfully!');
+  router.push('/'); // Redirect to home page
+};
+
+// Watch for changes in localStorage (in case login state changes elsewhere)
+watch(
+  () => localStorage.getItem('token'),
+  () => {
+    checkLoginStatus();
+  }
+);
+
+// Watch for route changes
+watch(() => route.fullPath, () => {
+  checkLoginStatus();
+});
+
+// Check login status on mount
+onMounted(() => {
+  checkLoginStatus();
+});
 </script>
 
 <style scoped>
@@ -118,7 +121,8 @@ export default {
   flex: 2;
 }
 
-.menu li, .Connect li {
+.menu li,
+.connect li {
   display: inline-block;
 }
 
@@ -136,5 +140,44 @@ export default {
 
 .navbar a:hover {
   color: #646cff;
+}
+
+/* Profile link with avatar */
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nav-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #646cff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .menu {
+    gap: 1rem;
+  }
+
+  .connect {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar ul {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .menu,
+  .connect {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
