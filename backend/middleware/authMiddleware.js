@@ -1,19 +1,24 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 
+// Simple auth check middleware
 function authenticateToken(req, res, next) {
-  const token = req.header('Authorization');
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied, token missing!' });
+  const auth = req.header('Authorization');
+  
+  if (!auth) {
+    return res.status(401).json({ message: 'Please login first' });
   }
 
+  // Get just the token part
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : auth;
+
   try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET); // Use JWT_SECRET from .env
-    req.user = verified;
+    // Verify the token
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = user;
     next();
   } catch (err) {
-    res.status(400).json({ message: 'Invalid token' });
+    res.status(400).json({ message: 'Invalid or expired login, please try again' });
   }
 }
 

@@ -4,6 +4,7 @@ import Login from '../src/views/Login.vue';
 import Signin from '../src/views/Signin.vue';
 import RentList from '../src/views/Rentlist.vue';
 import UserProfile from '../src/views/UserProfile.vue';
+import News from '../src/views/News.vue';
 
 const routes = [
   {
@@ -40,6 +41,12 @@ const routes = [
     name: 'UserProfile',
     component: UserProfile,
     meta: { requiresAuth: true }
+  },
+  
+  {
+    path: '/news',
+    name: 'News',
+    component: News
   }
 ];
 

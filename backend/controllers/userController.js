@@ -1,18 +1,20 @@
 const db = require('../config/db');
 const cloudinary = require('../config/cloudinary');
+const bcrypt = require('bcrypt');
 
+// User controller with simplified functions
 const userController = {
-  /**
-   * Get user profile information
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
-   */
+  // Get user profile
   getProfile: async (req, res) => {
     try {
-      const userId = req.user.id; // From JWT middleware
+      const userId = req.user.id;
       
-      // Query to get user details
-      const [users] = await db.query(
+      if (!userId) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+      }
+      
+      // Get user from database
+      const [rows] = await db.execute(
         `SELECT 
           user_id AS id,
           user_name AS name,
@@ -27,38 +29,24 @@ const userController = {
         [userId]
       );
       
-      if (users.length === 0) {
+      if (!rows || rows.length === 0) {
         return res.status(404).json({ message: 'User not found' });
       }
       
-      // Return user profile without sensitive information
-      const userProfile = users[0];
-      delete userProfile.password; // Ensure password is not sent
-      
-      res.status(200).json(userProfile);
+      res.json(rows[0]);
     } catch (error) {
-      console.error('Error in getProfile controller:', error);
-      res.status(500).json({ 
-        message: 'Error fetching user profile', 
-        error: error.message 
-      });
+      console.error('Profile error:', error.message);
+      res.status(500).json({ message: 'Error getting profile' });
     }
   },
   
-  /**
-   * Update user profile information
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
-   */
+  // Update user profile
   updateProfile: async (req, res) => {
     try {
-      const userId = req.user.id; // From JWT middleware
+      const userId = req.user.id;
       
-      // Get existing user to ensure it exists
-      const [users] = await db.query(
-        'SELECT * FROM User WHERE user_id = ?',
-        [userId]
-      );
+      // Check if user exists
+      const [users] = await db.query('SELECT * FROM User WHERE user_id = ?', [userId]);
       
       if (users.length === 0) {
         return res.status(404).json({ message: 'User not found' });
@@ -66,15 +54,15 @@ const userController = {
       
       const user = users[0];
       
-      // Prepare update data
-      const updateData = {
+      // Get update data
+      const updateFields = {
         user_name: req.body.name || user.user_name,
         user_phone: req.body.phone || user.user_phone,
         user_avatar_url: req.body.avatarUrl || user.user_avatar_url,
         user_date_of_birth: req.body.dateOfBirth || user.user_date_of_birth
       };
       
-      // Update the user
+      // Update user
       await db.query(
         `UPDATE User SET
           user_name = ?,
@@ -83,87 +71,71 @@ const userController = {
           user_date_of_birth = ?
         WHERE user_id = ?`,
         [
-          updateData.user_name,
-          updateData.user_phone,
-          updateData.user_avatar_url,
-          updateData.user_date_of_birth,
+          updateFields.user_name,
+          updateFields.user_phone, 
+          updateFields.user_avatar_url,
+          updateFields.user_date_of_birth,
           userId
         ]
       );
       
-      res.status(200).json({
-        message: 'Profile updated successfully',
+      res.json({
+        message: 'Profile updated!',
         user: {
           id: userId,
-          name: updateData.user_name,
-          phone: updateData.user_phone,
+          name: updateFields.user_name,
+          phone: updateFields.user_phone,
           email: user.user_email,
           role: user.user_role,
-          avatarUrl: updateData.user_avatar_url,
-          dateOfBirth: updateData.user_date_of_birth
+          avatarUrl: updateFields.user_avatar_url,
+          dateOfBirth: updateFields.user_date_of_birth
         }
       });
     } catch (error) {
-      console.error('Error in updateProfile controller:', error);
-      res.status(500).json({ 
-        message: 'Error updating user profile', 
-        error: error.message 
-      });
+      console.error('Update error:', error.message);
+      res.status(500).json({ message: 'Could not update profile' });
     }
   },
   
-  /**
-   * Upload user avatar to Cloudinary
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
-   */
+  // Upload user avatar
   uploadAvatar: async (req, res) => {
     try {
+      // Check if file was uploaded
       if (!req.file) {
-        return res.status(400).json({ message: 'No avatar image provided' });
+        return res.status(400).json({ message: 'No image uploaded' });
       }
       
-      const userId = req.user.id; // From JWT middleware
-      
-      // Cloudinary already uploaded the file via middleware
-      // Get the Cloudinary URL from the file
+      const userId = req.user.id;
       const avatarUrl = req.file.path;
       
-      // Update user record with new avatar URL
+      // Update avatar URL in database
       await db.query(
         'UPDATE User SET user_avatar_url = ? WHERE user_id = ?',
         [avatarUrl, userId]
       );
       
-      res.status(200).json({
-        message: 'Avatar uploaded successfully',
+      res.json({
+        message: 'Avatar uploaded!',
         avatarUrl: avatarUrl
       });
     } catch (error) {
-      console.error('Error in uploadAvatar controller:', error);
-      res.status(500).json({ 
-        message: 'Error uploading avatar', 
-        error: error.message 
-      });
+      console.error('Avatar upload error:', error.message);
+      res.status(500).json({ message: 'Could not upload avatar' });
     }
   },
   
-  /**
-   * Change user password
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
-   */
+  // Change password
   changePassword: async (req, res) => {
     try {
-      const userId = req.user.id; // From JWT middleware
+      const userId = req.user.id;
       const { currentPassword, newPassword } = req.body;
       
-      // Validate input
+      // Check inputs
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: 'Current password and new password are required' });
+        return res.status(400).json({ message: 'Both current and new password required' });
       }
       
-      // Get user record
+      // Get user's current password
       const [users] = await db.query(
         'SELECT user_password FROM User WHERE user_id = ?',
         [userId]
@@ -173,47 +145,33 @@ const userController = {
         return res.status(404).json({ message: 'User not found' });
       }
       
-      const user = users[0];
+      // Check if current password is correct
+      const passwordValid = await bcrypt.compare(currentPassword, users[0].user_password);
       
-      // Verify current password
-      const bcrypt = require('bcrypt');
-      const isPasswordValid = await bcrypt.compare(currentPassword, user.user_password);
-      
-      if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Current password is incorrect' });
+      if (!passwordValid) {
+        return res.status(401).json({ message: 'Wrong current password' });
       }
       
-      // Hash new password
+      // Hash and update new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      
-      // Update password
       await db.query(
         'UPDATE User SET user_password = ? WHERE user_id = ?',
         [hashedPassword, userId]
       );
       
-      res.status(200).json({
-        message: 'Password changed successfully'
-      });
+      res.json({ message: 'Password changed!' });
     } catch (error) {
-      console.error('Error in changePassword controller:', error);
-      res.status(500).json({ 
-        message: 'Error changing password', 
-        error: error.message 
-      });
+      console.error('Password change error:', error.message);
+      res.status(500).json({ message: 'Could not change password' });
     }
   },
 
-  /**
-   * Get favorite properties for the current user
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
-   */
+  // Get user's favorite properties
   getFavoriteProperties: async (req, res) => {
     try {
-      const userId = req.user.id; // From JWT middleware
+      const userId = req.user.id;
       
-      // Get favorites with property details
+      // Get favorites
       const [favorites] = await db.query(
         `SELECT 
           f.favorite_id,
@@ -232,15 +190,10 @@ const userController = {
         [userId]
       );
       
-      res.status(200).json({
-        favorites
-      });
+      res.json({ favorites });
     } catch (error) {
-      console.error('Error in getFavoriteProperties controller:', error);
-      res.status(500).json({ 
-        message: 'Error fetching favorite properties', 
-        error: error.message 
-      });
+      console.error('Favorites error:', error.message);
+      res.status(500).json({ message: 'Could not get favorites' });
     }
   }
 };
