@@ -5,6 +5,7 @@ export function fetchProperties(filters = {}) {
   return api.get('/properties', { params: filters })
     .then(response => {
       console.log('API response:', response.data);
+      // Handle different response formats
       if (response.data && response.data.properties) {
         return response.data.properties;
       } else if (Array.isArray(response.data)) {
@@ -67,7 +68,7 @@ export function deleteProperty(id) {
     });
 }
 
-// Upload property image(Important!!)
+// Upload property image
 export function uploadPropertyImage(file) {
   const formData = new FormData();
   formData.append('image', file);
