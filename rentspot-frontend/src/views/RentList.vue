@@ -269,52 +269,59 @@ function handleBoundsChanged(bounds) {
   }
 }
 
-// Load properties on component mount
+// Load everything when page opens
 onMounted(async () => {
   try {
-    // Load favorites from localStorage
+    // Get saved favorites
     const savedFavorites = localStorage.getItem('favoriteProperties')
     if (savedFavorites) {
       favorites.value = JSON.parse(savedFavorites)
     }
     
-    // Load visited properties from localStorage
+    // Get visited properties
     const savedVisited = localStorage.getItem('visitedProperties')
     if (savedVisited) {
       visitedProperties.value = JSON.parse(savedVisited)
     }
     
-    // Check if view mode is specified in query parameters
+    // Set view mode from URL
     if (route.query.view) {
       viewMode.value = route.query.view
     }
     
-    // Check if there are any query parameters to filter by
-    const queryParams = route.query
+    // Get properties from API
+    console.log("Getting properties...")
+    const fetchedProperties = await fetchProperties()
+    console.log("Properties:", fetchedProperties)
     
-    // Fetch properties from service
-    properties.value = await fetchProperties()
-    
-    // Filter properties based on query parameters
-    if (Object.keys(queryParams).length > 0 && queryParams.keyword) {
-      const keyword = queryParams.keyword.toLowerCase()
-      properties.value = properties.value.filter(p => 
-        p.title.toLowerCase().includes(keyword) || 
-        p.address.toLowerCase().includes(keyword) || 
-        (p.description && p.description.toLowerCase().includes(keyword))
-      )
-    }
-    
-    // Initialize map if in map view
-    if (viewMode.value === 'map' && mapRef.value) {
-      setTimeout(() => {
-        if (mapRef.value && mapRef.value.addPropertyMarkers) {
-          mapRef.value.addPropertyMarkers()
-        }
-      }, 300)
+    // If we got properties, show them
+    if (fetchedProperties && fetchedProperties.length > 0) {
+      properties.value = fetchedProperties
+      
+      // Filter by keyword if provided
+      const queryParams = route.query
+      if (queryParams.keyword) {
+        const keyword = queryParams.keyword.toLowerCase()
+        properties.value = properties.value.filter(p => 
+          p.title.toLowerCase().includes(keyword) || 
+          p.address.toLowerCase().includes(keyword) || 
+          (p.description && p.description.toLowerCase().includes(keyword))
+        )
+      }
+      
+      // Initialize map markers if in map view
+      if (viewMode.value === 'map' && mapRef.value) {
+        setTimeout(() => {
+          if (mapRef.value && mapRef.value.addPropertyMarkers) {
+            mapRef.value.addPropertyMarkers()
+          }
+        }, 300)
+      }
+    } else {
+      console.warn("No properties found")
     }
   } catch (error) {
-    console.error('Error loading properties:', error)
+    console.error('Error:', error)
   } finally {
     loading.value = false
   }
