@@ -28,6 +28,7 @@ app.use(cors(corsOptions));
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
+const userRoutes = require('./routes/userRoutes'); // New user routes
 
 // Test route
 app.get('/test', (req, res) => {
@@ -37,6 +38,7 @@ app.get('/test', (req, res) => {
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', workingPropertyRoutes);
+app.use('/api/users', userRoutes); // Add user routes
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -55,5 +57,5 @@ app.listen(PORT, () => {
   console.log('Try accessing:');
   console.log(`- http://localhost:${PORT}/test`);
   console.log(`- http://localhost:${PORT}/api/properties`);
-  console.log(`- http://localhost:${PORT}/api/properties/101`);
+  console.log(`- http://localhost:${PORT}/api/users/profile (requires auth)`);
 });
