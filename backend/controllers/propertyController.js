@@ -1,4 +1,5 @@
 const Property = require('../models/property');
+const PropertyImage = require('../models/propertyImage');
 const cloudinary = require('../config/cloudinary');
 
 // Property controller
@@ -45,6 +46,7 @@ const propertyController = {
    * @param {Object} req - Request object
    * @param {Object} res - Response object
    */
+  // Get property by ID
   getPropertyById: async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -59,13 +61,22 @@ const propertyController = {
         return res.status(404).json({ message: 'Property not found' });
       }
       
+      // Get property images
+      const propertyImages = await PropertyImage.getByPropertyId(id);
+      property.images = propertyImages;
+      
+      // Set primary image
+      if (propertyImages.length > 0) {
+        const primaryImage = propertyImages.find(img => img.isPrimary);
+        if (primaryImage) {
+          property.image = primaryImage.url;
+        }
+      }
+      
       res.status(200).json(property);
     } catch (error) {
-      console.error('Error in getPropertyById controller:', error);
-      res.status(500).json({ 
-        message: 'Error fetching property', 
-        error: error.message 
-      });
+      console.error('Error getting property:', error);
+      res.status(500).json({ message: 'Error fetching property' });
     }
   },
   
@@ -74,11 +85,12 @@ const propertyController = {
    * @param {Object} req - Request object
    * @param {Object} res - Response object
    */
+  // Create property
   createProperty: async (req, res) => {
     try {
-      // Extract property data from request body
+      // Get data from request
       const propertyData = {
-        owner_id: req.user.id, // From JWT middleware
+        owner_id: req.user.id,
         title: req.body.title,
         price: req.body.price,
         bedrooms: req.body.bedrooms,
@@ -92,10 +104,10 @@ const propertyController = {
         status: req.body.status || 0,
         lat: req.body.lat,
         lng: req.body.lng,
-        image: req.body.image // This will be the Cloudinary URL
+        image: req.body.primaryImage || req.body.image || ''
       };
       
-      // Validate required fields
+      // Check required fields
       if (!propertyData.title || !propertyData.price || !propertyData.bedrooms || 
           !propertyData.bathrooms || !propertyData.lat || !propertyData.lng) {
         return res.status(400).json({ 
@@ -104,19 +116,45 @@ const propertyController = {
         });
       }
       
-      // Create property in database
+      // Create property
       const createdProperty = await Property.create(propertyData);
+      
+      // Handle multiple images
+      if (req.body.images && Array.isArray(req.body.images) && req.body.images.length > 0) {
+        const propertyImages = await PropertyImage.createMultiple(
+          createdProperty.id, 
+          req.body.images
+        );
+        createdProperty.images = propertyImages;
+        
+        // Set primary image
+        if (propertyImages.length > 0) {
+          const primaryImage = propertyImages.find(img => img.isPrimary) || propertyImages[0];
+          await Property.update(createdProperty.id, {
+            ...createdProperty,
+            image: primaryImage.url
+          });
+          createdProperty.image = primaryImage.url;
+        }
+      }
+      // Handle single image
+      else if (propertyData.image) {
+        const propertyImage = await PropertyImage.create({
+          propertyId: createdProperty.id,
+          url: propertyData.image,
+          isPrimary: true,
+          orderIndex: 0
+        });
+        createdProperty.images = [propertyImage];
+      }
       
       res.status(201).json({
         message: 'Property created successfully',
         property: createdProperty
       });
     } catch (error) {
-      console.error('Error in createProperty controller:', error);
-      res.status(500).json({ 
-        message: 'Error creating property', 
-        error: error.message 
-      });
+      console.error('Error creating property:', error);
+      res.status(500).json({ message: 'Error creating property' });
     }
   },
   
@@ -125,6 +163,7 @@ const propertyController = {
    * @param {Object} req - Request object
    * @param {Object} res - Response object
    */
+  // Update property
   updateProperty: async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -133,14 +172,14 @@ const propertyController = {
         return res.status(400).json({ message: 'Invalid property ID' });
       }
       
-      // Get the existing property
+      // Get existing property
       const existingProperty = await Property.getById(id);
       
       if (!existingProperty) {
         return res.status(404).json({ message: 'Property not found' });
       }
       
-      // Check if user is the owner
+      // Check ownership
       if (existingProperty.owner_id !== req.user.id && req.user.role !== 2) {
         return res.status(403).json({ message: 'Unauthorized: You can only update your own properties' });
       }
@@ -160,22 +199,56 @@ const propertyController = {
         status: req.body.status !== undefined ? req.body.status : existingProperty.status,
         lat: req.body.lat || existingProperty.lat,
         lng: req.body.lng || existingProperty.lng,
-        image: req.body.image || existingProperty.image
+        image: existingProperty.image // Keep existing image for now
       };
       
-      // Update the property
+      // Update property
       const updatedProperty = await Property.update(id, updateData);
+      
+      // Handle image updates
+      if (req.body.images && Array.isArray(req.body.images)) {
+        // Replace all images if requested
+        if (req.body.replaceAllImages) {
+          await PropertyImage.deleteByPropertyId(id);
+        }
+        
+        // Add new images
+        if (req.body.images.length > 0) {
+          const propertyImages = await PropertyImage.createMultiple(id, req.body.images);
+          updatedProperty.images = propertyImages;
+          
+          // Set primary image
+          const primaryImage = propertyImages.find(img => img.isPrimary) || propertyImages[0];
+          if (primaryImage) {
+            await Property.update(id, { image: primaryImage.url });
+            updatedProperty.image = primaryImage.url;
+          }
+        }
+      } 
+      // Handle primary image update
+      else if (req.body.primaryImage) {
+        const propertyImage = await PropertyImage.create({
+          propertyId: id,
+          url: req.body.primaryImage,
+          isPrimary: true,
+          orderIndex: 0
+        });
+        
+        await Property.update(id, { image: req.body.primaryImage });
+        updatedProperty.image = req.body.primaryImage;
+      }
+      
+      // Get all images for response
+      const propertyImages = await PropertyImage.getByPropertyId(id);
+      updatedProperty.images = propertyImages;
       
       res.status(200).json({
         message: 'Property updated successfully',
         property: updatedProperty
       });
     } catch (error) {
-      console.error('Error in updateProperty controller:', error);
-      res.status(500).json({ 
-        message: 'Error updating property', 
-        error: error.message 
-      });
+      console.error('Error updating property:', error);
+      res.status(500).json({ message: 'Error updating property' });
     }
   },
   
@@ -184,6 +257,7 @@ const propertyController = {
    * @param {Object} req - Request object
    * @param {Object} res - Response object
    */
+  // Delete property
   deleteProperty: async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -192,46 +266,50 @@ const propertyController = {
         return res.status(400).json({ message: 'Invalid property ID' });
       }
       
-      // Get the existing property
+      // Get property
       const existingProperty = await Property.getById(id);
       
       if (!existingProperty) {
         return res.status(404).json({ message: 'Property not found' });
       }
       
-      // Check if user is the owner
+      // Check ownership
       if (existingProperty.owner_id !== req.user.id && req.user.role !== 2) {
         return res.status(403).json({ message: 'Unauthorized: You can only delete your own properties' });
       }
       
-      // Delete the property
-      const result = await Property.delete(id);
+      // Get all property images
+      const propertyImages = await PropertyImage.getByPropertyId(id);
       
-      // Delete image from Cloudinary if exists
-      if (existingProperty.image && existingProperty.image.includes('cloudinary')) {
-        try {
-          // Extract public_id from the URL
-          const urlParts = existingProperty.image.split('/');
-          const publicIdWithExtension = urlParts[urlParts.length - 1];
-          const publicId = publicIdWithExtension.split('.')[0];
-          
-          // Delete the image from Cloudinary
-          await cloudinary.uploader.destroy(`rentspot-properties/${publicId}`);
-        } catch (cloudinaryErr) {
-          console.error('Error deleting image from Cloudinary:', cloudinaryErr);
-          // Continue with response even if Cloudinary deletion fails
+      // Delete Cloudinary images
+      const deletionPromises = propertyImages.map(async (image) => {
+        if (image.url && image.url.includes('cloudinary')) {
+          try {
+            const urlParts = image.url.split('/');
+            const publicIdWithExtension = urlParts[urlParts.length - 1];
+            const publicId = publicIdWithExtension.split('.')[0];
+            
+            await cloudinary.uploader.destroy(`rentspot-properties/${publicId}`);
+          } catch (cloudinaryErr) {
+            console.error('Error deleting image from Cloudinary:', cloudinaryErr);
+          }
         }
-      }
+      });
+      
+      await Promise.all(deletionPromises);
+      
+      // Delete property images
+      await PropertyImage.deleteByPropertyId(id);
+      
+      // Delete property
+      const result = await Property.delete(id);
       
       res.status(200).json({
         message: 'Property deleted successfully'
       });
     } catch (error) {
-      console.error('Error in deleteProperty controller:', error);
-      res.status(500).json({ 
-        message: 'Error deleting property', 
-        error: error.message 
-      });
+      console.error('Error deleting property:', error);
+      res.status(500).json({ message: 'Error deleting property' });
     }
   },
   
@@ -267,29 +345,62 @@ const propertyController = {
    * @param {Object} req - Request object
    * @param {Object} res - Response object
    */
+  // Upload multiple images
   uploadMultipleImages: async (req, res) => {
     try {
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: 'No image files provided' });
       }
       
-      // Files already uploaded to Cloudinary via middleware
-      // Return the file details
+      // Get uploaded file info
       const urls = req.files.map(file => ({
         url: file.path,
         publicId: file.filename
       }));
+      
+      // If property ID provided, save to property
+      if (req.body.propertyId) {
+        const propertyId = parseInt(req.body.propertyId);
+        
+        if (!isNaN(propertyId)) {
+          // Verify property exists
+          const property = await Property.getById(propertyId);
+          
+          if (!property) {
+            return res.status(404).json({ message: 'Property not found' });
+          }
+          
+          // Check ownership
+          if (property.owner_id !== req.user.id && req.user.role !== 2) {
+            return res.status(403).json({ 
+              message: 'Unauthorized: You can only add images to your own properties' 
+            });
+          }
+          
+          // Save images to property
+          const imageUrls = urls.map(url => url.url);
+          const savedImages = await PropertyImage.createMultiple(propertyId, imageUrls);
+          
+          // Set primary image if needed
+          if (property.image === '' || !property.image) {
+            const primaryImage = savedImages[0];
+            await Property.update(propertyId, { image: primaryImage.url });
+          }
+          
+          return res.status(200).json({
+            message: 'Images uploaded and saved to property',
+            images: savedImages
+          });
+        }
+      }
       
       res.status(200).json({
         message: 'Images uploaded successfully',
         images: urls
       });
     } catch (error) {
-      console.error('Error in uploadMultipleImages controller:', error);
-      res.status(500).json({ 
-        message: 'Error uploading images', 
-        error: error.message 
-      });
+      console.error('Error uploading images:', error);
+      res.status(500).json({ message: 'Error uploading images' });
     }
   },
   

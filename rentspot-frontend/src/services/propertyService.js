@@ -1,83 +1,109 @@
 import api from './apiService';
 
-/**
- * Fetch properties with optional filters
- * @param {Object} filters - Filter parameters (optional)
- * @returns {Promise} - Properties list
- */
+// Get all properties
 export function fetchProperties(filters = {}) {
   return api.get('/properties', { params: filters })
-    .then(response => response.data)
+    .then(response => {
+      console.log('API response:', response.data);
+      // Handle different response formats
+      if (response.data && response.data.properties) {
+        return response.data.properties;
+      } else if (Array.isArray(response.data)) {
+        return response.data;
+      } else {
+        console.error('Unexpected response format:', response.data);
+        return getMockProperties().properties;
+      }
+    })
     .catch(error => {
-      console.error('Error fetching properties:', error);
-      // Return mock data in case of error (for development)
-      return getMockProperties();
+      console.error('Failed to get properties:', error);
+      // Use mock data as fallback
+      return getMockProperties().properties;
     });
 }
 
-/**
- * Get a property by ID
- * @param {number} id - Property ID
- * @returns {Promise} - Property details
- */
+// Get property by ID
 export function getPropertyById(id) {
   return api.get(`/properties/${id}`)
-    .then(response => response.data)
+    .then(response => {
+      console.log(`Got property ${id}:`, response.data);
+      return response.data;
+    })
     .catch(error => {
-      console.error(`Error fetching property ${id}:`, error);
-      // Return mock property in case of error (for development)
-      return getMockPropertyById(id);
+      console.error(`Failed to get property ${id}:`, error);
+      // Use mock data as fallback
+      const mockProperty = getMockPropertyById(id);
+      console.log(`Using mock data:`, mockProperty);
+      return mockProperty;
     });
 }
 
-/**
- * Create a new property
- * @param {Object} property - Property data
- * @returns {Promise} - Created property
- */
-export function createProperty(property) {
-  return api.post('/properties', property)
+// Create property
+export function createProperty(property, imageFiles = []) {
+  // Handle images if provided
+  let createPromise;
+  
+  if (imageFiles && imageFiles.length > 0) {
+    createPromise = uploadMultipleImages(imageFiles)
+      .then(uploadResult => {
+        const images = uploadResult.images.map(img => img.url);
+        return api.post('/properties', {
+          ...property,
+          images: images,
+          primaryImage: images[0] // Set first as primary
+        });
+      });
+  } else {
+    createPromise = api.post('/properties', property);
+  }
+  
+  return createPromise
     .then(response => response.data)
     .catch(error => {
-      console.error('Error creating property:', error);
+      console.error('Failed to create property:', error);
       throw error;
     });
 }
 
-/**
- * Update an existing property
- * @param {number} id - Property ID
- * @param {Object} property - Updated property data
- * @returns {Promise} - Updated property
- */
-export function updateProperty(id, property) {
-  return api.put(`/properties/${id}`, property)
+// Update property
+export function updateProperty(id, property, imageFiles = [], replaceAllImages = false) {
+  // Handle images if provided
+  let updatePromise;
+  
+  if (imageFiles && imageFiles.length > 0) {
+    updatePromise = uploadMultipleImages(imageFiles)
+      .then(uploadResult => {
+        const images = uploadResult.images.map(img => img.url);
+        return api.put(`/properties/${id}`, {
+          ...property,
+          images: images,
+          replaceAllImages: replaceAllImages,
+          primaryImage: property.setPrimaryImage ? images[0] : undefined
+        });
+      });
+  } else {
+    updatePromise = api.put(`/properties/${id}`, property);
+  }
+  
+  return updatePromise
     .then(response => response.data)
     .catch(error => {
-      console.error(`Error updating property ${id}:`, error);
+      console.error(`Failed to update property:`, error);
       throw error;
     });
 }
 
-/**
- * Delete a property
- * @param {number} id - Property ID
- * @returns {Promise} - Response
- */
+// Delete property
 export function deleteProperty(id) {
   return api.delete(`/properties/${id}`)
     .then(response => response.data)
     .catch(error => {
-      console.error(`Error deleting property ${id}:`, error);
+      console.error(`Failed to delete property ${id}:`, error);
       throw error;
     });
 }
 
-/**
- * Upload a property image
- * @param {File} file - Image file
- * @returns {Promise} - Upload result
- */
+// Upload property image
 export function uploadPropertyImage(file) {
   const formData = new FormData();
   formData.append('image', file);
@@ -89,15 +115,83 @@ export function uploadPropertyImage(file) {
   })
   .then(response => response.data)
   .catch(error => {
-    console.error('Error uploading image:', error);
+    console.error('Failed to upload image:', error);
     throw error;
   });
 }
 
-/**
- * Get mock properties (as fallback)
- * @returns {Object} - Mock properties data
- */
+// Upload multiple images
+export function uploadMultipleImages(files) {
+  const formData = new FormData();
+  
+  files.forEach(file => {
+    formData.append('images', file);
+  });
+  
+  return api.post('/properties/upload/multiple', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    console.error('Failed to upload images:', error);
+    throw error;
+  });
+}
+
+// Get property images
+export function getPropertyImages(propertyId) {
+  return api.get(`/properties/${propertyId}/images`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Failed to get images for property ${propertyId}:`, error);
+      return getMockPropertyImages(propertyId);
+    });
+}
+
+// Set primary image
+export function setPrimaryImage(propertyId, imageId) {
+  return api.put(`/properties/${propertyId}/images/${imageId}/primary`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Failed to set primary image:`, error);
+      throw error;
+    });
+}
+
+// Delete image
+export function deletePropertyImage(propertyId, imageId) {
+  return api.delete(`/properties/${propertyId}/images/${imageId}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error(`Failed to delete image:`, error);
+      throw error;
+    });
+}
+
+// Add images to property
+export function addImagesToProperty(propertyId, files) {
+  const formData = new FormData();
+  formData.append('propertyId', propertyId);
+  
+  files.forEach(file => {
+    formData.append('images', file);
+  });
+  
+  return api.post('/properties/upload/multiple', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    console.error(`Failed to add images:`, error);
+    throw error;
+  });
+}
+
+// Mock data for development
 function getMockProperties() {
   const mockProperties = [
     {
@@ -152,14 +246,39 @@ function getMockProperties() {
   };
 }
 
-/**
- * Get a mock property by ID (as fallback)
- * @param {number} id - Property ID
- * @returns {Object|null} - Mock property or null if not found
- */
 function getMockPropertyById(id) {
   const properties = getMockProperties().properties;
   return properties.find(p => p.id === parseInt(id)) || null;
+}
+
+function getMockPropertyImages(propertyId) {
+  const property = getMockPropertyById(propertyId);
+  if (!property) return [];
+  
+  // Generate mock images for the property
+  return [
+    {
+      id: 1,
+      propertyId: parseInt(propertyId),
+      url: property.image,
+      isPrimary: true,
+      orderIndex: 0
+    },
+    {
+      id: 2,
+      propertyId: parseInt(propertyId),
+      url: `https://picsum.photos/300/200?random=${propertyId}-2`,
+      isPrimary: false,
+      orderIndex: 1
+    },
+    {
+      id: 3,
+      propertyId: parseInt(propertyId),
+      url: `https://picsum.photos/300/200?random=${propertyId}-3`,
+      isPrimary: false,
+      orderIndex: 2
+    }
+  ];
 }
 
 export default {
@@ -168,5 +287,10 @@ export default {
   createProperty,
   updateProperty,
   deleteProperty,
-  uploadPropertyImage
+  uploadPropertyImage,
+  uploadMultipleImages,
+  getPropertyImages,
+  setPrimaryImage,
+  deletePropertyImage,
+  addImagesToProperty
 };
