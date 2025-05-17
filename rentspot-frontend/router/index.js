@@ -3,7 +3,8 @@ import Home from '../src/views/home.vue';
 import Login from '../src/views/Login.vue';
 import Signin from '../src/views/Signin.vue';
 import RentList from '../src/views/Rentlist.vue';
-import User from '../src/views/UserProfile.vue';
+import UserProfile from '../src/views/UserProfile.vue';
+import News from '../src/views/News.vue';
 
 const routes = [
   {
@@ -36,15 +37,38 @@ const routes = [
   },
 
   {
-    path: '/userprofile:id',
-    name: 'User',
-    component: User
+    path: '/userprofile',
+    name: 'UserProfile',
+    component: UserProfile,
+    meta: { requiresAuth: true }
+  },
+  
+  {
+    path: '/news',
+    name: 'News',
+    component: News
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+});
+
+// Navigation guard for routes that require authentication
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const token = localStorage.getItem('token');
+  
+  if (requiresAuth && !token) {
+    // Redirect to login page with return URL
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    });
+  } else {
+    next();
+  }
 });
 
 export default router;
