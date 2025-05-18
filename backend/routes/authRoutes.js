@@ -7,9 +7,7 @@ require('dotenv').config();
 
 const router = express.Router();
 
-// Check captcha
 async function checkCaptcha(token) {
-  // Skip in dev mode
   if (!token) {
     return process.env.NODE_ENV === 'development';
   }
@@ -31,22 +29,18 @@ async function checkCaptcha(token) {
   }
 }
 
-// Login
 router.post('/login', async (req, res) => {
   const { user_email, user_password, captcha } = req.body;
 
-  // Check required fields
   if (!user_email || !user_password) {
     return res.status(400).json({ message: 'Email and password required' });
   }
 
-  // Verify captcha if provided
   if (captcha && !(await checkCaptcha(captcha))) {
     return res.status(400).json({ message: 'Invalid captcha' });
   }
 
   try {
-    // Find user
     const [users] = await db.execute('SELECT * FROM User WHERE user_email = ?', [user_email]);
     
     if (users.length === 0) {
@@ -55,13 +49,12 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
     
-    // Check password
     const passwordValid = await bcrypt.compare(user_password, user.user_password);
     if (!passwordValid) {
       return res.status(401).json({ message: 'Wrong password' });
     }
 
-    // Create token
+    // create token
     const token = jwt.sign(
       { id: user.user_id, role: user.user_role }, 
       process.env.JWT_SECRET, 
@@ -84,37 +77,40 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Register
 router.post('/register', async (req, res) => {
   const { user_name, user_email, user_password, user_phone, user_role, captcha } = req.body;
 
-  // Check required fields
   if (!user_name || !user_email || !user_password) {
     return res.status(400).json({ message: 'Name, email and password required' });
   }
 
-  // Verify captcha if provided
   if (captcha && !(await checkCaptcha(captcha))) {
     return res.status(400).json({ message: 'Invalid captcha' });
   }
 
   try {
-    // Check if email already exists
     const [existing] = await db.execute('SELECT * FROM User WHERE user_email = ?', [user_email]);
     
     if (existing.length > 0) {
       return res.status(400).json({ message: 'Email already registered' });
     }
     
-    // Hash password
     const hashedPassword = await bcrypt.hash(user_password, 10);
     
-    // Create user
-    await db.execute(
-      `INSERT INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at) 
-       VALUES (?, ?, ?, ?, ?, NOW())`,
-      [user_name, user_email, hashedPassword, user_phone, user_role || 'user']
-    );
+    // default avatar
+    const avatarUrl = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747541055/defaultavatar_eavhnz_ezkjxa.png';
+    
+    try {
+      // create user
+      await db.execute(
+        `INSERT INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at, user_avatar_url) 
+         VALUES (?, ?, ?, ?, ?, NOW(), ?)`,
+        [user_name, user_email, hashedPassword, user_phone, user_role !== undefined ? user_role : 0, avatarUrl]
+      );
+    } catch (err) {
+      console.error('Insert error:', err.message);
+      throw err;
+    }
     
     res.status(201).json({ message: 'Registration successful!' });
   } catch (error) {
