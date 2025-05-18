@@ -3,7 +3,8 @@ const router = express.Router();
 const uploadMiddleware = require('../middleware/uploadMiddleware');
 const path = require('path');
 
-// Sample property data
+// Sample property data - 注释掉，改用数据库数据
+/*
 const mockProperties = [
     {
         id: 101,
@@ -48,31 +49,102 @@ const mockProperties = [
         owner_id: 1
     }
 ];
+*/
 
-// Get all properties
-router.get('/', (req, res) => {
-    console.log('Getting properties list');
-    res.json({
-        properties: mockProperties,
-        pagination: {
-            page: 1,
-            limit: 10,
-            total: mockProperties.length,
-            pages: 1
+// empty backup
+const mockProperties = [];
+
+// db
+const db = require('../config/db');
+
+// get all properties
+router.get('/', async (req, res) => {
+    console.log('Getting properties');
+    try {
+        // query
+        const [properties] = await db.query(`
+            SELECT 
+                property_id AS id, property_owner_id AS owner_id, 
+                property_name AS title, property_price AS price, 
+                property_room AS bedrooms, property_bathroom AS bathrooms, 
+                property_garages AS garages, property_aircon AS aircon, 
+                property_balcony AS balcony, property_petsconsidered AS petsConsidered, 
+                property_furnished AS furnished, property_type AS type, 
+                property_status AS status, property_latitude AS lat, 
+                property_longitude AS lng, property_img_url AS image
+            FROM Property
+            WHERE property_status = 0
+            ORDER BY property_id DESC
+        `);
+        
+        if (properties && properties.length > 0) {
+            // add address
+            const props = properties.map(p => ({
+                ...p,
+                address: `Adelaide SA ${p.id}`
+            }));
+            
+            res.json({
+                properties: props,
+                pagination: {
+                    page: 1,
+                    limit: 10,
+                    total: props.length,
+                    pages: 1
+                }
+            });
+        } else {
+            res.json({
+                properties: [],
+                pagination: { page: 1, limit: 10, total: 0, pages: 1 }
+            });
         }
-    });
+    } catch (error) {
+        console.error('DB error:', error);
+        res.status(500).json({
+            message: 'Error getting properties',
+            properties: [],
+            pagination: { page: 1, limit: 10, total: 0, pages: 1 }
+        });
+    }
 });
 
-// Get one property
-router.get('/:id', (req, res) => {
+// get property by id
+router.get('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const property = mockProperties.find(p => p.id === id);
     
-    if (!property) {
-        return res.status(404).json({ message: 'Property not found' });
+    try {
+        // query with owner
+        const [properties] = await db.query(`
+            SELECT 
+                p.property_id AS id, p.property_owner_id AS owner_id, 
+                p.property_name AS title, p.property_price AS price, 
+                p.property_room AS bedrooms, p.property_bathroom AS bathrooms, 
+                p.property_garages AS garages, p.property_aircon AS aircon, 
+                p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
+                p.property_furnished AS furnished, p.property_type AS type, 
+                p.property_status AS status, p.property_latitude AS lat, 
+                p.property_longitude AS lng, p.property_img_url AS image,
+                u.user_name AS owner_name, u.user_email AS owner_email, u.user_phone AS owner_phone
+            FROM Property p
+            LEFT JOIN User u ON p.property_owner_id = u.user_id
+            WHERE p.property_id = ?
+        `, [id]);
+        
+        if (properties && properties.length > 0) {
+            const property = {
+                ...properties[0],
+                address: `Adelaide SA ${properties[0].id}`
+            };
+            
+            res.json(property);
+        } else {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        return res.status(500).json({ message: 'Server error' });
     }
-    
-    res.json(property);
 });
 
 // Update property
