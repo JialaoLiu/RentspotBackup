@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleLogin" class="login-form">
     <div class="imgcontainer">
-      <img src="./images/profile.png" alt="Avatar" class="avatar">
+      <img src="../assets/profile.png" alt="Avatar" style="width: 100px;height: 100px;"  class="avatar">
     </div>
 
     <div class="container">
