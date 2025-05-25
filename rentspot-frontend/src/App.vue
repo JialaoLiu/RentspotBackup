@@ -1,13 +1,20 @@
 <script setup>
+import { onMounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
+import { currentRoute, initRouter } from './router/customRouter.js'
+
+// Initialize the router
+onMounted(() => {
+  initRouter();
+})
 </script>
 
 <template>
   <div class="app-container">
     <NavBar />
     <main class="main-content">
-      <router-view />
+      <component v-if="currentRoute" :is="currentRoute" />
     </main>
     <Footer />
   </div>

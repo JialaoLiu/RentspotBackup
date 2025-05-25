@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from '../composables/useRouter.js';
 import { useNotification } from '../composables/useNotification';
 import userService from '../services/userService';
 
@@ -89,7 +89,7 @@ watch(
 );
 
 // Watch for route changes
-watch(() => route.fullPath, () => {
+watch(() => route.value.fullPath, () => {
   checkLoginStatus();
 });
 

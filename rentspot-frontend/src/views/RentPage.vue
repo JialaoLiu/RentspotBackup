@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from '../composables/useRouter.js'
 import { getPropertyById } from '../services/propertyService'
 
 // Import components
@@ -64,7 +64,7 @@ const isFavorite = computed(() => {
 
 // Load property data
 onMounted(async () => {
-  const id = parseInt(route.params.id)
+  const id = parseInt(route.value.params.id)
   
   if (!id) {
     error.value = 'Invalid property ID'
