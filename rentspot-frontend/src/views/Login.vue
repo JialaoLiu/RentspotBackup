@@ -52,7 +52,7 @@
 import api from '../services/apiService'; // Axios instance
 import { useNotification } from '../composables/useNotification';
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from '../composables/useRouter.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -66,7 +66,7 @@ const turnstileToken = ref('');
 const isSubmitting = ref(false);
 
 // Get redirect path from query parameters
-const redirectPath = computed(() => route.query.redirect || '/');
+const redirectPath = computed(() => route.value.query.redirect || '/');
 
 onMounted(() => {
   // Load Cloudflare Turnstile script
