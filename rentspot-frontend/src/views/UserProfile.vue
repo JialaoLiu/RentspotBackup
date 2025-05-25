@@ -2,7 +2,7 @@
     <div>
         <form action="" class="container-user">
             <!-- Background Image -->
-            <img src="https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?cs=srgb&dl=pexels-pixabay-257540.jpg&fm=jpg"
+            <img src="https://images.pexels.com/photos/101808/pexels-photo-101808.jpeg"
             alt="Background" id="background-user">
 
             <!-- Avatar and Username Section -->
@@ -115,7 +115,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from '../composables/useRouter.js';
 import userService from '../services/userService';
 import { useNotification } from '../composables/useNotification';
 

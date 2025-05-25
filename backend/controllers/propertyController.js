@@ -1,6 +1,9 @@
 const Property = require('../models/property');
 const cloudinary = require('../config/cloudinary');
 
+// Debug mode
+const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
+
 // Property controller
 const propertyController = {
   /**
@@ -9,6 +12,20 @@ const propertyController = {
    * @param {Object} res - Response object
    */
   getAllProperties: async (req, res) => {
+    // Debug mode
+    if (DEBUG_MODE) {
+      return res.json({
+        message: 'getAllProperties works! (DEBUG MODE)',
+        properties: [],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          pages: 0
+        }
+      });
+    }
+    
     try {
       // Extract filter parameters from query
       const filters = {
@@ -205,7 +222,7 @@ const propertyController = {
       }
       
       // Delete the property
-      const result = await Property.delete(id);
+      await Property.delete(id);
       
       // Delete image from Cloudinary if exists
       if (existingProperty.image && existingProperty.image.includes('cloudinary')) {

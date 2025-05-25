@@ -12,7 +12,7 @@
 
     <div v-else>
       <MapDisplay ref="mapRef" />
-      <!-- PropertyList component temporarily removed and moved to RentList.vue -->
+      <!-- PropertyList moved to RentList.vue -->
       <!-- 
       <PropertyList
         :properties="properties"
@@ -40,24 +40,18 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-// Keep the import but comment out its usage below
-import { fetchProperties } from '../services/propertyService.js'
+import { useRouter } from '../composables/useRouter.js'
 import SearchBar from '../components/SearchBar.vue'
 import MapDisplay from '../components/MapDisplay.vue'
-// Keep the import but comment out its usage below
-import PropertyList from '../components/PropertyList.vue'
 import { fetchBlogs } from '../services/BlogService.js'
 import BlogList from '../components/BlogList.vue'
 
 const router = useRouter()
-const properties = ref([])
-const loading = ref(false) // Changed to false since we're not loading properties anymore
+const loading = ref(false) // No properties
 const error = ref(null)
 const mapRef = ref(null)
-const selectedPropertyId = ref(null)
 
-// States for managing blogs
+// Blogs
 const blogs = ref([])
 const loadingBlogs = ref(false)
 const errorBlogs = ref(null)
@@ -93,16 +87,16 @@ async function loadBlogs() {
   }
 }
 
-function handleSearch(searchParams) {
+async function handleSearch(searchParams) {
   console.log('Search params:', searchParams)
-  // Redirect to RentList page with search params
-  router.push({
+  // Redirect
+  await router.push({
     path: '/rentlist',
     query: searchParams
   })
 }
 
-// Comment out this function instead of removing it
+// Unused
 /*
 function handleFocusMap(property) {
   selectedPropertyId.value = property.id
@@ -117,15 +111,15 @@ function handleFocusMap(property) {
 */
 
 onMounted(() => {
-  // Remove the loadProperties call since we're not showing properties on home page anymore
+  // Skip properties
   // loadProperties()
   
-  // Load blogs on component mount
+  // Blogs
   loadBlogs()
   
-  // Initialize map if needed
+  // Map init
   if (mapRef.value) {
-    // You could set default map location here
+    // Default location
   }
 })
 </script>

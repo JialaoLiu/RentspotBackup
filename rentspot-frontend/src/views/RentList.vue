@@ -1,50 +1,50 @@
 <template>
   <div class="rent-list-container" :class="{ 'fullscreen-map-mode': viewMode === 'map' }">
-    <!-- View mode selector -->
+    <!-- View selector -->
     <ViewModeSelector v-model:mode="viewMode" />
     
-    <!-- Loading indicator -->
+    <!-- Loading -->
     <LoadingState v-if="loading" message="Loading properties..." />
     
-    <!-- Detailed List View -->
+    <!-- Empty -->
+    <NoProperties v-else-if="!loading && properties.length === 0" />
+    
+    <!-- Detailed -->
     <DetailedPropertyList 
-      v-else-if="viewMode === 'detailed'" 
+      v-else-if="!loading && viewMode === 'detailed' && properties.length > 0" 
       :properties="properties" 
       :favorites="favorites"
       @view-property="viewPropertyDetail"
       @toggle-favorite="toggleFavorite"
     />
     
-    <!-- Grid View -->
+    <!-- Grid -->
     <GridPropertyList 
-      v-else-if="viewMode === 'grid'" 
+      v-else-if="!loading && viewMode === 'grid' && properties.length > 0" 
       :properties="properties" 
       :favorites="favorites"
       @view-property="viewPropertyDetail"
       @toggle-favorite="toggleFavorite"
     />
     
-    <!-- Map View - Fullscreen -->
+    <!-- Map -->
     <MapPropertyView 
-      v-else-if="viewMode === 'map'" 
+      v-else-if="!loading && viewMode === 'map' && properties.length > 0" 
       :properties="properties" 
       :visitedProperties="visitedProperties"
       @change-view="viewMode = $event"
       @view-property="viewPropertyDetail"
       @property-visited="markPropertyAsVisited"
     />
-    
-    <!-- No properties found -->
-    <NoProperties v-else-if="properties.length === 0" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from '../composables/useRouter.js'
 import { fetchProperties } from '../services/propertyService.js'
 
-// Import components
+// Components
 import ViewModeSelector from '../components/Rent/ViewModeSelector.vue'
 import DetailedPropertyList from '../components/Rent/DetailedPropertyList.vue'
 import GridPropertyList from '../components/Rent/GridPropertyList.vue'
@@ -54,13 +54,13 @@ import NoProperties from '../components/Rent/NoProperties.vue'
 
 const router = useRouter()
 const route = useRoute()
-const viewMode = ref('grid') // Default view mode
+const viewMode = ref('grid') // Default
 const properties = ref([])
 const loading = ref(true)
-const favorites = ref([]) // Track favorite properties
-const visitedProperties = ref([]) // Track visited properties
+const favorites = ref([]) // Favorites
+const visitedProperties = ref([]) // Visited
 
-// Toggle favorite status for a property
+// Toggle favorite
 function toggleFavorite(propertyId) {
   const index = favorites.value.indexOf(propertyId)
   if (index === -1) {
@@ -68,18 +68,18 @@ function toggleFavorite(propertyId) {
   } else {
     favorites.value.splice(index, 1)
   }
-  // Save to localStorage
+  // Save
   localStorage.setItem('favoriteProperties', JSON.stringify(favorites.value))
 }
 
-// Navigate to property detail page and mark as visited
+// View property
 function viewPropertyDetail(propertyId) {
-  // Add to visited properties
+  // Mark visited
   markPropertyAsVisited(propertyId)
   router.push(`/rentpage/${propertyId}`)
 }
 
-// Mark property as visited
+// Mark visited
 function markPropertyAsVisited(propertyId) {
   if (!visitedProperties.value.includes(propertyId)) {
     visitedProperties.value.push(propertyId)
@@ -87,47 +87,40 @@ function markPropertyAsVisited(propertyId) {
   }
 }
 
-// Load everything when page opens
+// Init
 onMounted(async () => {
   try {
-    // Get saved favorites
+    // Favorites
     const savedFavorites = localStorage.getItem('favoriteProperties')
     if (savedFavorites) {
       favorites.value = JSON.parse(savedFavorites)
     }
     
-    // Get visited properties
+    // Visited
     const savedVisited = localStorage.getItem('visitedProperties')
     if (savedVisited) {
       visitedProperties.value = JSON.parse(savedVisited)
     }
     
-    // Set view mode from URL
-    if (route.query.view) {
-      viewMode.value = route.query.view
+    // View mode
+    if (route.value.query.view) {
+      viewMode.value = route.value.query.view
     }
     
-    // Get properties from API
+    // Fetch
     console.log("Getting properties...")
-    const fetchedProperties = await fetchProperties()
-    console.log("Properties:", fetchedProperties)
+    const fetchedData = await fetchProperties()
+    console.log("Properties:", fetchedData)
     
-    // If we got properties, show them
-    if (fetchedProperties && fetchedProperties.length > 0) {
-      properties.value = fetchedProperties
+    // Process
+    if (fetchedData && fetchedData.length > 0) {
+      fetchedProperties.value = fetchedData
       
-      // Filter by keyword if provided
-      const queryParams = route.query
-      if (queryParams.keyword) {
-        const keyword = queryParams.keyword.toLowerCase()
-        properties.value = properties.value.filter(p => 
-          p.title.toLowerCase().includes(keyword) || 
-          p.address.toLowerCase().includes(keyword) || 
-          (p.description && p.description.toLowerCase().includes(keyword))
-        )
-      }
+      // Filter
+      filterProperties()
     } else {
       console.warn("No properties found")
+      properties.value = []
     }
   } catch (error) {
     console.error('Error:', error)
@@ -136,11 +129,41 @@ onMounted(async () => {
   }
 })
 
-// Watch for view mode changes to update URL
+// Filter
+function filterProperties() {
+  console.log('Filtering:', route.value.query)
+  
+  if (fetchedProperties.value && fetchedProperties.value.length > 0) {
+    properties.value = [...fetchedProperties.value]
+    
+    const queryParams = route.value.query
+    if (queryParams.keyword) {
+      const keyword = queryParams.keyword.toLowerCase()
+      console.log('Keyword:', keyword)
+      properties.value = properties.value.filter(p => 
+        p.title.toLowerCase().includes(keyword) || 
+        p.address.toLowerCase().includes(keyword) || 
+        (p.description && p.description.toLowerCase().includes(keyword))
+      )
+      console.log('Results:', properties.value.length)
+    }
+  }
+}
+
+// Storage
+const fetchedProperties = ref([])
+
+// Watch keyword
+watch(() => route.value.query.keyword, () => {
+  filterProperties()
+})
+
+// Watch view
 watch(viewMode, (newMode) => {
-  // Update URL query parameter
+  // Update URL
   router.replace({
-    query: { ...route.query, view: newMode }
+    path: route.value.path,
+    query: { ...route.value.query, view: newMode }
   }).catch(() => {})
 })
 </script>
