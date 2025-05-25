@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const authenticateToken = require('../middleware/authMiddleware');
-const avatarUploadMiddleware = require('../middleware/avatarUploadMiddleware');
+const { uploadAvatar } = require('../middleware/uploadMiddleware');
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -14,7 +14,7 @@ router.get('/profile', userController.getProfile);
 router.put('/profile', userController.updateProfile);
 
 // Upload avatar - uses Cloudinary middleware
-router.post('/avatar', avatarUploadMiddleware, userController.uploadAvatar);
+router.post('/avatar', uploadAvatar, userController.uploadAvatar);
 
 // Change password
 router.post('/change-password', userController.changePassword);

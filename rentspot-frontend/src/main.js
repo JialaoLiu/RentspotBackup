@@ -1,14 +1,15 @@
 import { createApp } from 'vue';
-import Home from '../src/views/home.vue';
 import App from '../src/App.vue';
-import router from '../router/index.js';
+import customRouter from '../src/router/customRouter.js';
+import RouterLink from '../src/components/RouterLink.vue';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 import '../src/style.css';
 import { POSITION } from 'vue-toastification';
 
 const app = createApp(App);
-app.use(router);
+app.use(customRouter);
+app.component('router-link', RouterLink);
 app.use(Toast, {
   position: POSITION.TOP_CENTER,
   timeout: 2000,

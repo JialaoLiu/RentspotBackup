@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const uploadMiddleware = require('../middleware/uploadMiddleware');
+const { uploadProperty } = require('../middleware/uploadMiddleware');
 const path = require('path');
 
 // Sample property data - 注释掉，改用数据库数据
@@ -231,7 +231,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // Upload image
-router.post('/upload', uploadMiddleware.single, (req, res) => {
+router.post('/upload', uploadProperty, (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No image uploaded' });
     }
