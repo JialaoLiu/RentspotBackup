@@ -1,27 +1,70 @@
+/* Global Styles
+Please note: :root has a global impact. Do not modify it randomly. You can refer to and add comments. 
+If you want to change global UI styles, talk with me first.
+*/
 
+
+/*  Read css before coding frontend */
 :root {
+  /* font https://zhuanlan.zhihu.com/p/138934842 */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: white;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: black
+
+  /* Color System */
+  --color-primary: #3b82f6;        /* Primary */
+  --color-primary-hover: #2563eb;  /* Primary hover */
+  --color-primary-light: #e0f2fe;  /* Light backgrounds */
+  
+  --color-danger: #d32f2f;         /* error color */
+  --color-danger-hover: #b91c1c;   /* error hover */
+  --color-danger-light: #fee2e2;   /* backgrounds */
+  
+  --color-dark: #1f2937;           /* text */
+  --color-medium: #6b7280;         
+  --color-light: #9ca3af;          
+  
+  --color-bg-primary: #ffffff;     /* White backgrounds */
+  --color-bg-secondary: #f3f4f6;   
+  --color-bg-dark: #111827;        
+  
+  --color-border: #e5e7eb;         /*  border color */
+  --color-border-dark: #d1d5db;    /* more dark border */
+  
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+  
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  
+  /* Default colors */
+  color: var(--color-dark);
+  background-color: var(--color-bg-primary);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--color-primary);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--color-primary-hover);
 }
 
 body {
@@ -35,28 +78,14 @@ h1 {
   line-height: 1.1;
 }
 
+/* Generic button reset - specific styles use .btn classes */
+/* USED IN: All components with buttons */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-.card {
-  padding: 2em;
-}
+/* Card class moved to utility section above */
 
 #app {
   width: 100%;
@@ -67,48 +96,40 @@ button:focus-visible {
   text-align: center;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* Media queries for color scheme handled by CSS variables */
 
-/* Login-Signin */
-.login-form {
-  border: 3px solid #f1f1f1;
-  margin: 50px auto;
-  padding: 20px;
-  max-width: 600px;
-  width: 90%;
-  box-sizing: border-box;
-  background-color: white;
-}
-
+/* Login-Signin Forms */
+/* USED IN: Login.vue, Signin.vue */
+.login-form,
 .signin-form {
-  border: 3px solid #f1f1f1;
+  border: 3px solid var(--color-border);
   margin: 50px auto;
-  padding: 20px;
+  padding: var(--space-lg);
   max-width: 600px;
   width: 90%;
   box-sizing: border-box;
-  background-color: white;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
 }
 
 /* Full-width inputs */
+/* USED IN: Login.vue, Signin.vue, UserProfile.vue, FilterPopup.vue */
 input[type=text], input[type=password], input[type=email], input[type=date], input[type=file] {
   width: 100%;
   padding: 12px 20px;
-  margin: 8px 0;
+  margin: var(--space-sm) 0;
   display: inline-block;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   box-sizing: border-box;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=date]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
 input[type=radio] {
@@ -117,54 +138,81 @@ input[type=radio] {
   margin: 8px 0;
 }
 
-.login-form button,
-.signin-form button {
-  background-color: #7195c5;
+/* Login/Signin specific button styles - using unique class to avoid conflicts */
+/* USED IN: Login.vue, Signin.vue */
+.login-form-submit,
+.signin-form-submit {
+  background-color: var(--color-primary);
   color: white;
   padding: 14px 20px;
-  margin: 8px 0;
+  margin: var(--space-sm) 0;
   border: none;
   cursor: pointer;
   width: 100%;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color var(--transition-fast);
 }
 
-button:hover{
-  opacity: 0.8;
+.login-form-submit:hover,
+.signin-form-submit:hover {
+  background-color: var(--color-primary-hover);
+  opacity: 1;
 }
 
+/* Hover opacity handled in specific button classes */
+
+/* USED IN: Login.vue, Signin.vue */
 .cancelbtn {
   width: auto;
   padding: 10px 18px;
-  background-color: #f44336;
+  background-color: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.cancelbtn:hover {
+  background-color: var(--color-danger-hover);
+  opacity: 1;
 }
 
 /* Center the avatar image inside this container */
+/* USED IN: Login.vue */
 .imgcontainer {
   text-align: center;
   margin: 24px 0 12px 0;
 }
 
 /* Avatar image */
+/* USED IN: Login.vue */
 img.avatar {
   width: 40%;
   border-radius: 50%;
 }
 
 /* Add padding to containers */
+/* USED IN: Login.vue, Signin.vue, Multiple components */
 .container {
   padding: 16px;
 }
 
 /* The "Forgot password" text */
+/* USED IN: Login.vue */
 span.psw {
   float: right;
 }
 
+/* USED IN: Login.vue */
 span.SI {
   float: right;
   padding-top: 16px;
 }
 
+/* USED IN: Login.vue - Social login buttons */
 .login.social {
   position: relative;
   display: flex;
@@ -173,10 +221,17 @@ span.SI {
   padding: 12px 20px;
   width: 100%;
   font-size: 16px;
-  border: 1px solid #ccc;
-  background-color: white;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
   cursor: pointer;
-  color: black;
+  color: var(--color-dark);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.login.social:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-dark);
 }
 
 .login.social i {
@@ -192,16 +247,243 @@ span.SI {
   justify-content: center;
 }
 
-/* Toast Notification */
+/* Button Styles */
+/* USED IN: SearchBar.vue, UserProfile.vue, PropertyDetailView.vue, test-style-refactor.html */
+.btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  opacity: 1;
+}
+
+.btn-secondary {
+  background-color: var(--color-medium);  /* Medium gray #6b7280 for filter button */
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-dark);  /* Dark gray #1f2937 on hover */
+  color: white;
+  opacity: 1;
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger-hover);
+  opacity: 1;
+}
+
+.btn-dark {
+  background-color: var(--color-dark);
+  color: white;
+}
+
+.btn-dark:hover {
+  background-color: var(--color-bg-dark);
+  opacity: 1;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* Card Styles */
+/* USED IN: PropertyCard.vue (via custom styles), test-style-refactor.html */
+/* NOTE: PropertyCard uses custom styles but could be refactored to use .card */
+.card {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.card-hover {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* USED IN: PropertyDescription.vue, PropertyFeatures.vue, PropertyLocation.vue */
+.section {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+/* Form Styles */
+/* USED IN: UserProfile.vue (could be adopted), test-style-refactor.html */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--color-medium);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.form-control-error {
+  border-color: var(--color-danger);
+}
+
+.form-error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+/* Typography */
+/* USED IN: Various components for text styling */
+.text-primary { color: var(--color-dark); }
+.text-secondary { color: var(--color-medium); }
+.text-muted { color: var(--color-light); }
+.text-danger { color: var(--color-danger); }
+.text-center { text-align: center; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+/* Modal Styles */
+/* USED IN: FilterPopup.vue (uses custom styles but could adopt these) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-lg);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-medium);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Utility Classes */
+/* USED IN: Various components for spacing and layout */
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+.mb-4 { margin-bottom: var(--space-xl); }
+
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+
+.p-1 { padding: var(--space-sm); }
+.p-2 { padding: var(--space-md); }
+.p-3 { padding: var(--space-lg); }
+
+.d-flex { display: flex; }
+.d-block { display: block; }
+.d-none { display: none; }
+
+.flex-column { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.align-center { align-items: center; }
+
+.gap-1 { gap: var(--space-sm); }
+.gap-2 { gap: var(--space-md); }
+.gap-3 { gap: var(--space-lg); }
+
+.w-100 { width: 100%; }
+.w-auto { width: auto; }
+
+/* Transitions */
+.transition-all { transition: all var(--transition-fast); }
+.transition-colors { transition: background-color var(--transition-fast), color var(--transition-fast); }
+
+/* Toast Notification - Preserved with unique classes */
+/* USED IN: useNotification.js composable */
 .rentspot-toast {
   padding: 14px 18px;
   font-family: 'Segoe UI', sans-serif;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   font-size: 14px;
   align-items: center;
 }
-
-/* Toast 内容字体 */
 
 .rentspot-toast-body {
   white-space: nowrap; 

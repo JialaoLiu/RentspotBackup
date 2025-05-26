@@ -30,7 +30,7 @@
         :style="{ display: showCaptcha ? 'flex' : 'none' }"
       ></div>
 
-      <button type="submit">Sign Up</button>
+      <button type="submit" class="signin-form-submit">Sign Up</button>
     </div>
 
     <div class="container" style="background-color:#f1f1f1">

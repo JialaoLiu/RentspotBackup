@@ -10,8 +10,8 @@
       />
 
       <div class="filter-buttons">
-        <button type="button" @click="toggleFilter">Filters</button>
-        <button type="submit" id="search-button">Search</button>
+        <button type="button" class="btn btn-secondary" @click="toggleFilter">Filters</button>
+        <button type="submit" class="btn btn-dark" id="search-button">Search</button>
       </div>
     </form>
 
@@ -34,7 +34,7 @@ const showFilter = ref(false)
 function toggleFilter() {
   showFilter.value = !showFilter.value
 
-  // Prevent scrolling on body when popup is open
+  // Prevent scrolling 
   if (showFilter.value) {
     document.body.style.overflow = 'hidden'
   } else {
@@ -46,24 +46,20 @@ function handleApplyFilters(filters) {
   // Handle the filters received from the filter component
   console.log('Applied filters:', filters)
 
-  // Perform search with the filters
   const searchParams = {
     keyword: searchTerm.value,
     ...filters
   }
 
-  // Emit event to parent component
   emit('search', searchParams)
 
-  // Close filter popup
   showFilter.value = false
 }
 
 function handleSearch() {
-  // Simple search without filters
-  console.log('Searching for:', searchTerm.value)
 
-  // Emit event to parent component
+  console.log('Searching for:', searchTerm.value)
+  
   emit('search', { keyword: searchTerm.value })
 }
 
@@ -74,26 +70,28 @@ const emit = defineEmits(['search'])
 .search-bar {
   display: flex;
   flex-direction: column;
-  background-color: #f9fafb;
+  background-color: var(--color-bg-primary); 
   padding: 2rem 1rem;
   margin-top: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md); 
   align-items: center;
   gap: 2rem;
   position: relative;
+  border: 1px solid var(--color-border); 
+  border-radius: var(--radius-md);
 }
 
 .search-bar h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-dark);
   margin-bottom: 1rem;
 }
 
 .form-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-md);
   align-items: center;
   width: 100%;
   max-width: 800px;
@@ -103,47 +101,21 @@ const emit = defineEmits(['search'])
   flex: 1;
   min-width: 200px;
   padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   outline: none;
-  background-color: white;
+  background-color: var(--color-bg-primary);
 }
 
 .search-input:focus {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
 .filter-buttons {
   display: flex;
-  gap: 1rem;
-}
-
-.filter-buttons button {
-  padding: 0.5rem 1rem;
-  background-color: white;
-  color: black;
-  border: 1px solid black;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.filter-buttons button:hover {
-  opacity: 0.8;
-}
-
-#search-button {
-  background-color: black;
-  color: white;
-  border: none;
-}
-
-#search-button:hover {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
+  gap: var(--space-md);
 }
 
 @media (max-width: 640px) {

@@ -25,24 +25,25 @@ defineProps({
 })
 
 function handleImageError(e) {
-  // Fallback image if the property image fails to load
-  e.target.src = 'https://via.placeholder.com/400x300?text=Property+Image'
+  // load cloudinary default image
+  e.target.src = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'
 }
 </script>
 
 <style scoped>
 .property-card {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
 }
 
 .property-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-  border: 1px solid black;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-dark);
 }
 
 .property-image {
@@ -52,24 +53,26 @@ function handleImageError(e) {
 }
 
 .property-details {
-  padding: 16px;
+  padding: var(--space-md);
 }
 
 .property-title {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-dark);
+  margin-bottom: var(--space-xs);
 }
 
 .property-address {
   font-size: 14px;
-  color: #666;
+  color: var(--color-medium);
+  margin-bottom: var(--space-sm);
 }
 
 .property-price {
   font-size: 16px;
   font-weight: bold;
-  color: #007BFF;
-  margin-top: 8px;
+  color: var(--color-primary);
+  margin-top: var(--space-sm);
 }
 </style>

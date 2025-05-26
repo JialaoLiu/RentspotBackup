@@ -17,10 +17,10 @@
         <input type="checkbox" checked="checked" name="remember"> Remember me
       </label>
 
-      <!-- Cloudflare Turnstile Widget -->
+      <!-- Cloudflare Turnstile -->
       <div id="cf-turnstile" class="turnstile-container" ref="turnstileContainer"></div>
 
-      <button type="submit" :disabled="isSubmitting">
+      <button type="submit" class="login-form-submit" :disabled="isSubmitting">
         {{ isSubmitting ? 'Logging in...' : 'Login' }}
       </button>
 
@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import api from '../services/apiService'; // Axios instance
+import api from '../services/apiService';
 import { useNotification } from '../composables/useNotification';
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import { useRoute, useRouter } from '../composables/useRouter.js';
@@ -65,11 +65,10 @@ const user_password = ref('');
 const turnstileToken = ref('');
 const isSubmitting = ref(false);
 
-// Get redirect path from query parameters
 const redirectPath = computed(() => route.value.query.redirect || '/');
 
 onMounted(() => {
-  // Load Cloudflare Turnstile script
+
   const script = document.createElement('script');
   script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
   script.async = true;
@@ -77,18 +76,17 @@ onMounted(() => {
   document.head.appendChild(script);
 
   script.onload = () => {
-    // Initialize Turnstile when script is loaded
     if (window.turnstile) {
       renderTurnstile();
     } else {
-      // If turnstile is not available immediately, try again after a short delay
+
       setTimeout(renderTurnstile, 1000);
     }
   };
 });
 
 onBeforeUnmount(() => {
-  // Clean up the Turnstile widget when component is unmounted
+  // reset
   if (turnstileWidget) {
     window.turnstile.reset(turnstileWidget);
   }
@@ -99,7 +97,6 @@ function renderTurnstile() {
     turnstileWidget = window.turnstile.render('#cf-turnstile', {
       sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
       callback: function(token) {
-        // This function executes when the user completes the Turnstile challenge
         turnstileToken.value = token;
       }
     });
@@ -107,7 +104,7 @@ function renderTurnstile() {
 }
 
 function getTurnstileToken() {
-  // Get the token from the Turnstile widget
+  // Get the token 
   return turnstileToken.value || window.turnstile?.getResponse(turnstileWidget) || '';
 }
 
@@ -122,7 +119,7 @@ async function handleLogin() {
   // Get the Turnstile token
   const captchaToken = getTurnstileToken();
   
-  // Conditionally check for CAPTCHA - don't block login if CAPTCHA isn't loaded
+  // Conditionally check for CAPTCHA
   if (window.turnstile && !captchaToken) {
     toast.error('Please complete the CAPTCHA challenge');
     return;
@@ -140,7 +137,7 @@ async function handleLogin() {
     toast.success('Login successful!');
     localStorage.setItem('token', response.data.token);
     
-    // Store user info if available
+    // Store user info
     if (response.data.user) {
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
@@ -149,13 +146,12 @@ async function handleLogin() {
     user_email.value = '';
     user_password.value = '';
     
-    // Redirect to the intended page or home
+  
     router.push(redirectPath.value);
   } catch (error) {
     console.error(error.response?.data?.message || error.message);
     toast.error(error.response?.data?.message || "Login failed");
     
-    // Reset Turnstile if there's an error
     if (window.turnstile && turnstileWidget) {
       window.turnstile.reset(turnstileWidget);
     }
@@ -176,7 +172,6 @@ function socialLogin(provider) {
   justify-content: center;
 }
 
-/* Disable button styles */
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
