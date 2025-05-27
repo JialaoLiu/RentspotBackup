@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const cloudinary = require('../config/cloudinary');
 const bcrypt = require('bcrypt');
+const { handleDbError, handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
 // User controller with simplified functions
 const userController = {
@@ -10,7 +11,7 @@ const userController = {
       const userId = req.user.id;
       
       if (!userId) {
-        return res.status(400).json({ message: 'Invalid user ID' });
+        return handleValidationError(res, 'Invalid user ID');
       }
       
       // Get user from database
@@ -30,13 +31,12 @@ const userController = {
       );
       
       if (!rows || rows.length === 0) {
-        return res.status(404).json({ message: 'User not found' });
+        return handleNotFound(res, 'User');
       }
       
       res.json(rows[0]);
     } catch (error) {
-      console.error('Profile error:', error.message);
-      res.status(500).json({ message: 'Error getting profile' });
+      handleDbError(res, error, 'getting profile');
     }
   },
   
