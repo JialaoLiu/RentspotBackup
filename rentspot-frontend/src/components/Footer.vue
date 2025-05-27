@@ -13,12 +13,12 @@
 </template>
 
 <script setup>
-// Footer component — static content
+// 
 </script>
 
 <style scoped>
 .footer {
-  background-color: black;
+  background-color: var(--color-bg-dark);
   color: white;
   width: 100%;
   padding: 1.5rem 0;
@@ -36,25 +36,24 @@
 }
 
 .copyright {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-sm);
 }
 
 .footer-links {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .footer-link {
   color: white;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color var(--transition-normal);
 }
 
 .footer-link:hover {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
-/* Responsive design */
 @media (min-width: 640px) {
   .footer-container {
     flex-direction: row;
