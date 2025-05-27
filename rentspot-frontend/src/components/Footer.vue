@@ -54,7 +54,6 @@
   color: var(--color-primary);
 }
 
-/* Responsive design */
 @media (min-width: 640px) {
   .footer-container {
     flex-direction: row;

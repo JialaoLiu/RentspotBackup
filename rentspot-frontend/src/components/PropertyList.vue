@@ -15,8 +15,6 @@
           :address="property.address"
           :price="property.price"
           :image="property.image"
-          :bedrooms="property.bedrooms"
-          :bathrooms="property.bathrooms"
         />
       </div>
     </div>

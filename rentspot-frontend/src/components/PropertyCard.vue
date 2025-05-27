@@ -19,9 +19,7 @@ defineProps({
   title: String,
   address: String,
   price: Number,
-  image: String,
-  bedrooms: Number,
-  bathrooms: Number
+  image: String
 })
 
 function handleImageError(e) {

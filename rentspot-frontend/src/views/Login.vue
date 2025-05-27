@@ -68,7 +68,7 @@ const isSubmitting = ref(false);
 const redirectPath = computed(() => route.value.query.redirect || '/');
 
 onMounted(() => {
-
+  // Load Turnstile script once
   const script = document.createElement('script');
   script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
   script.async = true;
@@ -76,37 +76,31 @@ onMounted(() => {
   document.head.appendChild(script);
 
   script.onload = () => {
-    if (window.turnstile) {
-      renderTurnstile();
-    } else {
-
-      setTimeout(renderTurnstile, 1000);
+    // Single attempt to render Turnstile
+    if (window.turnstile && turnstileContainer.value) {
+      try {
+        turnstileWidget = window.turnstile.render('#cf-turnstile', {
+          sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
+          callback: function(token) {
+            turnstileToken.value = token;
+          }
+        });
+      } catch (error) {
+        console.warn('Turnstile failed to render:', error);
+      }
     }
+  };
+  
+  script.onerror = () => {
+    console.warn('Turnstile script failed to load');
   };
 });
 
 onBeforeUnmount(() => {
-  // reset
-  if (turnstileWidget) {
+  if (turnstileWidget && window.turnstile) {
     window.turnstile.reset(turnstileWidget);
   }
 });
-
-function renderTurnstile() {
-  if (window.turnstile && turnstileContainer.value) {
-    turnstileWidget = window.turnstile.render('#cf-turnstile', {
-      sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
-      callback: function(token) {
-        turnstileToken.value = token;
-      }
-    });
-  }
-}
-
-function getTurnstileToken() {
-  // Get the token 
-  return turnstileToken.value || window.turnstile?.getResponse(turnstileWidget) || '';
-}
 
 async function handleLogin() {
   if (isSubmitting.value) return;
@@ -116,14 +110,8 @@ async function handleLogin() {
     return;
   }
 
-  // Get the Turnstile token
-  const captchaToken = getTurnstileToken();
-  
-  // Conditionally check for CAPTCHA
-  if (window.turnstile && !captchaToken) {
-    toast.error('Please complete the CAPTCHA challenge');
-    return;
-  }
+  // Get the Turnstile token if available
+  const captchaToken = turnstileToken.value || '';
 
   isSubmitting.value = true;
   

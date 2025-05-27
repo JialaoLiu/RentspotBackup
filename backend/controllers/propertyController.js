@@ -1,8 +1,6 @@
 const Property = require('../models/property');
 const cloudinary = require('../config/cloudinary');
-
-// Debug mode
-const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
+const { handleDbError, handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
 // Property controller
 const propertyController = {
@@ -12,20 +10,6 @@ const propertyController = {
    * @param {Object} res - Response object
    */
   getAllProperties: async (req, res) => {
-    // Debug mode
-    if (DEBUG_MODE) {
-      return res.json({
-        message: 'getAllProperties works! (DEBUG MODE)',
-        properties: [],
-        pagination: {
-          page: 1,
-          limit: 10,
-          total: 0,
-          pages: 0
-        }
-      });
-    }
-    
     try {
       // Extract filter parameters from query
       const filters = {
@@ -49,11 +33,7 @@ const propertyController = {
       
       res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getAllProperties controller:', error);
-      res.status(500).json({ 
-        message: 'Error fetching properties', 
-        error: error.message 
-      });
+      handleDbError(res, error, 'fetching properties');
     }
   },
   
@@ -67,22 +47,18 @@ const propertyController = {
       const id = parseInt(req.params.id);
       
       if (isNaN(id)) {
-        return res.status(400).json({ message: 'Invalid property ID' });
+        return handleValidationError(res, 'Invalid property ID');
       }
       
       const property = await Property.getById(id);
       
       if (!property) {
-        return res.status(404).json({ message: 'Property not found' });
+        return handleNotFound(res, 'Property');
       }
       
       res.status(200).json(property);
     } catch (error) {
-      console.error('Error in getPropertyById controller:', error);
-      res.status(500).json({ 
-        message: 'Error fetching property', 
-        error: error.message 
-      });
+      handleDbError(res, error, 'fetching property');
     }
   },
   
