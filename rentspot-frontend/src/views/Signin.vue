@@ -10,7 +10,7 @@
       <input type="email" placeholder="Enter Email" v-model="user_email" required>
 
       <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" v-model="user_password" @click="initializeTurnstile" required>
+      <input type="password" placeholder="Enter Password" v-model="user_password" required>
 
       <label for="phone"><b>Phone</b></label>
       <input type="text" placeholder="Enter Phone Number" v-model="user_phone" required>
@@ -46,6 +46,10 @@ import { useNotification } from '../composables/useNotification';
 
 export default {
   name: "Signin",
+  setup() {
+    const toast = useNotification();
+    return { toast };
+  },
   data() {
     return {
       user_name: '',
@@ -53,96 +57,46 @@ export default {
       user_password: '',
       user_phone: '',
       user_role: 0,
-      showCaptcha: false,
+      showCaptcha: true,
       turnstileWidget: null,
-      turnstileToken: '',
-      turnstileInitialized: false,
-      scriptLoaded: false
+      turnstileToken: ''
     };
   },
+  mounted() {
+    this.initializeTurnstile();
+  },
   methods: {
-    // Load Turnstile script once
-    async loadTurnstileScript() {
-      if (this.scriptLoaded || document.getElementById('turnstile-script')) {
-        this.scriptLoaded = true;
-        return Promise.resolve();
-      }
+    // Initialize Turnstile on mount
+    initializeTurnstile() {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
 
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.id = 'turnstile-script';
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-        script.async = true;
-        script.defer = true;
-        
-        script.onload = () => {
-          this.scriptLoaded = true;
-          resolve();
-        };
-        
-        script.onerror = (error) => {
-          console.error('Failed to load Turnstile script:', error);
-          reject(error);
-        };
-        
-        document.head.appendChild(script);
-      });
-    },
-
-    // Initialize Turnstile widget once
-    async initializeTurnstile() {
-      // Don't initialize more than once or show if already shown
-      if (this.turnstileInitialized || this.showCaptcha) return;
-
-      this.showCaptcha = true;
-
-      try {
-        // Load script if needed
-        if (!this.scriptLoaded) {
-          await this.loadTurnstileScript();
-        }
-
-        // Wait briefly for DOM update
-        setTimeout(() => {
-          if (window.turnstile && this.$refs.turnstileContainer) {
+      script.onload = () => {
+        if (window.turnstile && this.$refs.turnstileContainer) {
+          try {
             this.turnstileWidget = window.turnstile.render('#cf-turnstile', {
               sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0',
-              callback: token => this.turnstileToken = token,
-              'expired-callback': () => this.turnstileToken = ''
+              callback: token => this.turnstileToken = token
             });
-            this.turnstileInitialized = true;
+          } catch (error) {
+            console.warn('Turnstile failed to render:', error);
           }
-        }, 100);
-      } catch (error) {
-        console.error('Turnstile initialization error:', error);
-      }
+        }
+      };
+      
+      script.onerror = () => {
+        console.warn('Turnstile script failed to load');
+      };
     },
 
-    // Reset Turnstile when needed
-    resetTurnstile() {
-      if (this.turnstileWidget && window.turnstile) {
-        window.turnstile.reset(this.turnstileWidget);
-        this.turnstileToken = '';
-      }
-    },
-
-    // Show notification or alert based on availability
-    notify(message, type = 'error') {
-      if (typeof useNotification === 'function') {
-        const toast = useNotification();
-        toast[type](message);
-      } else {
-        alert(message);
-      }
-    },
 
     // Form submission handler
     async handleSignIn() {
-      // Verify CAPTCHA is completed if it was shown
-      if (this.turnstileInitialized && !this.turnstileToken) {
-        this.notify('Please complete the CAPTCHA challenge');
-        return;
-      }
+      // Get CAPTCHA token if available
+      const captchaToken = this.turnstileToken || '';
 
       try {
         // Prepare request data
@@ -154,14 +108,14 @@ export default {
           user_role: this.user_role
         };
 
-        // Add CAPTCHA token if available
-        if (this.turnstileToken) {
-          requestData.captcha = this.turnstileToken;
+        // Add CAPTCHA token
+        if (captchaToken) {
+          requestData.captcha = captchaToken;
         }
 
         // Submit registration
         const response = await api.post('/auth/register', requestData);
-        this.notify('Registration successful', 'success');
+        this.toast.success('Registration successful');
         console.log(response.data);
 
         // Redirect to login page
@@ -169,14 +123,20 @@ export default {
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Unknown error";
         console.error(errorMessage);
-        this.notify('Registration failed: ' + errorMessage);
-        this.resetTurnstile();
+        this.toast.error('Registration failed: ' + errorMessage);
+        // Reset Turnstile if available
+        if (this.turnstileWidget && window.turnstile) {
+          window.turnstile.reset(this.turnstileWidget);
+          this.turnstileToken = '';
+        }
       }
     }
   },
   beforeUnmount() {
     // Clean up Turnstile widget
-    this.resetTurnstile();
+    if (this.turnstileWidget && window.turnstile) {
+      window.turnstile.reset(this.turnstileWidget);
+    }
   }
 };
 </script>

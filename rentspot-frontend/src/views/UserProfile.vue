@@ -31,7 +31,7 @@
                             <input type="file" id="avatar-upload" @change="handleAvatarUpload" accept="image/*" />
                             <div class="avatar-preview-container">
                                 <img v-if="avatarPreview" :src="avatarPreview" alt="Avatar Preview" class="avatar-preview" />
-                                <div v-if="avatarUploading" class="avatar-uploading">
+                                <div v-if="loadingState === 'avatar'" class="avatar-uploading">
                                     <span>Uploading...</span>
                                 </div>
                             </div>
@@ -53,7 +53,7 @@
                             <input type="email" id="email" v-model="profile.email" disabled />
                             <span class="input-hint">Email cannot be changed</span>
                         </div>
-                        <button type="submit" :disabled="updating">{{ updating ? 'Saving...' : 'Save Profile' }}</button>
+                        <button type="submit" :disabled="loadingState === 'profile'">{{ loadingState === 'profile' ? 'Saving...' : 'Save Profile' }}</button>
                     </form>
                 </div>
                 <div v-else-if="currentModal === 'changePassword'">
@@ -72,12 +72,12 @@
                             <input type="password" id="confirmPassword" v-model="passwords.confirmPassword" placeholder="Confirm new password" />
                         </div>
                         <div v-if="passwordError" class="form-error">{{ passwordError }}</div>
-                        <button type="submit" :disabled="changingPassword">{{ changingPassword ? 'Submitting...' : 'Submit' }}</button>
+                        <button type="submit" :disabled="loadingState === 'password'">{{ loadingState === 'password' ? 'Submitting...' : 'Submit' }}</button>
                     </form>
                 </div>
                 <div v-else-if="currentModal === 'favoriteHistory'">
                     <h2>Favorite Properties</h2>
-                    <div v-if="loadingFavorites" class="loading-message">Loading favorites...</div>
+                    <div v-if="loadingState === 'favorites'" class="loading-message">Loading favorites...</div>
                     <div v-else-if="favorites.length === 0" class="no-favorites">
                         <p>You haven't saved any properties yet.</p>
                         <p>Explore properties and click the heart icon to add them to your favorites.</p>
@@ -137,9 +137,11 @@ const profile = ref({
     role: 0
 });
 
-// Avatar upload state
+// Unified loading state: 'idle' | 'profile' | 'avatar' | 'password' | 'favorites'
+const loadingState = ref('idle');
+
+// Avatar state
 const avatarPreview = ref(null);
-const avatarUploading = ref(false);
 const avatarFile = ref(null);
 
 // Password state
@@ -149,14 +151,11 @@ const passwords = ref({
     confirmPassword: ''
 });
 const passwordError = ref('');
-const changingPassword = ref(false);
 
 // Favorites state
 const favorites = ref([]);
-const loadingFavorites = ref(false);
 
-// Form submit state
-const updating = ref(false);
+// Success notification
 const showSuccess = ref(false);
 const successMessage = ref('');
 
@@ -243,19 +242,19 @@ async function handleAvatarUpload(event) {
 
 // Update profile
 async function updateProfile() {
-    if (updating.value) return;
+    if (loadingState.value !== 'idle') return;
     
-    updating.value = true;
+    loadingState.value = 'profile';
     try {
         // If there's a new avatar file, upload it first
         if (avatarFile.value) {
-            avatarUploading.value = true;
+            loadingState.value = 'avatar';
             const uploadResult = await userService.uploadUserAvatar(avatarFile.value);
             profile.value.avatarUrl = uploadResult.avatarUrl;
-            avatarUploading.value = false;
             avatarFile.value = null; // Reset the file reference
         }
         
+        loadingState.value = 'profile';
         // Now update the profile
         const updatedData = {
             name: profile.value.name,
@@ -263,7 +262,7 @@ async function updateProfile() {
             dateOfBirth: profile.value.dateOfBirth
         };
         
-        const result = await userService.updateUserProfile(updatedData);
+        await userService.updateUserProfile(updatedData);
         
         // Show success message
         toast.success('Profile updated successfully!');
@@ -276,13 +275,13 @@ async function updateProfile() {
     } catch (error) {
         toast.error('Failed to update profile: ' + (error.response?.data?.message || error.message));
     } finally {
-        updating.value = false;
+        loadingState.value = 'idle';
     }
 }
 
 // Change password
 async function changePassword() {
-    if (changingPassword.value) return;
+    if (loadingState.value !== 'idle') return;
     
     // Validate password confirmation
     if (passwords.value.newPassword !== passwords.value.confirmPassword) {
@@ -290,7 +289,7 @@ async function changePassword() {
         return;
     }
     
-    changingPassword.value = true;
+    loadingState.value = 'password';
     passwordError.value = '';
     
     try {
@@ -314,7 +313,7 @@ async function changePassword() {
     } catch (error) {
         passwordError.value = error.response?.data?.message || 'Error changing password. Please try again.';
     } finally {
-        changingPassword.value = false;
+        loadingState.value = 'idle';
     }
 }
 
@@ -343,13 +342,13 @@ async function loadProfile() {
 
 // Load user favorites
 async function loadFavorites() {
-    loadingFavorites.value = true;
+    loadingState.value = 'favorites';
     try {
         favorites.value = await userService.getUserFavorites();
     } catch (error) {
         toast.error('Error loading favorites: ' + (error.response?.data?.message || error.message));
     } finally {
-        loadingFavorites.value = false;
+        loadingState.value = 'idle';
     }
 }
 
@@ -370,16 +369,6 @@ function viewProperty(propertyId) {
     router.push(`/rentpage/${propertyId}`);
 }
 
-// Show success notification
-function showSuccessNotification(message) {
-    successMessage.value = message;
-    showSuccess.value = true;
-    
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        showSuccess.value = false;
-    }, 3000);
-}
 
 // Load profile on component mount
 onMounted(() => {
