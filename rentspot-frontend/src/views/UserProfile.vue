@@ -14,9 +14,9 @@
 
         <!-- Buttons Section -->
         <form action="" class="container-user-btn">
-            <button type="button" @click="openModal('detail')">Detail Profile</button>
-            <button type="button" @click="openModal('changePassword')">Change Password</button>
-            <button type="button" @click="openModal('favoriteHistory')">Favorite History</button>
+            <button type="button" @click="openModal('detail')">👤Detail Profile</button>
+            <button type="button" @click="openModal('changePassword')">🔒 Change Password</button>
+            <button type="button" @click="openModal('favoriteHistory')">⭐ Favorite History</button>
         </form>
 
         <!-- Modal for Popups -->
@@ -91,7 +91,7 @@
                                 <h3>{{ item.title }}</h3>
                                 <p class="favorite-price">${{ item.price }}/week</p>
                                 <p class="favorite-features">
-                                    <span>{{ item.bedrooms }} bed</span> • 
+                                    <span>{{ item.bedrooms }} bed</span> •
                                     <span>{{ item.bathrooms }} bath</span>
                                 </p>
                                 <p class="favorite-date">Saved on: {{ formatDate(item.favorite_saved_at) }}</p>
@@ -165,10 +165,10 @@ function openModal(modalName) {
     if (modalName === 'favoriteHistory') {
         loadFavorites();
     }
-    
+
     currentModal.value = modalName;
     showModal.value = true;
-    
+
     // Reset form errors
     passwordError.value = '';
 }
@@ -177,12 +177,12 @@ function openModal(modalName) {
 function closeModal() {
     showModal.value = false;
     currentModal.value = null;
-    
+
     // Reset avatar preview when modal closes
     if (currentModal.value === 'detail') {
         avatarPreview.value = null;
     }
-    
+
     // Reset password form
     if (currentModal.value === 'changePassword') {
         passwords.value = {
@@ -198,10 +198,10 @@ function closeModal() {
 async function handleAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     // Store the file for actual upload later
     avatarFile.value = file;
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -243,7 +243,7 @@ async function handleAvatarUpload(event) {
 // Update profile
 async function updateProfile() {
     if (loadingState.value !== 'idle') return;
-    
+
     loadingState.value = 'profile';
     try {
         // If there's a new avatar file, upload it first
@@ -253,7 +253,7 @@ async function updateProfile() {
             profile.value.avatarUrl = uploadResult.avatarUrl;
             avatarFile.value = null; // Reset the file reference
         }
-        
+
         loadingState.value = 'profile';
         // Now update the profile
         const updatedData = {
@@ -261,15 +261,15 @@ async function updateProfile() {
             phone: profile.value.phone,
             dateOfBirth: profile.value.dateOfBirth
         };
-        
+
         await userService.updateUserProfile(updatedData);
-        
+
         // Show success message
         toast.success('Profile updated successfully!');
-        
+
         // Close the modal
         closeModal();
-        
+
         // Refresh the profile data
         loadProfile();
     } catch (error) {
@@ -282,28 +282,28 @@ async function updateProfile() {
 // Change password
 async function changePassword() {
     if (loadingState.value !== 'idle') return;
-    
+
     // Validate password confirmation
     if (passwords.value.newPassword !== passwords.value.confirmPassword) {
         passwordError.value = 'New password and confirmation do not match';
         return;
     }
-    
+
     loadingState.value = 'password';
     passwordError.value = '';
-    
+
     try {
         await userService.changeUserPassword({
             currentPassword: passwords.value.currentPassword,
             newPassword: passwords.value.newPassword
         });
-        
+
         // Show success message
         toast.success('Password changed successfully!');
-        
+
         // Close the modal
         closeModal();
-        
+
         // Reset the form
         passwords.value = {
             currentPassword: '',
@@ -332,7 +332,7 @@ async function loadProfile() {
         };
     } catch (error) {
         toast.error('Error loading profile: ' + (error.response?.data?.message || error.message));
-        
+
         // If unauthorized, redirect to login
         if (error.response && error.response.status === 401) {
             router.push('/login?redirect=/userprofile');
@@ -462,23 +462,35 @@ onMounted(() => {
   gap: 15px;
   margin-top: 20px;
   padding: 0 20px;
+  align-items: center; /* Center buttons horizontally */
 }
 
 /* Buttons for actions */
 .container-user-btn button {
-  padding: 10px 20px;
+  width: 100%; /* Full width on small screens */
+  max-width: 300px; /* Limit width on larger screens */
+  padding: 12px 24px;
   background-color: #007BFF;
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Button hover effect */
 .container-user-btn button:hover {
   background-color: #0056b3;
+  transform: translateY(-1px);
 }
+
 
 /* Modal Styles */
 .modal-overlay {
@@ -687,16 +699,16 @@ button[type="submit"]:disabled {
     width: 95%;
     padding: 15px;
   }
-  
+
   .favorite-image {
     width: 80px;
     height: 60px;
   }
-  
+
   .favorite-details h3 {
     font-size: 14px;
   }
-  
+
   .container-user-btn {
     padding: 0 10px;
   }
