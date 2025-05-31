@@ -85,6 +85,36 @@ export function uploadPropertyImage(file) {
   });
 }
 
+// Get all properties (Admin only)
+export function getAllProperties() {
+  return api.get('/properties/admin/all')
+    .then(response => response)
+    .catch(error => {
+      console.error('Failed to get all properties:', error);
+      throw error;
+    });
+}
+
+// Get user's own properties (Landlord)
+export function getMyProperties() {
+  return api.get('/properties/my')
+    .then(response => response)
+    .catch(error => {
+      console.error('Failed to get my properties:', error);
+      throw error;
+    });
+}
+
+// Get property statistics (Admin only)
+export function getPropertyStats() {
+  return api.get('/properties/admin/stats')
+    .then(response => response)
+    .catch(error => {
+      console.error('Failed to get property stats:', error);
+      throw error;
+    });
+}
+
 // Mock data for development
 function getMockProperties() {
   const mockProperties = [
@@ -151,5 +181,9 @@ export default {
   createProperty,
   updateProperty,
   deleteProperty,
-  uploadPropertyImage
+  uploadPropertyImage,
+  getAllProperties,
+  getMyProperties,
+  getPropertyStats
+
 };

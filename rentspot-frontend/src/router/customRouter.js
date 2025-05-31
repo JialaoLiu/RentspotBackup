@@ -9,6 +9,7 @@ import RentList from '../views/RentList.vue';
 import UserProfile from '../views/UserProfile.vue';
 import News from '../views/News.vue';
 import RentPage from '../views/RentPage.vue';
+import PropertyManagement from '../views/PropertyManagement.vue';
 
 // Routes
 const routes = {
@@ -18,7 +19,8 @@ const routes = {
   '/login': { name: 'Login', component: Login },
   '/signin': { name: 'Signin', component: Signin },
   '/userprofile': { name: 'UserProfile', component: UserProfile, requiresAuth: true },
-  '/news': { name: 'News', component: News }
+  '/news': { name: 'News', component: News },
+  '/property/manage': { name: 'PropertyManagement', component: PropertyManagement, requiresAuth: true, requiresLandlord: true }
 };
 
 // State
@@ -50,10 +52,15 @@ function matchRoute(path) {
     return { route: routes[path], params: {} };
   }
   
-  // Dynamic
+  // Dynamic routes
   if (path.startsWith('/rentpage/')) {
     const id = path.split('/')[2];
     return { route: routes['/rentpage'], params: { id } };
+  }
+  
+  // Property management route
+  if (path === '/property/manage') {
+    return { route: routes['/property/manage'], params: {} };
   }
   
   return { route: routes['/'], params: {} };
@@ -75,6 +82,15 @@ function navigate(path, replace = false) {
   if (route.requiresAuth && !localStorage.getItem('token')) {
     navigate(`/login?redirect=${encodeURIComponent(path)}`);
     return;
+  }
+  
+  // Landlord permission check
+  if (route.requiresLandlord) {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!userData.role || userData.role < 1) {
+      navigate('/userprofile'); // Redirect to user profile
+      return;
+    }
   }
   
   currentRoute.value = route.component;
