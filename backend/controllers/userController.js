@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const cloudinary = require('../config/cloudinary');
 const bcrypt = require('bcrypt');
-const { handleDbError, handleValidationError, handleNotFound } = require('../utils/errorHandler');
+const { handleDbError, handleValidationError, handleNotFound, handleForbidden, handleAuthError } = require('../utils/errorHandler');
 
 // User controller with simplified functions
 const userController = {
@@ -49,7 +49,7 @@ const userController = {
       const [users] = await db.query('SELECT * FROM User WHERE user_id = ?', [userId]);
       
       if (users.length === 0) {
-        return res.status(404).json({ message: 'User not found' });
+        return handleNotFound(res, 'User');
       }
       
       const user = users[0];
@@ -92,8 +92,7 @@ const userController = {
         }
       });
     } catch (error) {
-      console.error('Update error:', error.message);
-      res.status(500).json({ message: 'Could not update profile' });
+      handleDbError(res, error, 'updating profile');
     }
   },
   
@@ -102,7 +101,7 @@ const userController = {
     try {
       // Check if file was uploaded
       if (!req.file) {
-        return res.status(400).json({ message: 'No image uploaded' });
+        return handleValidationError(res, 'No image uploaded');
       }
       
       const userId = req.user.id;
@@ -119,8 +118,7 @@ const userController = {
         avatarUrl: avatarUrl
       });
     } catch (error) {
-      console.error('Avatar upload error:', error.message);
-      res.status(500).json({ message: 'Could not upload avatar' });
+      handleDbError(res, error, 'uploading avatar');
     }
   },
   
@@ -132,7 +130,7 @@ const userController = {
       
       // Check inputs
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: 'Both current and new password required' });
+        return handleValidationError(res, 'Both current and new password required');
       }
       
       // Get user's current password
@@ -142,14 +140,14 @@ const userController = {
       );
       
       if (users.length === 0) {
-        return res.status(404).json({ message: 'User not found' });
+        return handleNotFound(res, 'User');
       }
       
       // Check if current password is correct
       const passwordValid = await bcrypt.compare(currentPassword, users[0].user_password);
       
       if (!passwordValid) {
-        return res.status(401).json({ message: 'Wrong current password' });
+        return handleAuthError(res, 'Wrong current password');
       }
       
       // Hash and update new password
@@ -161,8 +159,7 @@ const userController = {
       
       res.json({ message: 'Password changed!' });
     } catch (error) {
-      console.error('Password change error:', error.message);
-      res.status(500).json({ message: 'Could not change password' });
+      handleDbError(res, error, 'changing password');
     }
   },
 
@@ -192,10 +189,144 @@ const userController = {
       
       res.json({ favorites });
     } catch (error) {
-      console.error('Favorites error:', error.message);
-      res.status(500).json({ message: 'Could not get favorites' });
+      handleDbError(res, error, 'fetching favorites');
+    }
+  },
+
+  // Admin functions
+  // Get all users
+  getAllUsers: async (req, res) => {
+    try {
+      const [users] = await db.query(`
+        SELECT 
+          user_id AS id,
+          user_name AS name,
+          user_email AS email,
+          user_phone AS phone,
+          user_role AS role,
+          user_registered_at AS registeredAt
+        FROM User
+        ORDER BY user_id DESC
+      `);
+      
+      res.json({
+        users,
+        total: users.length
+      });
+    } catch (error) {
+      handleDbError(res, error, 'getting users');
+    }
+  },
+
+  // Get user by ID
+  getUserById: async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const [users] = await db.query(`
+        SELECT 
+          user_id AS id,
+          user_name AS name,
+          user_email AS email,
+          user_phone AS phone,
+          user_role AS role,
+          user_avatar_url AS avatarUrl,
+          user_date_of_birth AS dateOfBirth,
+          user_registered_at AS registeredAt
+        FROM User
+        WHERE user_id = ?
+      `, [userId]);
+      
+      if (!users || users.length === 0) {
+        return handleNotFound(res, 'User');
+      }
+      
+      // Get user's properties count
+      const [properties] = await db.query(
+        'SELECT COUNT(*) as count FROM Property WHERE property_owner_id = ?',
+        [userId]
+      );
+      
+      res.json({
+        ...users[0],
+        propertyCount: properties[0].count
+      });
+    } catch (error) {
+      handleDbError(res, error, 'getting user');
+    }
+  },
+
+  // Update user role
+  updateUserRole: async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { role } = req.body;
+      
+      // Validate role (0=renter, 1=landlord, 2=admin)
+      if (![0, 1, 2].includes(role)) {
+        return handleValidationError(res, 'Invalid role. Must be 0 (renter), 1 (landlord), or 2 (admin)');
+      }
+      
+      // Prevent admin from changing their own role
+      if (userId === req.user.user_id) {
+        return handleForbidden(res, 'Cannot change your own role');
+      }
+      
+      const [result] = await db.query(
+        'UPDATE User SET user_role = ? WHERE user_id = ?',
+        [role, userId]
+      );
+      
+      if (result.affectedRows === 0) {
+        return handleNotFound(res, 'User');
+      }
+      
+      res.json({ 
+        message: 'User role updated successfully',
+        userId,
+        newRole: role
+      });
+    } catch (error) {
+      handleDbError(res, error, 'updating user role');
+    }
+  },
+
+  // Delete user (soft delete by setting role to -1)
+  deleteUser: async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Prevent admin from deleting themselves
+      if (userId === req.user.user_id) {
+        return handleForbidden(res, 'Cannot delete your own account');
+      }
+      
+      // Check if user has properties
+      const [properties] = await db.query(
+        'SELECT COUNT(*) as count FROM Property WHERE property_owner_id = ? AND property_status != 2',
+        [userId]
+      );
+      
+      if (properties[0].count > 0) {
+        return handleValidationError(res, `Cannot delete user with ${properties[0].count} active properties. Remove all properties first.`);
+      }
+      
+      // Soft delete by setting role to -1
+      const [result] = await db.query(
+        'UPDATE User SET user_role = -1 WHERE user_id = ?',
+        [userId]
+      );
+      
+      if (result.affectedRows === 0) {
+        return handleNotFound(res, 'User');
+      }
+      
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      handleDbError(res, error, 'deleting user');
     }
   }
 };
+
 
 module.exports = userController;

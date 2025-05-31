@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../src/views/home.vue';
 import Login from '../src/views/Login.vue';
 import Signin from '../src/views/Signin.vue';
-import RentList from '../src/views/Rentlist.vue';
+import RentList from '../src/views/RentList.vue';
 import UserProfile from '../src/views/UserProfile.vue';
 import News from '../src/views/News.vue';
 

@@ -20,6 +20,11 @@
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/rentlist">Rent</router-link></li>
           <li><router-link to="/news">News</router-link></li>
+          <li v-if="isLandlordOrAdmin">
+            <router-link to="/property/manage" class="management-link">
+              <HouseIcon class="nav-icon" /> Property Management
+            </router-link>
+          </li>
           <li><a href="#">Feedback</a></li>
         </ul>
       </li>
@@ -50,6 +55,11 @@
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/rentlist">Rent</router-link></li>
         <li><router-link to="/news">News</router-link></li>
+        <li v-if="isLandlordOrAdmin">
+          <router-link to="/property/manage" class="management-link">
+            <HouseIcon class="nav-icon" /> Property Management
+          </router-link>
+        </li>
         <li><a href="#">Feedback</a></li>
       </ul>
       <ul class="connect-mobile">
@@ -77,9 +87,12 @@ import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from '../composables/useRouter.js';
 import { useNotification } from '../composables/useNotification';
 import userService from '../services/userService';
+// Import SVG icons
+import HouseIcon from '../assets/svg/House.svg';
 
 const isLoggedIn = ref(false);
 const userAvatar = ref(null);
+const isLandlordOrAdmin = ref(false);
 const route = useRoute();
 const router = useRouter();
 const toast = useNotification();
@@ -125,11 +138,14 @@ const checkLoginStatus = () => {
   const token = localStorage.getItem('token');
   isLoggedIn.value = !!token; // If token exists, user is logged in
 
-  // If logged in, try to get user profile for avatar
+  // Check user role
   if (isLoggedIn.value) {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    isLandlordOrAdmin.value = userData.role >= 1; // Landlord (1) or Admin (2)
     fetchUserAvatar();
   } else {
     userAvatar.value = null;
+    isLandlordOrAdmin.value = false;
   }
 };
 
@@ -259,6 +275,29 @@ onMounted(() => {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #646cff;
+}
+
+/* Management link styling */
+.management-link {
+  background: linear-gradient(45deg, #10B981, #059669);
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.management-link:hover {
+  background: linear-gradient(45deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  color: white !important;
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 /* Hamburger container - hidden on desktop */
