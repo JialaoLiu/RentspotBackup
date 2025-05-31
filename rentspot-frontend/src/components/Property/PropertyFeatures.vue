@@ -1,32 +1,32 @@
 <template>
   <div class="property-features">
     <div class="feature">
-      <span class="feature-icon">🛏️</span>
+      <BedIcon class="feature-icon" />
       <span class="feature-value">{{ bedrooms }}</span>
       <span class="feature-label">Bedrooms</span>
     </div>
     <div class="feature">
-      <span class="feature-icon">🚿</span>
+      <BathroomIcon class="feature-icon" />
       <span class="feature-value">{{ bathrooms }}</span>
       <span class="feature-label">Bathrooms</span>
     </div>
     <div class="feature" v-if="garages !== undefined">
-      <span class="feature-icon">🚗</span>
+      <CarIcon class="feature-icon" />
       <span class="feature-value">{{ garages }}</span>
       <span class="feature-label">Parking</span>
     </div>
     <div class="feature">
-      <span class="feature-icon">🏠</span>
+      <HouseIcon class="feature-icon" />
       <span class="feature-value">{{ propertyType }}</span>
       <span class="feature-label">Type</span>
     </div>
     <div class="feature" v-if="landSize">
-      <span class="feature-icon">📏</span>
+      <RulerIcon class="feature-icon" />
       <span class="feature-value">{{ landSize }}</span>
       <span class="feature-label">Land Size</span>
     </div>
     <div class="feature" v-if="buildYear">
-      <span class="feature-icon">🏗️</span>
+      <ConstructionIcon class="feature-icon" />
       <span class="feature-value">{{ buildYear }}</span>
       <span class="feature-label">Built</span>
     </div>
@@ -36,7 +36,7 @@
     <h3>Amenities</h3>
     <ul class="amenities-list">
       <li v-for="(amenity, index) in amenities" :key="index" class="amenity-item">
-        <span class="checkmark">✓</span>
+        <CheckIcon class="checkmark" />
         {{ amenity }}
       </li>
     </ul>
@@ -44,6 +44,15 @@
 </template>
 
 <script setup>
+// Import SVG icons
+import BedIcon from '../../assets/svg/Bed.svg'
+import BathroomIcon from '../../assets/svg/Bathroom.svg'
+import CarIcon from '../../assets/svg/car.svg'
+import HouseIcon from '../../assets/svg/House.svg'
+import RulerIcon from '../../assets/svg/Ruler.svg'
+import ConstructionIcon from '../../assets/svg/Construction.svg'
+import CheckIcon from '../../assets/svg/Check.svg'
+
 defineProps({
   bedrooms: Number,
   bathrooms: Number,
@@ -76,8 +85,10 @@ defineProps({
 }
 
 .feature-icon {
-  font-size: 2rem;
+  width: 32px;
+  height: 32px;
   margin-bottom: 8px;
+  color: #6B7280;
 }
 
 .feature-value {
@@ -113,9 +124,10 @@ defineProps({
 }
 
 .checkmark {
+  width: 16px;
+  height: 16px;
   color: #10b981;
   margin-right: 8px;
-  font-weight: bold;
 }
 
 @media (max-width: 768px) {

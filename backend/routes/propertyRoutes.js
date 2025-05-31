@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
 // Mock data for testing
 const mockProperties = [
@@ -63,10 +64,15 @@ router.get('/', (req, res) => {
 // GET property by ID
 router.get('/:id', (req, res) => {
     const id = parseInt(req.params.id);
+    
+    if (isNaN(id)) {
+        return handleValidationError(res, 'Invalid property ID');
+    }
+    
     const property = mockProperties.find(p => p.id === id);
     
     if (!property) {
-        return res.status(404).json({ message: 'Property not found' });
+        return handleNotFound(res, 'Property');
     }
     
     res.json(property);

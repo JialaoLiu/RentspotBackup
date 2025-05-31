@@ -1,0 +1,747 @@
+<template>
+  <div class="property-management">
+    <!-- Header Section -->
+    <div class="management-header">
+      <div class="header-content">
+        <h1>Property Management</h1>
+        <p v-if="userRole === 2" class="header-subtitle">Admin View - Manage All Properties</p>
+        <p v-else class="header-subtitle">Manage Your Listed Properties</p>
+        
+        <div class="header-actions">
+          <button @click="showAddForm" class="btn-add-property">
+            <PlusIcon class="icon" /> Add Property
+          </button>
+          <button @click="refreshProperties" class="btn-refresh" :disabled="loading">
+            <RefreshIcon class="icon" /> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards (Admin only) -->
+    <div v-if="userRole === 2" class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card clickable" @click="setStatusFilter('')" :class="{ active: statusFilter === '' }">
+          <div class="stat-number">{{ stats.total || 0 }}</div>
+          <div class="stat-label">Total Properties</div>
+        </div>
+        <div class="stat-card clickable" @click="setStatusFilter('0')" :class="{ active: statusFilter === '0' }">
+          <div class="stat-number">{{ stats.available || 0 }}</div>
+          <div class="stat-label">Available</div>
+        </div>
+        <div class="stat-card clickable" @click="setStatusFilter('1')" :class="{ active: statusFilter === '1' }">
+          <div class="stat-number">{{ stats.booked || 0 }}</div>
+          <div class="stat-label">Rented</div>
+        </div>
+        <div class="stat-card clickable removed-card" @click="showRemovedSection = true" :class="{ active: showRemovedSection }">
+          <div class="stat-number">{{ stats.removed || 0 }}</div>
+          <div class="stat-label">Removed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+      <div class="search-container">
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Search property title or address..." 
+          class="search-input"
+        />
+      </div>
+      
+      <div class="filter-container">
+        <select v-model="statusFilter" class="filter-select">
+          <option value="">All Status</option>
+          <option value="0">Available</option>
+          <option value="1">Rented</option>
+          <option value="2" v-if="userRole === 2">Removed</option>
+        </select>
+        
+        <select v-model="typeFilter" class="filter-select">
+          <option value="">All Types</option>
+          <option value="0">House</option>
+          <option value="1">Apartment</option>
+          <option value="2">Townhouse</option>
+          <option value="3">Villa</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <LoadingSpinner v-if="loading" />
+
+    <!-- Error State -->
+    <div v-else-if="error" class="error-state">
+      <ErrorIcon class="error-icon" /> {{ error }}
+      <button @click="loadProperties" class="btn-retry">Retry</button>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="filteredProperties.length === 0 && !loading" class="empty-state">
+      <div class="empty-content">
+        <HouseIcon class="empty-icon" />
+        <h3>{{ searchQuery ? 'No matching properties found' : 'No properties yet' }}</h3>
+        <p v-if="!searchQuery">Click the "Add Property" button above to start adding your first property</p>
+        <p v-else>Try adjusting your search criteria or filters</p>
+      </div>
+    </div>
+
+    <!-- Properties Grid (Exclude Removed) -->
+    <div v-else-if="!showRemovedSection" class="properties-section">
+      <div class="properties-grid">
+        <PropertyManagementCard
+          v-for="property in filteredProperties"
+          :key="property.id"
+          :property="property"
+          @edit="showEditForm"
+          @delete="showDeleteConfirm"
+        />
+      </div>
+      
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="pagination">
+        <button 
+          @click="currentPage--" 
+          :disabled="currentPage === 1"
+          class="pagination-btn"
+        >
+          Previous
+        </button>
+        
+        <span class="pagination-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+        
+        <button 
+          @click="currentPage++" 
+          :disabled="currentPage === totalPages"
+          class="pagination-btn"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+    
+    <!-- Removed Properties Section -->
+    <div v-else-if="showRemovedSection && userRole === 2" class="removed-section">
+      <div class="removed-header">
+        <h2>Removed Properties</h2>
+        <button @click="showRemovedSection = false" class="btn-back">
+          ← Back to Properties
+        </button>
+      </div>
+      
+      <div v-if="removedProperties.length === 0" class="empty-state">
+        <div class="empty-content">
+          <RemoveIcon class="empty-icon" />
+          <h3>No removed properties</h3>
+          <p>Properties that are removed will appear here</p>
+        </div>
+      </div>
+      
+      <div v-else class="properties-grid">
+        <PropertyManagementCard
+          v-for="property in removedProperties"
+          :key="property.id"
+          :property="property"
+          @edit="showEditForm"
+          @delete="showDeleteConfirm"
+          :isRemoved="true"
+        />
+      </div>
+    </div>
+
+    <!-- Property Form Modal -->
+    <PropertyForm
+      v-if="showForm"
+      :mode="formMode"
+      :property="editingProperty"
+      @cancel="hideForm"
+      @success="handleFormSuccess"
+    />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmDeleteModal
+      v-if="showDeleteModal"
+      :property="deletingProperty"
+      @cancel="hideDeleteModal"
+      @confirm="handleDelete"
+    />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue'
+import PropertyManagementCard from '../components/Property/Management/PropertyManagementCard.vue'
+import PropertyForm from '../components/Property/Management/PropertyForm.vue'
+import ConfirmDeleteModal from '../components/Property/Management/ConfirmDeleteModal.vue'
+import LoadingSpinner from '../components/Common/LoadingSpinner.vue'
+import { getAllProperties, getMyProperties, getPropertyStats, deleteProperty } from '../services/propertyService'
+import { useNotification } from '../composables/useNotification'
+// Import SVG icons
+import PlusIcon from '../assets/svg/Plus.svg'
+import RefreshIcon from '../assets/svg/Refresh.svg'
+import ErrorIcon from '../assets/svg/Error.svg'
+import HouseIcon from '../assets/svg/House.svg'
+import RemoveIcon from '../assets/svg/remove.svg'
+
+// Composables
+const toast = useNotification()
+
+// Reactive data
+const properties = ref([])
+const stats = ref({})
+const loading = ref(false)
+const error = ref('')
+
+// Form state
+const showForm = ref(false)
+const formMode = ref('add')
+const editingProperty = ref(null)
+
+// Delete state
+const showDeleteModal = ref(false)
+const deletingProperty = ref(null)
+
+// Filters and search
+const searchQuery = ref('')
+const statusFilter = ref('')
+const typeFilter = ref('')
+
+// Removed section
+const showRemovedSection = ref(false)
+
+// Pagination
+const currentPage = ref(1)
+const itemsPerPage = 12
+
+// User info
+const userRole = ref(0)
+
+// Computed properties
+const filteredProperties = computed(() => {
+  let filtered = properties.value
+  
+  // Exclude removed properties from normal view
+  if (!showRemovedSection.value) {
+    filtered = filtered.filter(property => property.status !== 2)
+  }
+
+  // Search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(property =>
+      property.title.toLowerCase().includes(query) ||
+      property.address?.toLowerCase().includes(query)
+    )
+  }
+
+  // Status filter
+  if (statusFilter.value !== '') {
+    filtered = filtered.filter(property => 
+      property.status === parseInt(statusFilter.value)
+    )
+  }
+
+  // Type filter
+  if (typeFilter.value !== '') {
+    filtered = filtered.filter(property => 
+      property.type === parseInt(typeFilter.value)
+    )
+  }
+
+  // Pagination
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filtered.slice(start, end)
+})
+
+// Computed property for removed properties only
+const removedProperties = computed(() => {
+  return properties.value.filter(property => property.status === 2)
+})
+
+const totalPages = computed(() => {
+  const total = properties.value.length
+  return Math.ceil(total / itemsPerPage)
+})
+
+// Lifecycle
+onMounted(() => {
+  initializeComponent()
+})
+
+// Watchers
+watch([searchQuery, statusFilter, typeFilter], () => {
+  currentPage.value = 1
+})
+
+// Methods
+async function initializeComponent() {
+  // Get user info from localStorage
+  const userData = JSON.parse(localStorage.getItem('user') || '{}')
+  userRole.value = userData.role || 0
+
+  // Check permissions
+  if (userRole.value < 1) {
+    toast.error('You do not have permission to access this page')
+    // Redirect to home or login
+    return
+  }
+
+  await loadProperties()
+  
+  // Load stats for admin
+  if (userRole.value === 2) {
+    await loadStats()
+  }
+}
+
+async function loadProperties() {
+  loading.value = true
+  error.value = ''
+
+  try {
+    let response
+    if (userRole.value === 2) {
+      // Admin: get all properties
+      response = await getAllProperties()
+    } else {
+      // Landlord: get own properties (need to implement this API)
+      response = await getMyProperties()
+    }
+
+    // Handle response - check if it's the full axios response or just data
+    const data = response.data || response
+    properties.value = data.properties || data || []
+  } catch (err) {
+    console.error('Load properties error:', err)
+    error.value = err.response?.data?.message || 'Failed to load properties'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadStats() {
+  try {
+    const response = await getPropertyStats()
+    stats.value = response.data || response
+  } catch (err) {
+    console.error('Load stats error:', err)
+  }
+}
+
+function refreshProperties() {
+  loadProperties()
+  if (userRole.value === 2) {
+    loadStats()
+  }
+}
+
+// Filter methods
+function setStatusFilter(status) {
+  statusFilter.value = status
+  showRemovedSection.value = false
+  currentPage.value = 1
+}
+
+// Form methods
+function showAddForm() {
+  formMode.value = 'add'
+  editingProperty.value = null
+  showForm.value = true
+}
+
+function showEditForm(property) {
+  formMode.value = 'edit'
+  editingProperty.value = property
+  showForm.value = true
+}
+
+function hideForm() {
+  showForm.value = false
+  editingProperty.value = null
+}
+
+function handleFormSuccess() {
+  hideForm()
+  refreshProperties()
+}
+
+// Delete methods
+function showDeleteConfirm(property) {
+  deletingProperty.value = property
+  showDeleteModal.value = true
+}
+
+function hideDeleteModal() {
+  showDeleteModal.value = false
+  deletingProperty.value = null
+}
+
+async function handleDelete() {
+  if (!deletingProperty.value) return
+
+  const isPermanentDelete = deletingProperty.value.status === 2
+
+  try {
+    await deleteProperty(deletingProperty.value.id)
+    toast.success(isPermanentDelete ? 'Property permanently deleted' : 'Property removed successfully')
+    hideDeleteModal()
+    refreshProperties()
+  } catch (err) {
+    console.error('Delete property error:', err)
+    toast.error(
+      err.response?.data?.message || 'Delete failed, please try again'
+    )
+  }
+}
+</script>
+
+<style scoped>
+.property-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header Section */
+.management-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  color: white;
+}
+
+.header-content h1 {
+  margin: 0 0 8px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.header-subtitle {
+  margin: 0 0 24px 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-add-property,
+.btn-refresh {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-property {
+  background-color: #10B981;
+  color: white;
+}
+
+.btn-add-property:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-refresh {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Statistics Section */
+.stats-section {
+  margin-bottom: 32px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #E5E7EB;
+  transition: all 0.3s ease;
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+}
+
+.stat-card.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #9CA3AF;
+}
+
+.stat-card.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.stat-card.active .stat-number,
+.stat-card.active .stat-label {
+  color: white;
+}
+
+.stat-card.removed-card.active {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* Filters Section */
+.filters-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #E5E7EB;
+}
+
+.search-container {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+/* Properties Section */
+.properties-section {
+  margin-bottom: 32px;
+}
+
+.properties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* States */
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 64px 32px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+}
+
+.empty-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #9CA3AF;
+}
+
+.error-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #DC2626;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.empty-state h3 {
+  margin: 0 0 16px 0;
+  color: #374151;
+}
+
+.empty-state p {
+  color: #6B7280;
+  margin: 0;
+}
+
+.btn-retry {
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-top: 16px;
+}
+
+.btn-retry:hover {
+  background-color: #2563EB;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #D1D5DB;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #F3F4F6;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #6B7280;
+  font-weight: 500;
+}
+
+/* Removed Section */
+.removed-section {
+  margin-top: 20px;
+}
+
+.removed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.removed-header h2 {
+  margin: 0;
+  color: #DC2626;
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.btn-back {
+  background-color: #F3F4F6;
+  color: #374151;
+  padding: 10px 20px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background-color: #E5E7EB;
+  transform: translateX(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .property-management {
+    padding: 16px;
+  }
+  
+  .management-header {
+    padding: 24px;
+  }
+  
+  .header-content h1 {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .properties-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-container {
+    flex-direction: column;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+</style>
