@@ -107,6 +107,17 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkMobileView);
 });
+
+watch(
+  () => route.value.fullPath,
+  () => {
+    if (isMobileView.value) {
+      isMenuOpen.value = false;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+);
+
 //=======================
 
 // Check login status
