@@ -35,4 +35,5 @@ router.put('/:userId/role', requireAdmin, userController.updateUserRole);
 // Delete user - Admin only
 router.delete('/:userId', requireAdmin, userController.deleteUser);
 
+
 module.exports = router;

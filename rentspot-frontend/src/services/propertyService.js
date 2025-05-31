@@ -185,4 +185,5 @@ export default {
   getAllProperties,
   getMyProperties,
   getPropertyStats
+
 };
