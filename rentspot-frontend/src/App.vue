@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import NavBar from './components/NavBar.vue'
+import NavBar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import { currentRoute, initRouter } from './router/customRouter.js'
 

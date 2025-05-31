@@ -48,6 +48,7 @@ const handleClick = (event) => {
 
 <style scoped>
 .router-link-active {
-  /* Add your active link styles here if needed */
+  /* prevent error */
+  all: initial;
 }
 </style>

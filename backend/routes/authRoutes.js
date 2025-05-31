@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const db = require('../config/db');
+const { handleValidationError, handleNotFound, handleAuthError, handleDbError } = require('../utils/errorHandler');
 require('dotenv').config();
 
 const router = express.Router();
@@ -33,30 +34,35 @@ router.post('/login', async (req, res) => {
   const { user_email, user_password, captcha } = req.body;
 
   if (!user_email || !user_password) {
-    return res.status(400).json({ message: 'Email and password required' });
+    return handleValidationError(res, 'Email and password required');
   }
 
   if (captcha && !(await checkCaptcha(captcha))) {
-    return res.status(400).json({ message: 'Invalid captcha' });
+    return handleValidationError(res, 'Invalid captcha');
   }
 
   try {
     const [users] = await db.execute('SELECT * FROM User WHERE user_email = ?', [user_email]);
     
     if (users.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+      return handleNotFound(res, 'User');
     }
 
     const user = users[0];
     
     const passwordValid = await bcrypt.compare(user_password, user.user_password);
     if (!passwordValid) {
-      return res.status(401).json({ message: 'Wrong password' });
+      return handleAuthError(res, 'Wrong password');
     }
 
     // create token
     const token = jwt.sign(
-      { id: user.user_id, role: user.user_role }, 
+      { 
+        id: user.user_id, 
+        user_id: user.user_id,  // Add this for consistency
+        user_role: user.user_role,
+        role: user.user_role  // Keep for backward compatibility
+      }, 
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }
     );
@@ -72,8 +78,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error.message);
-    res.status(500).json({ message: 'Login failed' });
+    handleDbError(res, error, 'login');
   }
 });
 
@@ -81,18 +86,18 @@ router.post('/register', async (req, res) => {
   const { user_name, user_email, user_password, user_phone, user_role, captcha } = req.body;
 
   if (!user_name || !user_email || !user_password) {
-    return res.status(400).json({ message: 'Name, email and password required' });
+    return handleValidationError(res, 'Name, email and password required');
   }
 
   if (captcha && !(await checkCaptcha(captcha))) {
-    return res.status(400).json({ message: 'Invalid captcha' });
+    return handleValidationError(res, 'Invalid captcha');
   }
 
   try {
     const [existing] = await db.execute('SELECT * FROM User WHERE user_email = ?', [user_email]);
     
     if (existing.length > 0) {
-      return res.status(400).json({ message: 'Email already registered' });
+      return handleValidationError(res, 'Email already registered');
     }
     
     const hashedPassword = await bcrypt.hash(user_password, 10);
@@ -114,8 +119,7 @@ router.post('/register', async (req, res) => {
     
     res.status(201).json({ message: 'Registration successful!' });
   } catch (error) {
-    console.error('Register error:', error.message);
-    res.status(500).json({ message: 'Registration failed' });
+    handleDbError(res, error, 'registration');
   }
 });
 
