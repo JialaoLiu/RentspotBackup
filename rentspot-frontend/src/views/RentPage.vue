@@ -31,7 +31,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from '../composables/useRouter.js'
-import { getPropertyById } from '../services/propertyService'
+import { getPropertyById, addFavorite, removeFavorite, checkFavorite } from '../services/propertyService'
+import { useNotification } from '../composables/useNotification'
 
 // Import components
 import LoadingState from '../components/Rent/LoadingState.vue'
@@ -40,10 +41,12 @@ import PropertyDetailView from '../components/Rent/PropertyDetailView.vue'
 
 const router = useRouter()
 const route = useRoute()
+const toast = useNotification()
 
 const property = ref(null)
 const loading = ref(true)
 const error = ref(null)
+const isFavoriteState = ref(false)
 const agentInfo = ref({
   name: 'Property Manager',
   email: 'agent@rentspot.com.au',
@@ -55,12 +58,7 @@ const agentInfo = ref({
 const isAuthenticated = ref(!!localStorage.getItem('token'))
 
 // Check if property is in favorites
-const isFavorite = computed(() => {
-  if (!isAuthenticated.value || !property.value) return false
-  
-  const favorites = JSON.parse(localStorage.getItem('favoriteProperties') || '[]')
-  return favorites.includes(property.value.id)
-})
+const isFavorite = computed(() => isFavoriteState.value)
 
 // Load property data
 onMounted(async () => {
@@ -85,6 +83,16 @@ onMounted(async () => {
     }
     
     property.value = data
+    
+    // Check favorite status if authenticated
+    if (isAuthenticated.value) {
+      try {
+        isFavoriteState.value = await checkFavorite(id)
+      } catch (err) {
+        console.error('Failed to check favorite status:', err)
+        // Don't show error, just default to false
+      }
+    }
   } catch (err) {
     console.error('Error:', err)
     error.value = 'Failed to load property details. Please try again later.'
@@ -94,28 +102,29 @@ onMounted(async () => {
 })
 
 // Add/remove from favorites
-function toggleFavorite() {
+async function toggleFavorite() {
   if (!isAuthenticated.value) {
     // Redirect to login if not logged in
-    router.push({ 
-      name: 'Login', 
-      query: { redirect: router.currentRoute.value.fullPath }
-    })
+    router.push('/login?redirect=' + encodeURIComponent(route.value.fullPath))
     return
   }
   
-  const favorites = JSON.parse(localStorage.getItem('favoriteProperties') || '[]')
-  
-  if (isFavorite.value) {
-    // Remove from favorites
-    const index = favorites.indexOf(property.value.id)
-    favorites.splice(index, 1)
-  } else {
-    // Add to favorites
-    favorites.push(property.value.id)
+  try {
+    if (isFavoriteState.value) {
+      // Remove from favorites
+      await removeFavorite(property.value.id)
+      isFavoriteState.value = false
+      toast.success('Removed from favorites')
+    } else {
+      // Add to favorites
+      await addFavorite(property.value.id)
+      isFavoriteState.value = true
+      toast.success('Added to favorites')
+    }
+  } catch (error) {
+    console.error('Failed to update favorites:', error)
+    toast.error('Failed to update favorites. Please try again.')
   }
-  
-  localStorage.setItem('favoriteProperties', JSON.stringify(favorites))
 }
 
 // Go back to previous page

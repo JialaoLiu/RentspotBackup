@@ -8,27 +8,35 @@
       <div class="property-image">
         <img :src="property.image" :alt="property.title" @error="handleImageError">
         <div class="property-badge" v-if="property.status === 0">Available</div>
+        <button 
+          class="favorite-btn-corner" 
+          :class="{ 'is-favorited': isFavorite(property.id) }"
+          @click.stop="$emit('toggle-favorite', property.id)"
+        >
+          <Icon 
+            :name="isFavorite(property.id) ? 'heart' : 'heart-outline'" 
+            size="md" 
+            :color="isFavorite(property.id) ? '#EF4444' : '#9CA3AF'"
+          />
+        </button>
       </div>
       <div class="property-info">
         <h3 class="property-title">{{ property.title }}</h3>
         <p class="address">
-          <i class="location-icon">📍</i>
+          <Icon name="location" size="md" />
           {{ property.address }}
         </p>
         <div class="property-features">
-          <span><i class="feature-icon">🛏️</i> {{ property.bedrooms }} bedrooms</span>
-          <span><i class="feature-icon">🚿</i> {{ property.bathrooms }} bathrooms</span>
-          <span v-if="property.garages"><i class="feature-icon">🚗</i> {{ property.garages }} parking</span>
-          <span v-if="property.type !== undefined"><i class="feature-icon">🏠</i> {{ getPropertyType(property.type) }}</span>
+          <span><Icon name="bed" size="md" /> {{ property.bedrooms }} bedrooms</span>
+          <span><Icon name="bathroom" size="md" /> {{ property.bathrooms }} bathrooms</span>
+          <span v-if="property.garages"><Icon name="car" size="md" /> {{ property.garages }} parking</span>
+          <span v-if="property.type !== undefined"><Icon name="house" size="md" /> {{ getPropertyType(property.type) }}</span>
         </div>
         <p class="description" v-if="property.description">{{ property.description }}</p>
         <p class="description" v-else>Modern property in a convenient location with great amenities nearby. Contact us for more details!</p>
         <div class="property-footer">
           <span class="price">${{ property.price }}<span class="per-week">/week</span></span>
           <button class="view-details-btn">View Details</button>
-          <button class="favorite-btn" @click.stop="$emit('toggle-favorite', property.id)">
-            <i :class="['heart-icon', {'favorited': isFavorite(property.id)}]">❤</i>
-          </button>
         </div>
       </div>
     </div>
@@ -36,6 +44,7 @@
 </template>
 
 <script setup>
+import Icon from '../Common/Icon.vue'
 // Props
 const props = defineProps({
   properties: {
@@ -64,7 +73,7 @@ function getPropertyType(typeCode) {
 
 // Image error handler
 function handleImageError(e) {
-  e.target.src = 'https://via.placeholder.com/300x200?text=Property+Image'
+  e.target.src = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'
 }
 
 // Check if property is favorited
@@ -152,7 +161,9 @@ function isFavorite(propertyId) {
 }
 
 .location-icon {
-  font-size: 14px;
+  width: 16px;
+  height: 16px;
+  color: #6B7280;
 }
 
 .property-features {
@@ -163,10 +174,12 @@ function isFavorite(propertyId) {
   color: #4B5563;
 }
 
-.feature-icon {
-  font-size: 14px;
-  margin-right: 4px;
+.property-features span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
 
 .description {
   margin-bottom: 16px;
@@ -210,12 +223,15 @@ function isFavorite(propertyId) {
   background-color: #1F2937;
 }
 
-.favorite-btn {
-  background: none;
+/* Corner favorite button */
+.favorite-btn-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   cursor: pointer;
-  color: #9CA3AF;
-  font-size: 18px;
+  padding: 8px;
   width: 40px;
   height: 40px;
   display: flex;
@@ -223,21 +239,20 @@ function isFavorite(propertyId) {
   justify-content: center;
   border-radius: 50%;
   transition: all 0.2s ease;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
 }
 
-.favorite-btn:hover {
-  background-color: #F3F4F6;
+.favorite-btn-corner:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
 }
 
-.heart-icon {
-  opacity: 0.5;
-  transition: all 0.2s ease;
+.favorite-btn-corner.is-favorited {
+  background: rgba(255, 255, 255, 1);
 }
 
-.heart-icon.favorited {
-  color: #EF4444;
-  opacity: 1;
-}
 
 @media (max-width: 768px) {
   .detailed-property {
@@ -255,7 +270,6 @@ function isFavorite(propertyId) {
   }
   
   .view-details-btn {
-    order: -1;
     width: 100%;
   }
   
@@ -263,14 +277,6 @@ function isFavorite(propertyId) {
     flex-basis: 100%;
     text-align: center;
     margin-bottom: 8px;
-  }
-  
-  .favorite-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 }
 </style>

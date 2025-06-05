@@ -11,19 +11,33 @@
       <h3 class="card-title">{{ property.title }}</h3>
       <p class="card-address">{{ property.address || `Adelaide SA ${property.id}` }}</p>
       <div class="card-features">
-        <span>{{ property.bedrooms }} bed</span>
-        <span>•</span>
-        <span>{{ property.bathrooms }} bath</span>
+        <span class="feature-item">
+          <Icon name="bed" size="md" />
+          {{ property.bedrooms }}
+        </span>
+        <span class="feature-separator">•</span>
+        <span class="feature-item">
+          <Icon name="bathroom" size="md" />
+          {{ property.bathrooms }}
+        </span>
+        <span v-if="property.garage" class="feature-separator">•</span>
+        <span v-if="property.garage" class="feature-item">
+          <Icon name="car" size="md" />
+          {{ property.garage }}
+        </span>
       </div>
       
       <div class="management-footer">
         <span class="card-price">${{ property.price }}<span class="per-week">/week</span></span>
         <div class="action-buttons">
-          <button class="edit-btn" @click="$emit('edit', property)" title="Edit Property">
-            <EditIcon class="icon" /> Edit
+          <button v-if="property.status !== 2" class="edit-btn" @click="$emit('edit', property)" title="Edit Property">
+            <Icon name="edit" size="md" /> Edit
+          </button>
+          <button v-else class="restore-btn" @click="$emit('restore', property)" title="Restore Property">
+            <Icon name="refresh" size="md" /> Restore
           </button>
           <button class="delete-btn" @click="$emit('delete', property)" :title="property.status === 2 ? 'Permanently Delete Property' : 'Remove Property'">
-            <RemoveIcon class="icon" /> {{ property.status === 2 ? 'Delete' : 'Remove' }}
+            <Icon :name="property.status === 2 ? 'delete-forever' : 'remove'" size="md" /> {{ property.status === 2 ? 'Delete' : 'Remove' }}
           </button>
         </div>
       </div>
@@ -32,9 +46,9 @@
 </template>
 
 <script setup>
-// Import SVG icons
-import EditIcon from '../../../assets/svg/Edit.svg'
-import RemoveIcon from '../../../assets/svg/remove.svg'
+// Import Icon component
+import Icon from '../../Common/Icon.vue'
+
 
 // Props
 const props = defineProps({
@@ -49,7 +63,7 @@ const props = defineProps({
 })
 
 // Emits
-defineEmits(['edit', 'delete'])
+defineEmits(['edit', 'delete', 'restore'])
 
 // Image error handler
 function handleImageError(e) {
@@ -163,6 +177,19 @@ function getStatusClass(status) {
   display: flex;
   color: #6B7280;
   font-size: 0.875rem;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card-features .feature-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-features .feature-separator {
+  margin: 0 4px;
   margin-bottom: 12px;
   gap: 6px;
 }
@@ -190,7 +217,7 @@ function getStatusClass(status) {
   gap: 8px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn, .delete-btn, .restore-btn {
   border: none;
   border-radius: 4px;
   padding: 6px 12px;
@@ -211,6 +238,15 @@ function getStatusClass(status) {
   background-color: #2563EB;
 }
 
+.restore-btn {
+  background-color: #10B981;
+  color: white;
+}
+
+.restore-btn:hover {
+  background-color: #059669;
+}
+
 .delete-btn {
   background-color: #EF4444;
   color: white;
@@ -220,9 +256,8 @@ function getStatusClass(status) {
   background-color: #DC2626;
 }
 
-.icon {
-  width: 16px;
-  height: 16px;
+.action-buttons .icon {
+  color: inherit;
 }
 
 /* Responsive design */

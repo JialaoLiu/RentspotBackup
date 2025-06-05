@@ -36,6 +36,8 @@
         <img :src="image.url" :alt="`Thumbnail ${index + 1}`">
       </div>
     </div>
+    
+    <!-- basic carousel - no lightbox -->
   </div>
 </template>
 
@@ -50,11 +52,12 @@ const props = defineProps({
 })
 
 const currentIndex = ref(0)
+// basic carousel state
 
 const currentImage = computed(() => {
   if (props.images.length === 0) {
     return { 
-      url: 'https://via.placeholder.com/800x600?text=No+Images+Available', 
+      url: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png', 
       alt: 'No images available' 
     }
   }
@@ -75,8 +78,10 @@ function setImage(index) {
 }
 
 function handleImageError(e) {
-  e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Available'
+  e.target.src = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'
 }
+
+// simplified gallery - no lightbox or keyboard nav
 </script>
 
 <style scoped>
@@ -153,6 +158,8 @@ function handleImageError(e) {
   object-fit: cover;
 }
 
+/* simple gallery styles */
+
 @media (max-width: 640px) {
   .gallery-main {
     height: 300px;
@@ -162,5 +169,7 @@ function handleImageError(e) {
     width: 70px;
     height: 50px;
   }
+  
+  /* mobile thumbnail adjustments */
 }
 </style>

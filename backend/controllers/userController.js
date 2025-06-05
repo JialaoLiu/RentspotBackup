@@ -107,6 +107,8 @@ const userController = {
       const userId = req.user.id;
       const avatarUrl = req.file.path;
       
+      console.log('Avatar upload - userId:', userId, 'avatarUrl:', avatarUrl);
+      
       // Update avatar URL in database
       await db.query(
         'UPDATE User SET user_avatar_url = ? WHERE user_id = ?',
@@ -118,6 +120,7 @@ const userController = {
         avatarUrl: avatarUrl
       });
     } catch (error) {
+      // upload failed
       handleDbError(res, error, 'uploading avatar');
     }
   },
