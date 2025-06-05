@@ -2,103 +2,103 @@ const db = require('../config/db');
 
 // Property data model
 const Property = {
-  /**
-   * Get all properties with optional filtering and pagination
-   * @param {Object} filters - Filter parameters
-   * @param {Object} pagination - Pagination options
-   * @returns {Promise} - Properties list
-   */
+  // get all properties with filters
   getAll: async (filters = {}, pagination = { page: 1, limit: 10 }) => {
     try {
-      // Base query
+      // main query
       let query = `
         SELECT 
-          property_id AS id, 
-          property_owner_id AS owner_id, 
-          property_name AS title, 
-          property_price AS price, 
-          property_room AS bedrooms, 
-          property_bathroom AS bathrooms, 
-          property_garages AS garages, 
-          property_aircon AS aircon, 
-          property_balcony AS balcony, 
-          property_petsconsidered AS petsConsidered, 
-          property_furnished AS furnished, 
-          property_type AS type, 
-          property_status AS status, 
-          property_latitude AS lat, 
-          property_longitude AS lng, 
-          property_img_url AS image
-        FROM Property
+          p.property_id AS id, 
+          p.property_owner_id AS owner_id, 
+          p.property_name AS title, 
+          p.property_price AS price, 
+          p.property_room AS bedrooms, 
+          p.property_bathroom AS bathrooms, 
+          p.property_garages AS garages, 
+          p.property_aircon AS aircon, 
+          p.property_balcony AS balcony, 
+          p.property_petsconsidered AS petsConsidered, 
+          p.property_furnished AS furnished, 
+          p.property_type AS type, 
+          p.property_status AS status, 
+          p.property_latitude AS lat, 
+          p.property_longitude AS lng, 
+          p.property_address AS address, 
+          COALESCE(
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id AND is_primary = 1 LIMIT 1),
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id ORDER BY order_index ASC LIMIT 1),
+            p.property_img_url
+          ) AS image
+        FROM Property p
         WHERE 1=1
       `;
       
       const queryParams = [];
       
-      // Apply filters
+      // add filters
       if (filters.keyword) {
-        query += ' AND (property_name LIKE ? OR property_address LIKE ?)';
+        query += ' AND (p.property_name LIKE ? OR p.property_address LIKE ?)';
         queryParams.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
       }
       
       if (filters.minPrice) {
-        query += ' AND property_price >= ?';
+        query += ' AND p.property_price >= ?';
         queryParams.push(Number(filters.minPrice));
       }
       
       if (filters.maxPrice) {
-        query += ' AND property_price <= ?';
+        query += ' AND p.property_price <= ?';
         queryParams.push(Number(filters.maxPrice));
       }
       
       if (filters.bedrooms) {
-        query += ' AND property_room >= ?';
+        query += ' AND p.property_room >= ?';
         queryParams.push(Number(filters.bedrooms));
       }
       
       if (filters.bathrooms) {
-        query += ' AND property_bathroom >= ?';
+        query += ' AND p.property_bathroom >= ?';
         queryParams.push(Number(filters.bathrooms));
       }
       
       if (filters.type && Array.isArray(filters.type) && filters.type.length > 0 && !filters.type.includes('all')) {
         const typeValues = filters.type.map(t => {
-          // Convert string type to number if needed
+          // convert type
           return isNaN(t) ? 
             (t === 'house' ? 0 : t === 'apartment' ? 1 : t === 'townhouse' ? 2 : t === 'villa' ? 3 : null) : 
             Number(t);
         }).filter(t => t !== null);
         
         if (typeValues.length > 0) {
-          query += ' AND property_type IN (?)';
+          query += ' AND p.property_type IN (?)';
           queryParams.push(typeValues);
         }
       }
       
       if (filters.status !== undefined) {
-        query += ' AND property_status = ?';
+        query += ' AND p.property_status = ?';
         queryParams.push(Number(filters.status));
       }
       
-      // Add order by
-      query += ' ORDER BY property_id DESC';
+      // order by
+      query += ' ORDER BY p.property_id DESC';
       
-      // Add pagination
+      // pagination
       const offset = (pagination.page - 1) * pagination.limit;
       query += ' LIMIT ? OFFSET ?';
       queryParams.push(Number(pagination.limit), offset);
       
-      // Execute query
+      // execute query
       const [properties] = await db.query(query, queryParams);
       
-      // Count total for pagination
+      // count total
       let countQuery = `
         SELECT COUNT(*) AS total 
         FROM Property
         WHERE 1=1
       `;
       
-      // Apply the same filters to count query
+      // apply filters
       if (filters.keyword) {
         countQuery += ' AND (property_name LIKE ? OR property_address LIKE ?)';
       }
@@ -127,7 +127,7 @@ const Property = {
         countQuery += ' AND property_status = ?';
       }
       
-      // Remove limit and offset params for count query
+      // remove pagination
       const countParams = queryParams.slice(0, -2);
       
       const [countResult] = await db.query(countQuery, countParams);
@@ -148,7 +148,7 @@ const Property = {
     }
   },
   
-  // Rest of the model methods...
+  // get by id
   getById: async (id) => {
     try {
       const [properties] = await db.query(
@@ -168,7 +168,12 @@ const Property = {
           p.property_status AS status, 
           p.property_latitude AS lat, 
           p.property_longitude AS lng, 
-          p.property_img_url AS image,
+          p.property_address AS address, 
+          COALESCE(
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id AND is_primary = 1 LIMIT 1),
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id ORDER BY order_index ASC LIMIT 1),
+            p.property_img_url
+          ) AS image,
           u.user_name AS owner_name,
           u.user_email AS owner_email,
           u.user_phone AS owner_phone
@@ -207,8 +212,9 @@ const Property = {
           property_status,
           property_latitude,
           property_longitude,
+          property_address,
           property_img_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           property.owner_id,
           property.title,
@@ -224,6 +230,7 @@ const Property = {
           property.status || 0,
           property.lat,
           property.lng,
+          property.address,
           property.image
         ]
       );
@@ -252,6 +259,7 @@ const Property = {
           property_status = ?,
           property_latitude = ?,
           property_longitude = ?,
+          property_address = ?,
           property_img_url = ?
         WHERE property_id = ?`,
         [
@@ -268,6 +276,7 @@ const Property = {
           property.status || 0,
           property.lat,
           property.lng,
+          property.address,
           property.image,
           id
         ]
@@ -282,7 +291,7 @@ const Property = {
   
   delete: async (id) => {
     try {
-      // First check if property exists
+      // check exists
       const [properties] = await db.query(
         'SELECT property_id FROM Property WHERE property_id = ?',
         [id]
@@ -292,7 +301,7 @@ const Property = {
         return { success: false, message: 'Property not found' };
       }
       
-      // Delete the property
+      // delete property
       await db.query('DELETE FROM Property WHERE property_id = ?', [id]);
       
       return { success: true };
@@ -306,31 +315,91 @@ const Property = {
     try {
       const [properties] = await db.query(
         `SELECT 
-          property_id AS id, 
-          property_owner_id AS owner_id, 
-          property_name AS title, 
-          property_price AS price, 
-          property_room AS bedrooms, 
-          property_bathroom AS bathrooms, 
-          property_garages AS garages, 
-          property_aircon AS aircon, 
-          property_balcony AS balcony, 
-          property_petsconsidered AS petsConsidered, 
-          property_furnished AS furnished, 
-          property_type AS type, 
-          property_status AS status, 
-          property_latitude AS lat, 
-          property_longitude AS lng, 
-          property_img_url AS image
-        FROM Property
-        WHERE property_owner_id = ?
-        ORDER BY property_id DESC`,
+          p.property_id AS id, 
+          p.property_owner_id AS owner_id, 
+          p.property_name AS title, 
+          p.property_price AS price, 
+          p.property_room AS bedrooms, 
+          p.property_bathroom AS bathrooms, 
+          p.property_garages AS garages, 
+          p.property_aircon AS aircon, 
+          p.property_balcony AS balcony, 
+          p.property_petsconsidered AS petsConsidered, 
+          p.property_furnished AS furnished, 
+          p.property_type AS type, 
+          p.property_status AS status, 
+          p.property_latitude AS lat, 
+          p.property_longitude AS lng, 
+          p.property_address AS address, 
+          COALESCE(
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id AND is_primary = 1 LIMIT 1),
+            (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id ORDER BY order_index ASC LIMIT 1),
+            p.property_img_url
+          ) AS image
+        FROM Property p
+        WHERE p.property_owner_id = ?
+        ORDER BY p.property_id DESC`,
         [ownerId]
       );
+      
+      // add images
+      for (let property of properties) {
+        const images = await Property.getImages(property.id);
+        property.images = images.map(img => img.image_url);
+      }
       
       return properties;
     } catch (error) {
       console.error(`Error fetching properties for owner ${ownerId}:`, error);
+      throw error;
+    }
+  },
+
+  // image methods
+  addImages: async (propertyId, images) => {
+    try {
+      const values = images.map((image, index) => [
+        propertyId,
+        image.url,
+        image.isPrimary || false,
+        index
+      ]);
+      
+      await db.query(
+        `INSERT INTO PropertyImage (property_id, image_url, is_primary, order_index) VALUES ?`,
+        [values]
+      );
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding property images:', error);
+      throw error;
+    }
+  },
+
+  getImages: async (propertyId) => {
+    try {
+      const [images] = await db.query(
+        `SELECT image_id, image_url, is_primary, order_index
+         FROM PropertyImage 
+         WHERE property_id = ? 
+         ORDER BY order_index ASC`,
+        [propertyId]
+      );
+      
+      return images;
+    } catch (error) {
+      console.error(`Error fetching images for property ${propertyId}:`, error);
+      throw error;
+    }
+  },
+
+  deleteImages: async (propertyId) => {
+    try {
+      await db.query('DELETE FROM PropertyImage WHERE property_id = ?', [propertyId]);
+      return { success: true };
+    } catch (error) {
+      console.error(`Error deleting images for property ${propertyId}:`, error);
       throw error;
     }
   }

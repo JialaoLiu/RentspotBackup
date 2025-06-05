@@ -100,7 +100,7 @@ const emit = defineEmits(['search'])
 .search-input {
   flex: 1;
   min-width: 200px;
-  padding: 0.5rem 1rem;
+  padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border-dark);
   border-radius: var(--radius-sm);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -108,10 +108,7 @@ const emit = defineEmits(['search'])
   background-color: var(--color-bg-primary);
 }
 
-.search-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
+/* focus styles handled by global CSS */
 
 .filter-buttons {
   display: flex;

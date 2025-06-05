@@ -71,13 +71,21 @@ defineEmits(['toggle-favorite'])
 const propertyImages = computed(() => {
   if (!props.property) return []
   
-  // If multiple images exist, return the array
-  if (props.property.images && Array.isArray(props.property.images)) {
-    return props.property.images
+  // If multiple images exist, format them as objects
+  if (props.property.images && Array.isArray(props.property.images) && props.property.images.length > 0) {
+    return props.property.images.map((imageUrl, index) => ({
+      url: imageUrl,
+      alt: `${props.property.title} - Image ${index + 1}`
+    }))
   }
   
-  // If only one image exists
-  return [{ url: props.property.image, alt: props.property.title }]
+  // If only one image exists, use the legacy image field
+  if (props.property.image) {
+    return [{ url: props.property.image, alt: props.property.title }]
+  }
+  
+  // No images available
+  return []
 })
 
 // Helper functions

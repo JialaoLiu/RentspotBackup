@@ -13,7 +13,7 @@
         <button class="filter-button">Price</button>
         <button class="filter-button">Bed</button>
         <button class="filter-button">
-          <span class="filter-icon">🔍</span> Filters
+          <Icon name="search" size="md" /> Filters
         </button>
         <button class="list-view-button" @click="$emit('change-view', 'grid')">
           <span class="list-icon">≡</span> List
@@ -43,8 +43,12 @@
       <div class="popup-carousel">
         <img :src="selectedProperty.image" :alt="selectedProperty.title" @error="handleImageError">
         <div class="carousel-controls">
-          <button class="carousel-prev">❮</button>
-          <button class="carousel-next">❯</button>
+          <button class="carousel-prev">
+            <Icon name="arrow-left" size="md" />
+          </button>
+          <button class="carousel-next">
+            <Icon name="arrow-right" size="md" />
+          </button>
         </div>
       </div>
       
@@ -56,12 +60,16 @@
         </div>
         <div class="popup-features">
           <div class="feature">
-            <span class="feature-icon-small">🛏️</span>
+            <Icon name="bed" size="md" />
             <span class="feature-value">{{ selectedProperty.bedrooms }}</span>
           </div>
           <div class="feature">
-            <span class="feature-icon-small">🚿</span>
+            <Icon name="bathroom" size="md" />
             <span class="feature-value">{{ selectedProperty.bathrooms }}</span>
+          </div>
+          <div v-if="selectedProperty.garage" class="feature">
+            <Icon name="car" size="md" />
+            <span class="feature-value">{{ selectedProperty.garage }}</span>
           </div>
         </div>
         <button class="view-details-btn" @click="$emit('view-property', selectedProperty.id)">
@@ -75,6 +83,7 @@
 <script setup>
 import { ref } from 'vue'
 import MapDisplay from '../MapDisplay.vue'
+import Icon from '../Common/Icon.vue'
 
 // Props
 const props = defineProps({
@@ -109,7 +118,7 @@ function getPropertyTypeText(typeCode) {
 
 // Image error handler
 function handleImageError(e) {
-  e.target.src = 'https://via.placeholder.com/300x200?text=Property+Image'
+  e.target.src = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'
 }
 
 // Update handleMarkerClick to mark property as visited
@@ -304,12 +313,13 @@ function handleBoundsChanged(bounds) {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+  color: #6B7280;
 }
 
 .popup-features .feature {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .feature-icon-small {
@@ -319,7 +329,7 @@ function handleBoundsChanged(bounds) {
 .feature-value {
   font-size: 16px;
   font-weight: 500;
-  color: #4B5563;
+  color: #6B7280;
 }
 
 .view-details-btn {

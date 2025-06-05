@@ -9,10 +9,10 @@
         
         <div class="header-actions">
           <button @click="showAddForm" class="btn-add-property">
-            <PlusIcon class="icon" /> Add Property
+            <Icon name="plus" size="md" /> Add Property
           </button>
           <button @click="refreshProperties" class="btn-refresh" :disabled="loading">
-            <RefreshIcon class="icon" /> Refresh
+            <Icon name="refresh" size="md" /> Refresh
           </button>
         </div>
       </div>
@@ -33,7 +33,7 @@
           <div class="stat-number">{{ stats.booked || 0 }}</div>
           <div class="stat-label">Rented</div>
         </div>
-        <div class="stat-card clickable removed-card" @click="showRemovedSection = true" :class="{ active: showRemovedSection }">
+        <div class="stat-card clickable removed-card" @click="setStatusFilter('2')" :class="{ active: statusFilter === '2' }">
           <div class="stat-number">{{ stats.removed || 0 }}</div>
           <div class="stat-label">Removed</div>
         </div>
@@ -74,22 +74,22 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="error-state">
-      <ErrorIcon class="error-icon" /> {{ error }}
+      <Icon name="error" size="xl" class="error-icon" /> {{ error }}
       <button @click="loadProperties" class="btn-retry">Retry</button>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="filteredProperties.length === 0 && !loading" class="empty-state">
       <div class="empty-content">
-        <HouseIcon class="empty-icon" />
+        <Icon name="house" size="xl" class="empty-icon" />
         <h3>{{ searchQuery ? 'No matching properties found' : 'No properties yet' }}</h3>
         <p v-if="!searchQuery">Click the "Add Property" button above to start adding your first property</p>
         <p v-else>Try adjusting your search criteria or filters</p>
       </div>
     </div>
 
-    <!-- Properties Grid (Exclude Removed) -->
-    <div v-else-if="!showRemovedSection" class="properties-section">
+    <!-- Properties Grid -->
+    <div v-else class="properties-section">
       <div class="properties-grid">
         <PropertyManagementCard
           v-for="property in filteredProperties"
@@ -97,6 +97,7 @@
           :property="property"
           @edit="showEditForm"
           @delete="showDeleteConfirm"
+          @restore="showRestoreConfirm"
         />
       </div>
       
@@ -123,35 +124,6 @@
         </button>
       </div>
     </div>
-    
-    <!-- Removed Properties Section -->
-    <div v-else-if="showRemovedSection && userRole === 2" class="removed-section">
-      <div class="removed-header">
-        <h2>Removed Properties</h2>
-        <button @click="showRemovedSection = false" class="btn-back">
-          ← Back to Properties
-        </button>
-      </div>
-      
-      <div v-if="removedProperties.length === 0" class="empty-state">
-        <div class="empty-content">
-          <RemoveIcon class="empty-icon" />
-          <h3>No removed properties</h3>
-          <p>Properties that are removed will appear here</p>
-        </div>
-      </div>
-      
-      <div v-else class="properties-grid">
-        <PropertyManagementCard
-          v-for="property in removedProperties"
-          :key="property.id"
-          :property="property"
-          @edit="showEditForm"
-          @delete="showDeleteConfirm"
-          :isRemoved="true"
-        />
-      </div>
-    </div>
 
     <!-- Property Form Modal -->
     <PropertyForm
@@ -169,6 +141,14 @@
       @cancel="hideDeleteModal"
       @confirm="handleDelete"
     />
+    
+    <!-- Restore Confirmation Modal -->
+    <ConfirmRestoreModal
+      v-if="showRestoreModal"
+      :property="restoringProperty"
+      @cancel="hideRestoreModal"
+      @confirm="handleRestore"
+    />
   </div>
 </template>
 
@@ -177,15 +157,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import PropertyManagementCard from '../components/Property/Management/PropertyManagementCard.vue'
 import PropertyForm from '../components/Property/Management/PropertyForm.vue'
 import ConfirmDeleteModal from '../components/Property/Management/ConfirmDeleteModal.vue'
+import ConfirmRestoreModal from '../components/Property/Management/ConfirmRestoreModal.vue'
 import LoadingSpinner from '../components/Common/LoadingSpinner.vue'
-import { getAllProperties, getMyProperties, getPropertyStats, deleteProperty } from '../services/propertyService'
+import Icon from '../components/Common/Icon.vue'
+import { getAllProperties, getMyProperties, getPropertyStats, deleteProperty, updateProperty } from '../services/propertyService'
 import { useNotification } from '../composables/useNotification'
-// Import SVG icons
-import PlusIcon from '../assets/svg/Plus.svg'
-import RefreshIcon from '../assets/svg/Refresh.svg'
-import ErrorIcon from '../assets/svg/Error.svg'
-import HouseIcon from '../assets/svg/House.svg'
-import RemoveIcon from '../assets/svg/remove.svg'
 
 // Composables
 const toast = useNotification()
@@ -205,13 +181,15 @@ const editingProperty = ref(null)
 const showDeleteModal = ref(false)
 const deletingProperty = ref(null)
 
+// Restore state
+const showRestoreModal = ref(false)
+const restoringProperty = ref(null)
+
 // Filters and search
 const searchQuery = ref('')
 const statusFilter = ref('')
 const typeFilter = ref('')
 
-// Removed section
-const showRemovedSection = ref(false)
 
 // Pagination
 const currentPage = ref(1)
@@ -223,9 +201,9 @@ const userRole = ref(0)
 // Computed properties
 const filteredProperties = computed(() => {
   let filtered = properties.value
-  
-  // Exclude removed properties from normal view
-  if (!showRemovedSection.value) {
+
+  // For "Total Properties" view, exclude removed properties
+  if (statusFilter.value === '') {
     filtered = filtered.filter(property => property.status !== 2)
   }
 
@@ -258,13 +236,13 @@ const filteredProperties = computed(() => {
   return filtered.slice(start, end)
 })
 
-// Computed property for removed properties only
-const removedProperties = computed(() => {
-  return properties.value.filter(property => property.status === 2)
-})
 
 const totalPages = computed(() => {
-  const total = properties.value.length
+  let total = properties.value.length
+  // Exclude removed properties from total count when showing all
+  if (statusFilter.value === '') {
+    total = properties.value.filter(p => p.status !== 2).length
+  }
   return Math.ceil(total / itemsPerPage)
 })
 
@@ -343,7 +321,6 @@ function refreshProperties() {
 // Filter methods
 function setStatusFilter(status) {
   statusFilter.value = status
-  showRemovedSection.value = false
   currentPage.value = 1
 }
 
@@ -398,6 +375,34 @@ async function handleDelete() {
     )
   }
 }
+
+// Restore methods
+function showRestoreConfirm(property) {
+  restoringProperty.value = property
+  showRestoreModal.value = true
+}
+
+function hideRestoreModal() {
+  showRestoreModal.value = false
+  restoringProperty.value = null
+}
+
+async function handleRestore() {
+  if (!restoringProperty.value) return
+
+  try {
+    // Update property status to 0 (Available)
+    await updateProperty(restoringProperty.value.id, { status: 0 })
+    toast.success('Property restored successfully')
+    hideRestoreModal()
+    refreshProperties()
+  } catch (err) {
+    console.error('Restore property error:', err)
+    toast.error(
+      err.response?.data?.message || 'Restore failed, please try again'
+    )
+  }
+}
 </script>
 
 <style scoped>
@@ -442,6 +447,11 @@ async function handleDelete() {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1;
 }
 
 .btn-add-property {
@@ -467,6 +477,13 @@ async function handleDelete() {
 .btn-refresh:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-add-property .icon,
+.btn-refresh .icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 /* Statistics Section */
@@ -612,8 +629,18 @@ async function handleDelete() {
 }
 
 .icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.btn-add-property .icon,
+.btn-refresh .icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
 }
 
 .empty-state h3 {
@@ -670,43 +697,6 @@ async function handleDelete() {
 .pagination-info {
   color: #6B7280;
   font-weight: 500;
-}
-
-/* Removed Section */
-.removed-section {
-  margin-top: 20px;
-}
-
-.removed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 16px 0;
-  border-bottom: 2px solid #E5E7EB;
-}
-
-.removed-header h2 {
-  margin: 0;
-  color: #DC2626;
-  font-size: 1.875rem;
-  font-weight: 700;
-}
-
-.btn-back {
-  background-color: #F3F4F6;
-  color: #374151;
-  padding: 10px 20px;
-  border: 1px solid #D1D5DB;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-back:hover {
-  background-color: #E5E7EB;
-  transform: translateX(-2px);
 }
 
 /* Responsive Design */
