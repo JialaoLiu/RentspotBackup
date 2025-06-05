@@ -14,9 +14,18 @@
 
         <!-- Buttons Section -->
         <form action="" class="container-user-btn">
-            <button type="button" @click="openModal('detail')">👤Detail Profile</button>
-            <button type="button" @click="openModal('changePassword')">🔒 Change Password</button>
-            <button type="button" @click="openModal('favoriteHistory')">⭐ Favorite History</button>
+            <button type="button" @click="openModal('detail')">
+                <Icon name="user" size="sm" />
+                Detail Profile
+            </button>
+            <button type="button" @click="openModal('changePassword')">
+                <Icon name="key" size="sm" />
+                Change Password
+            </button>
+            <button type="button" @click="openModal('favoriteHistory')">
+                <Icon name="heart" size="sm" />
+                Favorite History
+            </button>
         </form>
 
         <!-- Modal for Popups -->
@@ -85,7 +94,7 @@
                     <ul v-else class="favorites-list">
                         <li v-for="item in favorites" :key="item.id" class="favorite-item" @click="viewProperty(item.id)">
                             <div class="favorite-image">
-                                <img :src="item.image || 'https://via.placeholder.com/100x75?text=No+Image'" :alt="item.title">
+                                <img :src="item.image || 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'" :alt="item.title">
                             </div>
                             <div class="favorite-details">
                                 <h3>{{ item.title }}</h3>
@@ -118,6 +127,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from '../composables/useRouter.js';
 import userService from '../services/userService';
 import { useNotification } from '../composables/useNotification';
+import Icon from '../components/Common/Icon.vue';
 
 const router = useRouter();
 const toast = useNotification();
@@ -326,7 +336,7 @@ async function loadProfile() {
             name: userProfile.name,
             email: userProfile.email,
             phone: userProfile.phone,
-            dateOfBirth: userProfile.dateOfBirth,
+            dateOfBirth: userProfile.dateOfBirth ? userProfile.dateOfBirth.split('T')[0] : '',
             avatarUrl: userProfile.avatarUrl,
             role: userProfile.role
         };

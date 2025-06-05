@@ -4,19 +4,19 @@ import api from './apiService';
 export function fetchProperties(filters = {}) {
   return api.get('/properties', { params: filters })
     .then(response => {
-      console.log('API response:', response.data);
+      // Got properties
       // Handle different response formats
       if (response.data && response.data.properties) {
         return response.data.properties;
       } else if (Array.isArray(response.data)) {
         return response.data;
       } else {
-        console.error('Unexpected response format:', response.data);
+        // Unexpected format
         return getMockProperties().properties;
       }
     })
     .catch(error => {
-      console.error('Failed to get properties:', error);
+      // API failed
       // Use mock data as fallback
       return getMockProperties().properties;
     });
@@ -26,14 +26,14 @@ export function fetchProperties(filters = {}) {
 export function getPropertyById(id) {
   return api.get(`/properties/${id}`)
     .then(response => {
-      console.log(`Got property ${id}:`, response.data);
+      // Got property
       return response.data;
     })
     .catch(error => {
-      console.error(`Failed to get property ${id}:`, error);
+      // Property not found
       // Use mock data as fallback
       const mockProperty = getMockPropertyById(id);
-      console.log(`Using mock data:`, mockProperty);
+      // Using mock
       return mockProperty;
     });
 }
@@ -43,7 +43,7 @@ export function createProperty(property) {
   return api.post('/properties', property)
     .then(response => response.data)
     .catch(error => {
-      console.error('Failed to create property:', error);
+      // Create failed
       throw error;
     });
 }
@@ -53,7 +53,7 @@ export function updateProperty(id, property) {
   return api.put(`/properties/${id}`, property)
     .then(response => response.data)
     .catch(error => {
-      console.error(`Failed to update property ${id}:`, error);
+      // Update failed
       throw error;
     });
 }
@@ -63,7 +63,7 @@ export function deleteProperty(id) {
   return api.delete(`/properties/${id}`)
     .then(response => response.data)
     .catch(error => {
-      console.error(`Failed to delete property ${id}:`, error);
+      // Delete failed
       throw error;
     });
 }
@@ -80,7 +80,31 @@ export function uploadPropertyImage(file) {
   })
   .then(response => response.data)
   .catch(error => {
-    console.error('Failed to upload image:', error);
+    // Upload failed
+    throw error;
+  });
+}
+
+// Upload multiple property images
+export function uploadMultiplePropertyImages(files, propertyId) {
+  const formData = new FormData();
+  
+  // Append property ID
+  formData.append('propertyId', propertyId);
+  
+  // Append each file to the form data
+  files.forEach(file => {
+    formData.append('images', file);
+  });
+
+  return api.post('/properties/upload-multiple', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    // Upload failed
     throw error;
   });
 }
@@ -90,7 +114,7 @@ export function getAllProperties() {
   return api.get('/properties/admin/all')
     .then(response => response)
     .catch(error => {
-      console.error('Failed to get all properties:', error);
+      // Get all failed
       throw error;
     });
 }
@@ -100,7 +124,7 @@ export function getMyProperties() {
   return api.get('/properties/my')
     .then(response => response)
     .catch(error => {
-      console.error('Failed to get my properties:', error);
+      // Get mine failed
       throw error;
     });
 }
@@ -110,8 +134,38 @@ export function getPropertyStats() {
   return api.get('/properties/admin/stats')
     .then(response => response)
     .catch(error => {
-      console.error('Failed to get property stats:', error);
+      // Stats failed
       throw error;
+    });
+}
+
+// Add property to favorites
+export function addFavorite(propertyId) {
+  return api.post(`/properties/${propertyId}/favorite`)
+    .then(response => response.data)
+    .catch(error => {
+      // Add favorite failed
+      throw error;
+    });
+}
+
+// Remove property from favorites
+export function removeFavorite(propertyId) {
+  return api.delete(`/properties/${propertyId}/favorite`)
+    .then(response => response.data)
+    .catch(error => {
+      // Remove favorite failed
+      throw error;
+    });
+}
+
+// Check if property is favorited
+export function checkFavorite(propertyId) {
+  return api.get(`/properties/${propertyId}/favorite`)
+    .then(response => response.data.favorited)
+    .catch(error => {
+      // Check failed
+      return false;
     });
 }
 
@@ -128,7 +182,7 @@ function getMockProperties() {
       type: 1,
       lat: -34.92846,
       lng: 138.59593,
-      image: 'https://picsum.photos/300/200?random=101',
+      image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
       status: 0
     },
     {
@@ -141,7 +195,7 @@ function getMockProperties() {
       type: 0,
       lat: -34.90571,
       lng: 138.59544,
-      image: 'https://picsum.photos/300/200?random=102',
+      image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
       status: 0
     },
     {
@@ -154,7 +208,7 @@ function getMockProperties() {
       type: 1,
       lat: -34.92146,
       lng: 138.60745,
-      image: 'https://picsum.photos/300/200?random=103',
+      image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
       status: 0
     }
   ];
@@ -184,6 +238,8 @@ export default {
   uploadPropertyImage,
   getAllProperties,
   getMyProperties,
-  getPropertyStats
-
+  getPropertyStats,
+  addFavorite,
+  removeFavorite,
+  checkFavorite
 };

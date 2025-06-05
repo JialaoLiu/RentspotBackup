@@ -125,50 +125,44 @@
         <div class="form-section">
           <h3>Location Information</h3>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lat">Latitude *</label>
-              <input 
-                type="number" 
-                id="lat" 
-                v-model.number="form.lat" 
-                placeholder="e.g., -34.9285" 
-                step="any" 
-                required 
-              />
-            </div>
-            <div class="form-group">
-              <label for="lng">Longitude *</label>
-              <input 
-                type="number" 
-                id="lng" 
-                v-model.number="form.lng" 
-                placeholder="e.g., 138.6007" 
-                step="any" 
-                required 
-              />
-            </div>
+          <!-- Hidden coordinate inputs for form validation -->
+          <input type="hidden" v-model.number="form.lat" required />
+          <input type="hidden" v-model.number="form.lng" required />
+          <input type="hidden" v-model="form.address" required />
+          
+          <!-- Display detected address -->
+          <div v-if="form.address" class="detected-address">
+            <p><strong>Detected Address:</strong> {{ form.address }}</p>
           </div>
           
-          <div class="form-hint">
-            <p>💡 Tip: You can use <a href="https://www.latlong.net/" target="_blank">LatLong.net</a> to get accurate latitude and longitude coordinates</p>
+          <div class="map-container">
+            <div class="map-instructions">
+              <p>Pan and zoom the map to position the marker at your desired location</p>
+            </div>
+            <div class="map-wrapper">
+              <div ref="mapContainer" class="map-display"></div>
+              <div class="center-marker">
+                <div class="marker-pin"></div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Image Upload -->
         <div class="form-section">
-          <h3>Property Image</h3>
+          <h3>Property Images</h3>
           <div class="form-group">
-            <ImageUploader 
-              @file-selected="handleFileSelected" 
-              @clear="removeImage"
+            <MultipleImageUploader 
+              @files-selected="handleFilesSelected" 
+              @clear="removeAllImages"
               :uploading="imageUploading"
               :upload-progress="uploadProgress"
-              :model-value="form.image"
+              :model-value="form.images"
+              ref="imageUploader"
             />
-            <!-- Show uploaded image URL for debugging -->
-            <div v-if="form.image && !imageUploading" class="image-url-info">
-              <small>Image URL: {{ form.image }}</small>
+            <!-- Show uploaded image URLs for debugging -->
+            <div v-if="form.images && form.images.length > 0 && !imageUploading" class="image-urls-info">
+              <small>{{ form.images.length }} image(s) selected</small>
             </div>
           </div>
         </div>
@@ -178,7 +172,7 @@
           <button type="button" @click="$emit('cancel')" class="btn-secondary" :disabled="loading">
             Cancel
           </button>
-          <button type="submit" class="btn-primary" :disabled="loading || !isFormValid">
+          <button type="submit" class="btn-primary" :disabled="loading">
             {{ loading ? 'Submitting...' : (mode === 'add' ? 'Create Property' : 'Save Changes') }}
           </button>
         </div>
@@ -189,8 +183,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import ImageUploader from '../../ImageUploader.vue'
-import { uploadPropertyImage, createProperty, updateProperty } from '../../../services/propertyService'
+import MultipleImageUploader from '../../MultipleImageUploader.vue'
+import { uploadMultiplePropertyImages, createProperty, updateProperty } from '../../../services/propertyService'
 import { useNotification } from '../../../composables/useNotification'
 
 // Props
@@ -216,6 +210,10 @@ const toast = useNotification()
 const loading = ref(false)
 const imageUploading = ref(false)
 const uploadProgress = ref(0)
+const mapContainer = ref(null)
+const imageUploader = ref(null)
+const pendingImageFiles = ref([])
+let map = null
 const form = ref({
   title: '',
   price: 0,
@@ -227,20 +225,13 @@ const form = ref({
   balcony: false,
   petsConsidered: false,
   furnished: 1, // Default to Unfurnished
-  lat: -34.9285,
-  lng: 138.6007,
-  image: ''
+  lat: null,
+  lng: null,
+  address: '',
+  images: []
 })
 
-// Computed properties
-const isFormValid = computed(() => {
-  return form.value.title && 
-         form.value.price > 0 && 
-         form.value.bedrooms > 0 && 
-         form.value.bathrooms > 0 && 
-         form.value.lat && 
-         form.value.lng
-})
+// form validation handled by HTML5 required attributes
 
 // Watch for property changes (edit mode)
 watch(() => props.property, (newProperty) => {
@@ -249,15 +240,28 @@ watch(() => props.property, (newProperty) => {
   }
 }, { immediate: true })
 
-// Initialize form
+// Initialize form and map
 onMounted(() => {
   if (props.mode === 'edit' && props.property) {
     populateForm(props.property)
+  } else {
+    // Set default coordinates for new properties
+    form.value.lat = -34.9285
+    form.value.lng = 138.6007
+    // Get initial address for default coordinates
+    updateAddressFromCoordinates(-34.9285, 138.6007)
   }
+  
+  // Initialize map automatically
+  setTimeout(() => {
+    initMap()
+  }, 100)
 })
 
 // Methods
 function populateForm(property) {
+  // set form values
+  
   form.value = {
     title: property.title || '',
     price: property.price || 0,
@@ -271,17 +275,41 @@ function populateForm(property) {
     furnished: property.furnished || 1,
     lat: property.lat || -34.9285,
     lng: property.lng || 138.6007,
-    image: property.image || ''
+    address: property.address || '',
+    images: (property.images || []).map(url => ({ url }))
+  }
+  
+  // Set form values
+}
+
+async function handleFilesSelected(files) {
+  if (!files || files.length === 0) return
+  
+  // For edit mode with existing property, upload immediately
+  if (props.mode === 'edit' && props.property?.id) {
+    await uploadImagesForProperty(files, props.property.id)
+  } else {
+    // For add mode, just store files for later upload
+    pendingImageFiles.value = files
+    form.value.images = files.map(file => ({ 
+      url: URL.createObjectURL(file), 
+      isPending: true,
+      file: file
+    }))
+    toast.info(`${files.length} image(s) selected. Will upload after property creation.`)
   }
 }
 
-async function handleFileSelected(file) {
-  if (!file) return
-  
+async function uploadImagesForProperty(files, propertyId) {
   imageUploading.value = true
   uploadProgress.value = 0
   
   try {
+    // Update upload progress info
+    if (imageUploader.value) {
+      imageUploader.value.updateUploadProgress(0, files.length)
+    }
+    
     // Simulate progress (since we can't track actual upload progress with current setup)
     const progressInterval = setInterval(() => {
       if (uploadProgress.value < 90) {
@@ -290,41 +318,157 @@ async function handleFileSelected(file) {
     }, 100)
     
     // Upload to Cloudinary via backend
-    const response = await uploadPropertyImage(file)
+    const response = await uploadMultiplePropertyImages(files, propertyId)
     
     clearInterval(progressInterval)
     uploadProgress.value = 100
     
-    // Set the image URL from response
-    form.value.image = response.imageUrl
-    toast.success('Image uploaded successfully')
+    // Set the image URLs from response
+    form.value.images = response.images.map(img => ({ url: img.url }))
+    toast.success(`${files.length} image(s) uploaded successfully`)
     
     // Reset progress after a short delay
     setTimeout(() => {
       uploadProgress.value = 0
     }, 500)
   } catch (error) {
-    console.error('Image upload error:', error)
-    toast.error('Failed to upload image: ' + (error.response?.data?.message || error.message))
+    // Upload failed
+    toast.error('Failed to upload images: ' + (error.response?.data?.message || error.message))
   } finally {
     imageUploading.value = false
   }
 }
 
-function removeImage() {
-  form.value.image = ''
+function removeAllImages() {
+  form.value.images = []
 }
 
-async function handleSubmit() {
-  if (!isFormValid.value) {
-    toast.error('Please fill in all required fields')
+
+function initMap() {
+  if (!mapContainer.value || !window.google || !window.google.maps) {
+    // If Google Maps isn't ready, try again after a short delay
+    setTimeout(() => {
+      initMap()
+    }, 500)
     return
   }
+  
+  // Initialize map with current coordinates or default Adelaide location
+  const initialPosition = {
+    lat: (typeof form.value.lat === 'number' && !isNaN(form.value.lat)) ? form.value.lat : -34.9285,
+    lng: (typeof form.value.lng === 'number' && !isNaN(form.value.lng)) ? form.value.lng : 138.6007
+  }
+  
+  map = new google.maps.Map(mapContainer.value, {
+    center: initialPosition,
+    zoom: 13,
+    mapTypeControl: false,
+    streetViewControl: true,
+    fullscreenControl: true,
+    zoomControl: true,
+    styles: [
+      {
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }],
+      },
+    ],
+  })
+  
+  // Set initial coordinates immediately after map creation
+  setTimeout(() => {
+    updateCoordinatesFromCenter()
+  }, 100)
+  
+  // Add listener for when map center changes (pan/zoom)
+  map.addListener('center_changed', () => {
+    updateCoordinatesFromCenter()
+  })
+  
+  // Add listener for when map bounds change (zoom)
+  map.addListener('bounds_changed', () => {
+    updateCoordinatesFromCenter()
+  })
+}
 
+function updateCoordinatesFromCenter() {
+  if (!map) return
+  
+  const center = map.getCenter()
+  if (center) {
+    // Update form coordinates to current map center
+    const lat = parseFloat(center.lat().toFixed(6))
+    const lng = parseFloat(center.lng().toFixed(6))
+    
+    // update coordinates
+    form.value.lat = lat
+    form.value.lng = lng
+    
+    // Update address via reverse geocoding
+    updateAddressFromCoordinates(lat, lng)
+  }
+}
+
+// Google Maps reverse geocoding function
+function updateAddressFromCoordinates(lat, lng) {
+  if (!window.google || !window.google.maps) {
+    // Maps unavailable
+    return
+  }
+  
+  // basic check
+  if (!lat || !lng) return
+  
+  const geocoder = new google.maps.Geocoder()
+  const latlng = { lat: lat, lng: lng }
+  
+  geocoder.geocode({ location: latlng }, (results, status) => {
+    if (status === 'OK' && results && results.length > 0) {
+      // Find the most relevant result with suburb and postcode
+      const result = results.find(r => 
+        r.types.includes('locality') || 
+        r.types.includes('sublocality') ||
+        r.types.includes('political')
+      ) || results[0]
+      
+      // Extract suburb and postcode
+      let suburb = ''
+      let postcode = ''
+      
+      result.address_components.forEach(component => {
+        if (component.types.includes('locality') || component.types.includes('sublocality')) {
+          suburb = component.long_name
+        }
+        if (component.types.includes('postal_code')) {
+          postcode = component.long_name
+        }
+      })
+      
+      // Format address as "Suburb Postcode"
+      if (suburb && postcode) {
+        form.value.address = `${suburb} ${postcode}`
+      } else if (suburb) {
+        form.value.address = suburb
+      } else {
+        // Fallback to formatted address parts
+        const addressParts = result.formatted_address.split(', ')
+        form.value.address = addressParts.slice(0, 2).join(' ').trim()
+      }
+      
+      // Address updated
+    } else {
+      // Geocoder failed
+      form.value.address = 'Address not found'
+    }
+  })
+}
+
+
+async function handleSubmit() {
   loading.value = true
 
   try {
-    // Prepare form data
+    // Prepare form data (without images for backend)
     const formData = {
       title: form.value.title,
       price: form.value.price,
@@ -338,12 +482,21 @@ async function handleSubmit() {
       furnished: form.value.furnished,
       lat: form.value.lat,
       lng: form.value.lng,
-      image: form.value.image
+      address: form.value.address
     }
 
+    let propertyId = null
+
     if (props.mode === 'add') {
-      await createProperty(formData)
+      const response = await createProperty(formData)
+      propertyId = response.propertyId
       toast.success('Property created successfully!')
+      
+      // Upload pending images if any
+      if (pendingImageFiles.value && pendingImageFiles.value.length > 0) {
+        toast.info('Uploading images...')
+        await uploadImagesForProperty(pendingImageFiles.value, propertyId)
+      }
     } else {
       await updateProperty(props.property.id, formData)
       toast.success('Property updated successfully!')
@@ -358,7 +511,7 @@ async function handleSubmit() {
       emit('success')
     }, 500)
   } catch (error) {
-    console.error('Property operation error:', error)
+    // Operation failed
     toast.error(
       error.response?.data?.message || 'Operation failed, please try again'
     )
@@ -612,13 +765,107 @@ async function handleSubmit() {
   }
 }
 
-.image-url-info {
+.image-urls-info {
   margin-top: 8px;
   padding: 8px;
   background-color: #f3f4f6;
   border-radius: 4px;
-  word-break: break-all;
   font-size: 0.75rem;
   color: #6b7280;
+  text-align: center;
+}
+
+/* Map container styles */
+.map-container {
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #F9FAFB;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+.map-instructions {
+  padding: 12px;
+  background-color: #EBF8FF;
+  border-bottom: 1px solid #BAE6FD;
+  text-align: center;
+}
+
+.map-instructions p {
+  margin: 0;
+  color: #0369A1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.location-warning {
+  color: #DC2626 !important;
+  font-weight: 600 !important;
+  margin-top: 4px !important;
+}
+
+.map-display {
+  width: 100%;
+  height: 100%;
+  background-color: #E5E7EB;
+}
+
+/* Center marker styles */
+.center-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.marker-pin {
+  width: 20px;
+  height: 20px;
+  background-color: #3B82F6;
+  border: 3px solid #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.marker-pin::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background-color: #1E40AF;
+  border-radius: 50%;
+}
+
+/* Responsive adjustments for map */
+@media (max-width: 768px) {
+  .map-wrapper {
+    height: 250px;
+  }
+}
+
+/* Detected address styles */
+.detected-address {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 6px;
+}
+
+.detected-address p {
+  margin: 0;
+  color: #0369A1;
+  font-size: 14px;
 }
 </style>

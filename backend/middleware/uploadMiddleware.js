@@ -66,7 +66,7 @@ const uploadConfigs = {
   avatar: multer({
     storage: avatarStorage,
     fileFilter: imageFilter,
-    limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB - increased from 2MB
   }),
   
   // Property upload
