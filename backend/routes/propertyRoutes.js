@@ -14,7 +14,7 @@ const mockProperties = [
         type: 1,
         lat: -34.92846,
         lng: 138.59593,
-        image: 'https://picsum.photos/300/200?random=101',
+        image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
         status: 0,
         owner_id: 3
     },
@@ -28,7 +28,7 @@ const mockProperties = [
         type: 0,
         lat: -34.90571,
         lng: 138.59544,
-        image: 'https://picsum.photos/300/200?random=102',
+        image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
         status: 0,
         owner_id: 2
     },
@@ -42,7 +42,7 @@ const mockProperties = [
         type: 1,
         lat: -34.92146,
         lng: 138.60745,
-        image: 'https://picsum.photos/300/200?random=103',
+        image: 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png',
         status: 0,
         owner_id: 1
     }

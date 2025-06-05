@@ -13,11 +13,14 @@
         @click="$emit('favorite')"
         aria-label="Add to favorites"
       >
-        <span v-if="isFavorite">❤️</span>
-        <span v-else>🤍</span>
+        <Icon 
+          :name="isFavorite ? 'heart' : 'heart-outline'" 
+          size="md"
+          :color="isFavorite ? '#EF4444' : '#9CA3AF'"
+        />
       </button>
       <button class="share-button" @click="shareProperty" aria-label="Share property">
-        <span>🔗</span>
+        <Icon name="share" size="md" color="#6B7280" />
       </button>
     </div>
   </div>
@@ -25,6 +28,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
+import Icon from '../Common/Icon.vue'
 
 const props = defineProps({
   title: String,
@@ -102,8 +106,9 @@ function shareProperty() {
 }
 
 .favorite-button, .share-button {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
   border-radius: 50%;
   border: 1px solid #e5e7eb;
   background: white;
@@ -111,8 +116,8 @@ function shareProperty() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 1.2rem;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .favorite-button:hover, .share-button:hover {

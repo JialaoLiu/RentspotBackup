@@ -42,7 +42,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from '../composables/useRouter.js'
-import { fetchProperties } from '../services/propertyService.js'
+import { fetchProperties, addFavorite, removeFavorite } from '../services/propertyService.js'
+import { getUserFavorites } from '../services/userService.js'
+import { useNotification } from '../composables/useNotification'
 
 // Components
 import ViewModeSelector from '../components/Rent/ViewModeSelector.vue'
@@ -54,22 +56,39 @@ import NoProperties from '../components/Rent/NoProperties.vue'
 
 const router = useRouter()
 const route = useRoute()
+const toast = useNotification()
 const viewMode = ref('grid') // Default
 const properties = ref([])
 const loading = ref(true)
 const favorites = ref([]) // Favorites
 const visitedProperties = ref([]) // Visited
+const isAuthenticated = ref(!!localStorage.getItem('token'))
 
 // Toggle favorite
-function toggleFavorite(propertyId) {
-  const index = favorites.value.indexOf(propertyId)
-  if (index === -1) {
-    favorites.value.push(propertyId)
-  } else {
-    favorites.value.splice(index, 1)
+async function toggleFavorite(propertyId) {
+  if (!isAuthenticated.value) {
+    // Redirect to login
+    router.push('/login?redirect=' + encodeURIComponent(route.value.fullPath))
+    return
   }
-  // Save
-  localStorage.setItem('favoriteProperties', JSON.stringify(favorites.value))
+  
+  try {
+    const index = favorites.value.indexOf(propertyId)
+    if (index === -1) {
+      // Add to favorites
+      await addFavorite(propertyId)
+      favorites.value.push(propertyId)
+      toast.success('Added to favorites')
+    } else {
+      // Remove from favorites
+      await removeFavorite(propertyId)
+      favorites.value.splice(index, 1)
+      toast.success('Removed from favorites')
+    }
+  } catch (error) {
+    console.error('Failed to update favorites:', error)
+    toast.error('Failed to update favorites. Please try again.')
+  }
 }
 
 // View property
@@ -90,10 +109,16 @@ function markPropertyAsVisited(propertyId) {
 // Init
 onMounted(async () => {
   try {
-    // Favorites
-    const savedFavorites = localStorage.getItem('favoriteProperties')
-    if (savedFavorites) {
-      favorites.value = JSON.parse(savedFavorites)
+    // Load favorites from backend if authenticated
+    if (isAuthenticated.value) {
+      try {
+        const userFavorites = await getUserFavorites()
+        // Extract property IDs from the favorites array
+        favorites.value = userFavorites.map(fav => fav.id)
+      } catch (error) {
+        console.error('Failed to load favorites:', error)
+        // Don't show error, just use empty array
+      }
     }
     
     // Visited

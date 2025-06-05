@@ -1,96 +1,175 @@
 const express = require('express');
 const router = express.Router();
-const { uploadProperty } = require('../middleware/uploadMiddleware');
+const { uploadProperty, uploadMultipleProperty } = require('../middleware/uploadMiddleware');
 const { authenticateToken, requireLandlord, requireAdmin } = require('../middleware/authMiddleware');
 const { handleValidationError, handleNotFound, handleForbidden, handleDbError } = require('../utils/errorHandler');
 
-// Sample property data - commented out, using database data instead
-/*
-const mockProperties = [
-    {
-        id: 101,
-        title: 'Modern 2-Bed Apartment in CBD',
-        address: '15 Grote St, Adelaide SA',
-        price: 620,
-        bedrooms: 2,
-        bathrooms: 1,
-        type: 1,
-        lat: -34.92846,
-        lng: 138.59593,
-        image: 'https://picsum.photos/300/200?random=101',
-        status: 0,
-        owner_id: 3
-    },
-    {
-        id: 102,
-        title: 'Spacious Family House -- North Adelaide',
-        address: '18 Jeffcott St, North Adelaide SA',
-        price: 890,
-        bedrooms: 4,
-        bathrooms: 2,
-        type: 0,
-        lat: -34.90571,
-        lng: 138.59544,
-        image: 'https://picsum.photos/300/200?random=102',
-        status: 0,
-        owner_id: 2
-    },
-    {
-        id: 103,
-        title: 'Cozy Studio near University',
-        address: '5 Frome Road, Adelaide SA',
-        price: 380,
-        bedrooms: 1,
-        bathrooms: 1,
-        type: 1,
-        lat: -34.92146,
-        lng: 138.60745,
-        image: 'https://picsum.photos/300/200?random=103',
-        status: 0,
-        owner_id: 1
-    }
-];
-*/
-
-// Empty backup
-const mockProperties = [];
 
 // Database connection
 const db = require('../config/db');
+
+// Upload single image - requires authentication (MUST come before generic routes)
+router.post('/upload', authenticateToken, uploadProperty, (req, res) => {
+    if (!req.file) {
+        return handleValidationError(res, 'No image uploaded');
+    }
+    
+    // For Cloudinary uploads, the URL is in req.file.path
+    const imageUrl = req.file.path || req.file.secure_url;
+    
+    res.json({
+        message: 'Image uploaded successfully',
+        imageUrl: imageUrl,
+        cloudinaryId: req.file.public_id,
+        file: {
+            originalname: req.file.originalname,
+            size: req.file.size,
+            format: req.file.format
+        }
+    });
+});
+
+// Upload multiple images for a property - requires authentication with error handling
+router.post('/upload-multiple', authenticateToken, (req, res, next) => {
+    uploadMultipleProperty(req, res, (err) => {
+        if (err) {
+            // Handle multer errors
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'One or more files are too large. Maximum size per file is 10MB.'
+                });
+            }
+            if (err.code === 'LIMIT_FILE_COUNT') {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Too many files. Maximum 10 images allowed.'
+                });
+            }
+            if (err.message === 'Only image files are allowed!') {
+                return res.status(400).json({
+                    status: 'error',
+                    message: err.message
+                });
+            }
+            // Other errors
+            return res.status(500).json({
+                status: 'error',
+                message: 'Error uploading files: ' + err.message
+            });
+        }
+        next();
+    });
+}, async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return handleValidationError(res, 'No images uploaded');
+        }
+        
+        const { propertyId } = req.body;
+        
+        if (!propertyId) {
+            return handleValidationError(res, 'Property ID is required');
+        }
+        
+        // Verify property exists and user owns it (or is admin)
+        const [properties] = await db.query(
+            'SELECT property_owner_id FROM Property WHERE property_id = ?',
+            [propertyId]
+        );
+        
+        if (!properties || properties.length === 0) {
+            return handleNotFound(res, 'Property');
+        }
+        
+        // Check ownership (unless admin)
+        if (req.user.user_role !== 2 && properties[0].property_owner_id !== req.user.user_id) {
+            return handleForbidden(res, 'You can only upload images to your own properties');
+        }
+        
+        // Get current max order_index for this property
+        const [maxOrder] = await db.query(
+            'SELECT COALESCE(MAX(order_index), 0) as max_order FROM PropertyImage WHERE property_id = ?',
+            [propertyId]
+        );
+        let nextOrder = (maxOrder[0]?.max_order || 0) + 1;
+        
+        // Insert each image into PropertyImage table
+        const uploadedImages = [];
+        console.log(`Uploading ${req.files.length} images for property ${propertyId}`);
+        
+        for (let i = 0; i < req.files.length; i++) {
+            const file = req.files[i];
+            const imageUrl = file.path || file.secure_url;
+            
+            console.log(`Processing image ${i + 1}: ${file.originalname}, URL: ${imageUrl}`);
+            
+            // Set first image as primary if no primary exists
+            const [primaryExists] = await db.query(
+                'SELECT COUNT(*) as count FROM PropertyImage WHERE property_id = ? AND is_primary = 1',
+                [propertyId]
+            );
+            const isPrimary = primaryExists[0].count === 0 && i === 0 ? 1 : 0;
+            
+            const [result] = await db.query(
+                'INSERT INTO PropertyImage (property_id, image_url, is_primary, order_index) VALUES (?, ?, ?, ?)',
+                [propertyId, imageUrl, isPrimary, nextOrder + i]
+            );
+            
+            console.log(`Image saved to database with ID: ${result.insertId}`);
+            
+            uploadedImages.push({
+                id: result.insertId,
+                url: imageUrl,
+                isPrimary: isPrimary,
+                orderIndex: nextOrder + i,
+                cloudinaryId: file.public_id,
+                originalname: file.originalname
+            });
+        }
+        
+        res.json({
+            message: 'Images uploaded successfully',
+            images: uploadedImages,
+            count: uploadedImages.length
+        });
+        
+    } catch (error) {
+        console.error('Error uploading images:', error);
+        handleDbError(res, error, 'uploading images');
+    }
+});
 
 // Get all properties
 router.get('/', async (req, res) => {
     console.log('Getting properties');
     try {
-        // Execute query
+        // Execute query with LEFT JOIN to get primary image
         const [properties] = await db.query(`
             SELECT 
-                property_id AS id, property_owner_id AS owner_id, 
-                property_name AS title, property_price AS price, 
-                property_room AS bedrooms, property_bathroom AS bathrooms, 
-                property_garages AS garages, property_aircon AS aircon, 
-                property_balcony AS balcony, property_petsconsidered AS petsConsidered, 
-                property_furnished AS furnished, property_type AS type, 
-                property_status AS status, property_latitude AS lat, 
-                property_longitude AS lng, property_img_url AS image
-            FROM Property
-            WHERE property_status = 0
-            ORDER BY property_id DESC
+                p.property_id AS id, p.property_owner_id AS owner_id, 
+                p.property_name AS title, p.property_price AS price, 
+                p.property_room AS bedrooms, p.property_bathroom AS bathrooms, 
+                p.property_garages AS garages, p.property_aircon AS aircon, 
+                p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
+                p.property_furnished AS furnished, p.property_type AS type, 
+                p.property_status AS status, p.property_latitude AS lat, 
+                p.property_longitude AS lng, 
+                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
+                COALESCE(pi.image_url, 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png') AS image
+            FROM Property p
+            LEFT JOIN PropertyImage pi ON p.property_id = pi.property_id AND pi.is_primary = 1
+            WHERE p.property_status = 0
+            ORDER BY p.property_id DESC
         `);
         
         if (properties && properties.length > 0) {
-            // Add mock address
-            const props = properties.map(p => ({
-                ...p,
-                address: `Adelaide SA ${p.id}`
-            }));
-            
             res.json({
-                properties: props,
+                properties: properties,
                 pagination: {
                     page: 1,
                     limit: 10,
-                    total: props.length,
+                    total: properties.length,
                     pages: 1
                 }
             });
@@ -102,6 +181,101 @@ router.get('/', async (req, res) => {
         }
     } catch (error) {
         handleDbError(res, error, 'fetching properties');
+    }
+});
+
+// Favorite routes - MUST be before /:id route
+// Check if property is favorited - requires authentication
+router.get('/:id/favorite', authenticateToken, async (req, res) => {
+    const propertyId = parseInt(req.params.id);
+    const userId = req.user.user_id || req.user.id;
+    
+    try {
+        const [favorites] = await db.query(
+            'SELECT favorite_id FROM Favorite WHERE favorite_user_id = ? AND favorite_property_id = ?',
+            [userId, propertyId]
+        );
+        
+        res.json({
+            favorited: favorites && favorites.length > 0
+        });
+        
+    } catch (error) {
+        handleDbError(res, error, 'checking favorite status');
+    }
+});
+
+// Add property to favorites - requires authentication
+router.post('/:id/favorite', authenticateToken, async (req, res) => {
+    const propertyId = parseInt(req.params.id);
+    const userId = req.user.user_id || req.user.id;
+    
+    try {
+        // Check if property exists
+        const [properties] = await db.query(
+            'SELECT property_id FROM Property WHERE property_id = ?',
+            [propertyId]
+        );
+        
+        if (!properties || properties.length === 0) {
+            return handleNotFound(res, 'Property');
+        }
+        
+        // Check if already favorited
+        const [existing] = await db.query(
+            'SELECT favorite_id FROM Favorite WHERE favorite_user_id = ? AND favorite_property_id = ?',
+            [userId, propertyId]
+        );
+        
+        if (existing && existing.length > 0) {
+            return handleValidationError(res, 'Property already in favorites');
+        }
+        
+        // Add to favorites
+        await db.query(
+            'INSERT INTO Favorite (favorite_user_id, favorite_property_id, favorite_saved_at) VALUES (?, ?, NOW())',
+            [userId, propertyId]
+        );
+        
+        res.json({
+            message: 'Property added to favorites',
+            favorited: true
+        });
+        
+    } catch (error) {
+        handleDbError(res, error, 'adding favorite');
+    }
+});
+
+// Remove property from favorites - requires authentication
+router.delete('/:id/favorite', authenticateToken, async (req, res) => {
+    const propertyId = parseInt(req.params.id);
+    const userId = req.user.user_id || req.user.id;
+    
+    try {
+        // Check if favorite exists
+        const [existing] = await db.query(
+            'SELECT favorite_id FROM Favorite WHERE favorite_user_id = ? AND favorite_property_id = ?',
+            [userId, propertyId]
+        );
+        
+        if (!existing || existing.length === 0) {
+            return handleNotFound(res, 'Favorite');
+        }
+        
+        // Remove from favorites
+        await db.query(
+            'DELETE FROM Favorite WHERE favorite_user_id = ? AND favorite_property_id = ?',
+            [userId, propertyId]
+        );
+        
+        res.json({
+            message: 'Property removed from favorites',
+            favorited: false
+        });
+        
+    } catch (error) {
+        handleDbError(res, error, 'removing favorite');
     }
 });
 
@@ -120,7 +294,13 @@ router.get('/:id', async (req, res) => {
                 p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
                 p.property_furnished AS furnished, p.property_type AS type, 
                 p.property_status AS status, p.property_latitude AS lat, 
-                p.property_longitude AS lng, p.property_img_url AS image,
+                p.property_longitude AS lng, 
+                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
+                COALESCE(
+                    (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id AND is_primary = 1 LIMIT 1),
+                    (SELECT image_url FROM PropertyImage WHERE property_id = p.property_id ORDER BY order_index ASC LIMIT 1),
+                    p.property_img_url
+                ) AS image,
                 u.user_name AS owner_name, u.user_email AS owner_email, u.user_phone AS owner_phone
             FROM Property p
             LEFT JOIN User u ON p.property_owner_id = u.user_id
@@ -128,10 +308,16 @@ router.get('/:id', async (req, res) => {
         `, [id]);
         
         if (properties && properties.length > 0) {
-            const property = {
-                ...properties[0],
-                address: `Adelaide SA ${properties[0].id}`
-            };
+            const property = properties[0];
+            
+            // Get all images for this property
+            const [images] = await db.query(
+                'SELECT image_url FROM PropertyImage WHERE property_id = ? ORDER BY order_index ASC',
+                [id]
+            );
+            
+            // Add images array to response
+            property.images = images.map(img => img.image_url);
             
             res.json(property);
         } else {
@@ -194,6 +380,10 @@ router.put('/:id', requireLandlord, async (req, res) => {
             updates.push('property_longitude = ?');
             values.push(parseFloat(req.body.lng));
         }
+        if (req.body.address) {
+            updates.push('property_address = ?');
+            values.push(req.body.address);
+        }
         if (req.body.image) {
             updates.push('property_img_url = ?');
             values.push(req.body.image);
@@ -226,21 +416,21 @@ router.put('/:id', requireLandlord, async (req, res) => {
 // Create property - requires landlord or admin
 router.post('/', requireLandlord, async (req, res) => {
     // Check required fields
-    const { title, price, bedrooms, bathrooms, lat, lng } = req.body;
+    const { title, price, bedrooms, bathrooms, lat, lng, address } = req.body;
     
-    if (!title || !price || !bedrooms || !bathrooms || !lat || !lng) {
-        return handleValidationError(res, 'Missing required fields: title, price, bedrooms, bathrooms, lat, lng');
+    if (!title || !price || !bedrooms || !bathrooms || !lat || !lng || !address) {
+        return handleValidationError(res, 'Missing required fields: title, price, bedrooms, bathrooms, lat, lng, address');
     }
     
     try {
-        // Insert new property
+        // Insert new property without property_img_url
         const [result] = await db.query(
             `INSERT INTO Property (
                 property_owner_id, property_name, property_price, 
                 property_room, property_bathroom, property_garages,
                 property_aircon, property_balcony, property_petsconsidered,
                 property_furnished, property_type, property_status,
-                property_latitude, property_longitude, property_img_url
+                property_latitude, property_longitude, property_address
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 req.user.user_id, // Owner is the authenticated user
@@ -257,9 +447,11 @@ router.post('/', requireLandlord, async (req, res) => {
                 0, // Status: Available
                 parseFloat(lat),
                 parseFloat(lng),
-                req.body.image || 'https://picsum.photos/300/200?random=' + Date.now()
+                address
             ]
         );
+        
+        console.log(`Property created with ID: ${result.insertId}`);
         
         res.status(201).json({
             message: 'Property created successfully',
@@ -319,25 +511,27 @@ router.delete('/:id', requireLandlord, async (req, res) => {
     }
 });
 
-// Upload image - requires authentication
-router.post('/upload', authenticateToken, uploadProperty, (req, res) => {
-    if (!req.file) {
-        return handleValidationError(res, 'No image uploaded');
+// Get property images
+router.get('/:id/images', async (req, res) => {
+    const propertyId = parseInt(req.params.id);
+    
+    if (isNaN(propertyId)) {
+        return handleValidationError(res, 'Invalid property ID');
     }
     
-    // For Cloudinary uploads, the URL is in req.file.path
-    const imageUrl = req.file.path || req.file.secure_url;
-    
-    res.json({
-        message: 'Image uploaded successfully',
-        imageUrl: imageUrl,
-        cloudinaryId: req.file.public_id,
-        file: {
-            originalname: req.file.originalname,
-            size: req.file.size,
-            format: req.file.format
-        }
-    });
+    try {
+        const [images] = await db.query(
+            'SELECT image_id, image_url, is_primary, order_index FROM PropertyImage WHERE property_id = ? ORDER BY order_index ASC',
+            [propertyId]
+        );
+        
+        res.json({
+            images: images,
+            count: images.length
+        });
+    } catch (error) {
+        handleDbError(res, error, 'fetching property images');
+    }
 });
 
 // Get properties for logged-in landlord
@@ -352,21 +546,18 @@ router.get('/my', requireLandlord, async (req, res) => {
                 p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
                 p.property_furnished AS furnished, p.property_type AS type, 
                 p.property_status AS status, p.property_latitude AS lat, 
-                p.property_longitude AS lng, p.property_img_url AS image
+                p.property_longitude AS lng, 
+                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
+                COALESCE(pi.image_url, 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png') AS image
             FROM Property p
+            LEFT JOIN PropertyImage pi ON p.property_id = pi.property_id AND pi.is_primary = 1
             WHERE p.property_owner_id = ?
             ORDER BY p.property_id DESC
         `, [req.user.user_id]);
         
-        // Add address field to each property
-        const propertiesWithAddress = properties.map(p => ({
-            ...p,
-            address: `Adelaide SA ${p.id}`
-        }));
-        
         res.json({
-            properties: propertiesWithAddress,
-            total: propertiesWithAddress.length
+            properties: properties,
+            total: properties.length
         });
     } catch (error) {
         handleDbError(res, error, 'fetching user properties');
@@ -386,22 +577,19 @@ router.get('/admin/all', requireAdmin, async (_req, res) => {
                 p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
                 p.property_furnished AS furnished, p.property_type AS type, 
                 p.property_status AS status, p.property_latitude AS lat, 
-                p.property_longitude AS lng, p.property_img_url AS image,
+                p.property_longitude AS lng, 
+                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
+                COALESCE(pi.image_url, 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png') AS image,
                 u.user_name AS owner_name, u.user_email AS owner_email
             FROM Property p
             LEFT JOIN User u ON p.property_owner_id = u.user_id
+            LEFT JOIN PropertyImage pi ON p.property_id = pi.property_id AND pi.is_primary = 1
             ORDER BY p.property_id DESC
         `);
         
-        // Add address field to each property
-        const propertiesWithAddress = properties.map(p => ({
-            ...p,
-            address: `Adelaide SA ${p.id}`
-        }));
-        
         res.json({
-            properties: propertiesWithAddress,
-            total: propertiesWithAddress.length
+            properties: properties,
+            total: properties.length
         });
     } catch (error) {
         handleDbError(res, error, 'fetching all properties');
@@ -434,6 +622,5 @@ router.get('/admin/stats', requireAdmin, async (_req, res) => {
         handleDbError(res, error, 'fetching statistics');
     }
 });
-
 
 module.exports = router;

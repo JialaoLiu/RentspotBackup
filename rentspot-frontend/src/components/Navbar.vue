@@ -20,12 +20,12 @@
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/rentlist">Rent</router-link></li>
           <li><router-link to="/news">News</router-link></li>
+          <li><a href="#">Feedback</a></li>
           <li v-if="isLandlordOrAdmin">
             <router-link to="/property/manage" class="management-link">
-              <HouseIcon class="nav-icon" /> Property Management
+              <Icon name="house" size="md" color="white" /> Property Management
             </router-link>
           </li>
-          <li><a href="#">Feedback</a></li>
         </ul>
       </li>
 
@@ -55,12 +55,12 @@
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/rentlist">Rent</router-link></li>
         <li><router-link to="/news">News</router-link></li>
+        <li><a href="#">Feedback</a></li>
         <li v-if="isLandlordOrAdmin">
           <router-link to="/property/manage" class="management-link">
-            <HouseIcon class="nav-icon" /> Property Management
+            <Icon name="house" size="sm" color="white" /> Property Management
           </router-link>
         </li>
-        <li><a href="#">Feedback</a></li>
       </ul>
       <ul class="connect-mobile">
         <template v-if="!isLoggedIn">
@@ -87,8 +87,10 @@ import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from '../composables/useRouter.js';
 import { useNotification } from '../composables/useNotification';
 import userService from '../services/userService';
-// Import SVG icons
-import HouseIcon from '../assets/svg/House.svg';
+
+// Import Icon component
+import Icon from './Common/Icon.vue';
+
 
 const isLoggedIn = ref(false);
 const userAvatar = ref(null);
@@ -139,9 +141,10 @@ const checkLoginStatus = () => {
   isLoggedIn.value = !!token; // If token exists, user is logged in
 
   // Check user role
-  if (isLoggedIn.value) {
+  if (isLoggedIn.value && token) {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     isLandlordOrAdmin.value = userData.role >= 1; // Landlord (1) or Admin (2)
+    // Only fetch avatar if we have a valid token
     fetchUserAvatar();
   } else {
     userAvatar.value = null;
@@ -156,6 +159,15 @@ const fetchUserAvatar = async () => {
     userAvatar.value = profile.avatarUrl;
   } catch (error) {
     console.error('Error fetching user avatar:', error);
+    // If we get a 401 or 400 error, the token might be invalid
+    if (error.response && (error.response.status === 401 || error.response.status === 400)) {
+      // Clear invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      isLoggedIn.value = false;
+      userAvatar.value = null;
+      isLandlordOrAdmin.value = false;
+    }
     // Don't show error toast as this is a background operation
   }
 };
@@ -163,8 +175,10 @@ const fetchUserAvatar = async () => {
 // Logout functionality
 const handleLogout = () => {
   localStorage.removeItem('token'); // Remove token from localStorage
+  localStorage.removeItem('user'); // Remove user data from localStorage
   isLoggedIn.value = false; // Update login state
   userAvatar.value = null; // Clear avatar
+  isLandlordOrAdmin.value = false; // Clear role state
   toast.success('Logged out successfully!');
   router.push('/'); // Redirect to home page
 };
@@ -190,8 +204,8 @@ onMounted(() => {
 
 <style scoped>
 .navbar {
-  background-color: black;
-  padding: 1rem;
+  background-color: var(--color-bg-dark);
+  padding: var(--space-md);
 }
 
 /* Main nav wrapper */
@@ -202,7 +216,7 @@ onMounted(() => {
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 /* Logo left */
@@ -219,7 +233,7 @@ onMounted(() => {
 
 .menu ul {
   display: flex;
-  gap: 2rem;
+  gap: var(--space-xl);
   justify-content: center;
   margin: 0;
   padding: 0;
@@ -233,7 +247,7 @@ onMounted(() => {
 }
 
 .menu ul li a:hover {
-  color: #646cff;
+  color: var(--color-primary);
 }
 
 /* Connect right */
@@ -245,7 +259,7 @@ onMounted(() => {
 
 .connect ul {
   display: flex;
-  gap: 2rem;
+  gap: var(--space-xl);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -259,7 +273,7 @@ onMounted(() => {
 }
 
 .connect ul li a:hover {
-  color: #646cff;
+  color: var(--color-primary);
 }
 
 /* Profile link */
@@ -274,7 +288,7 @@ onMounted(() => {
   height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #646cff;
+  border: 2px solid var(--color-primary);
 }
 
 /* Management link styling */
@@ -282,7 +296,7 @@ onMounted(() => {
   background: linear-gradient(45deg, #10B981, #059669);
   border-radius: 6px;
   padding: 8px 12px;
-  transition: all 0.2s ease;
+  transition: var(--transition-fast);
   border: none;
 }
 
@@ -293,9 +307,7 @@ onMounted(() => {
   color: white !important;
 }
 
-.nav-icon {
-  width: 16px;
-  height: 16px;
+.management-link .icon {
   margin-right: 6px;
   vertical-align: middle;
 }
@@ -341,7 +353,7 @@ onMounted(() => {
 .mobile-menu {
   display: none;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
@@ -375,7 +387,7 @@ onMounted(() => {
 
 .menu-mobile li a:hover,
 .connect-mobile li a:hover {
-  color: #646cff;
+  color: var(--color-primary);
 }
 
 /* Responsive rules */

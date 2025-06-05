@@ -2,15 +2,15 @@
   <div class="modal-overlay" @click.self="$emit('cancel')">
     <div class="modal-container">
       <div class="modal-header">
-        <h3>{{ property.status === 2 ? 'Confirm Permanent Deletion' : 'Confirm Remove Property' }}</h3>
+        <h3>Confirm Restore Property</h3>
         <button class="modal-close" @click="$emit('cancel')">&times;</button>
       </div>
       
       <div class="modal-body">
-        <div class="warning-icon">
-          <Icon :name="property.status === 2 ? 'delete-forever' : 'warning'" size="xl" />
+        <div class="success-icon">
+          <Icon name="refresh" size="xl" color="#10B981" />
         </div>
-        <p class="warning-text">Are you sure you want to {{ property.status === 2 ? 'permanently delete' : 'remove' }} the following property?</p>
+        <p class="restore-text">Are you sure you want to restore the following property?</p>
         
         <div class="property-preview">
           <img :src="property.image" :alt="property.title" @error="handleImageError" />
@@ -24,17 +24,12 @@
           </div>
         </div>
         
-        <div class="warning-notice" :class="{ 'danger-notice': property.status === 2 }">
-          <p><strong>{{ property.status === 2 ? 'Warning:' : 'Note:' }}</strong> This action will:</p>
-          <ul v-if="property.status === 2">
-            <li>Permanently delete this property from the database</li>
-            <li>Remove all associated data and history</li>
-            <li><strong>This action CANNOT be undone!</strong></li>
-          </ul>
-          <ul v-else>
-            <li>Set the property status to "Removed"</li>
-            <li>Hide the property from tenants</li>
-            <li>This action can be reversed by administrators</li>
+        <div class="restore-notice">
+          <p><strong>Note:</strong> This action will:</p>
+          <ul>
+            <li>Change the property status to "Available"</li>
+            <li>Make the property visible to tenants again</li>
+            <li>Allow the property to be rented</li>
           </ul>
         </div>
       </div>
@@ -43,8 +38,8 @@
         <button @click="$emit('cancel')" class="btn-cancel">
           Cancel
         </button>
-        <button @click="$emit('confirm')" class="btn-delete" :class="{ 'btn-danger': property.status === 2 }">
-          {{ property.status === 2 ? 'Permanently Delete' : 'Remove Property' }}
+        <button @click="$emit('confirm')" class="btn-restore">
+          Restore Property
         </button>
       </div>
     </div>
@@ -148,14 +143,14 @@ function handleImageError(e) {
   text-align: center;
 }
 
-.warning-icon {
+.success-icon {
   margin-bottom: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.warning-text {
+.restore-text {
   font-size: 1.1rem;
   color: #374151;
   margin: 0 0 24px 0;
@@ -207,27 +202,27 @@ function handleImageError(e) {
   font-size: 0.875rem;
 }
 
-.warning-notice {
-  background-color: #FEF3C7;
-  border: 1px solid #F59E0B;
+.restore-notice {
+  background-color: #D1FAE5;
+  border: 1px solid #10B981;
   border-radius: 8px;
   padding: 16px;
   text-align: left;
 }
 
-.warning-notice p {
+.restore-notice p {
   margin: 0 0 12px 0;
-  color: #92400E;
+  color: #065F46;
   font-weight: 500;
 }
 
-.warning-notice ul {
+.restore-notice ul {
   margin: 0;
   padding-left: 20px;
-  color: #92400E;
+  color: #065F46;
 }
 
-.warning-notice li {
+.restore-notice li {
   margin-bottom: 4px;
   font-size: 0.875rem;
 }
@@ -240,7 +235,7 @@ function handleImageError(e) {
 }
 
 .btn-cancel,
-.btn-delete {
+.btn-restore {
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -260,34 +255,15 @@ function handleImageError(e) {
   background-color: #E5E7EB;
 }
 
-.btn-delete {
-  background-color: #EF4444;
+.btn-restore {
+  background-color: #10B981;
   color: white;
 }
 
-.btn-delete:hover {
-  background-color: #DC2626;
+.btn-restore:hover {
+  background-color: #059669;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-.btn-delete.btn-danger {
-  background-color: #991B1B;
-}
-
-.btn-delete.btn-danger:hover {
-  background-color: #7F1D1D;
-  box-shadow: 0 4px 16px rgba(153, 27, 27, 0.5);
-}
-
-.warning-notice.danger-notice {
-  background-color: #FEE2E2;
-  border-color: #DC2626;
-}
-
-.warning-notice.danger-notice p,
-.warning-notice.danger-notice li {
-  color: #991B1B;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 /* Responsive design */
@@ -321,7 +297,7 @@ function handleImageError(e) {
   }
   
   .btn-cancel,
-  .btn-delete {
+  .btn-restore {
     width: 100%;
   }
 }

@@ -13,8 +13,37 @@ router.get('/profile', userController.getProfile);
 // Update user profile
 router.put('/profile', userController.updateProfile);
 
-// Upload avatar - uses Cloudinary middleware
-router.post('/avatar', uploadAvatar, userController.uploadAvatar);
+// Upload avatar - uses Cloudinary middleware with error handling
+router.post('/avatar', (req, res, next) => {
+  console.log('Avatar upload request received');
+  console.log('User:', req.user);
+  
+  uploadAvatar(req, res, (err) => {
+    if (err) {
+      console.error('Upload error:', err);
+      
+      // Handle multer errors
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'File too large. Maximum size is 5MB.'
+        });
+      }
+      if (err.message === 'Only image files are allowed!') {
+        return res.status(400).json({
+          status: 'error',
+          message: err.message
+        });
+      }
+      // Other errors
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error uploading file: ' + err.message
+      });
+    }
+    next();
+  });
+}, userController.uploadAvatar);
 
 // Change password
 router.post('/change-password', userController.changePassword);
