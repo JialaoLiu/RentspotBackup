@@ -5,12 +5,19 @@ import Signin from '../src/views/Signin.vue';
 import RentList from '../src/views/RentList.vue';
 import UserProfile from '../src/views/UserProfile.vue';
 import News from '../src/views/News.vue';
+import welcomePage from '../src/views/welcomePage.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+
+  {
+    path: '/webcomePage',
+    name: 'welcomePage',
+    component: welcomePage
   },
 
   {
@@ -42,7 +49,7 @@ const routes = [
     component: UserProfile,
     meta: { requiresAuth: true }
   },
-  
+
   {
     path: '/news',
     name: 'News',
@@ -59,7 +66,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const token = localStorage.getItem('token');
-  
+
   if (requiresAuth && !token) {
     // Redirect to login page with return URL
     next({
