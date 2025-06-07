@@ -21,7 +21,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* These styles should not be scoped so they can apply globally */
 html, body {
   height: 100%;
   margin: 0;
@@ -37,27 +36,11 @@ html, body {
   flex: 1; /* This makes the content area expand to fill available space */
 }
 
-/* Global theme variables (dark/light mode)*/
-
-:root {
-  --color-bg: #ffffff;
-  --color-text: #333333;
-  --color-primary: #059669;
-  --color-bg-dark: #f9f9f9;
-}
-
-.dark {
-  --color-bg: #121212;
-  --color-text: #e0e0e0;
-  --color-primary: #10B981;
-  --color-bg-dark: #1f1f1f;
-}
 
 /* Apply variables to body and html */
 html, body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 </style>

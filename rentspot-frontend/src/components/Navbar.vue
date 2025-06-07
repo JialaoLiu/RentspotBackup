@@ -32,6 +32,10 @@
       <!-- Connect (desktop only) -->
       <li class="connect">
         <ul>
+          <!-- Dark Mode Toggle -->
+          <li class="dark-mode-item">
+            <DarkModeToggle />
+          </li>
           <template v-if="!isLoggedIn">
             <li><router-link to="/login">Login</router-link></li>
             <li><router-link to="/signin">Register</router-link></li>
@@ -45,12 +49,6 @@
               </router-link>
             </li>
           </template>
-          <!-- dark/light mode -->
-          <li>
-            <button class="theme-toggle-btn" @click="toggleTheme">
-              {{ isDarkMode ? '☀️ Light' : '🌙 Dark' }}
-            </button>
-          </li>
         </ul>
       </li>
     </ul>
@@ -62,12 +60,6 @@
         <li><router-link to="/rentlist">Rent</router-link></li>
         <li><router-link to="/news">News</router-link></li>
         <li><a href="#">Feedback</a></li>
-        <li>
-          <!-- dark/light mode -->
-          <button class="theme-toggle-btn mobile" @click="toggleTheme">
-            {{ isDarkMode ? '☀️' : '🌙' }}
-          </button>
-        </li>
         <li v-if="isLandlordOrAdmin">
           <router-link to="/property/manage" class="management-link">
             <Icon name="house" size="sm" color="white" /> Property Management
@@ -75,6 +67,10 @@
         </li>
       </ul>
       <ul class="connect-mobile">
+        <!-- Dark Mode Toggle for Mobile -->
+        <li class="dark-mode-item-mobile">
+          <DarkModeToggle />
+        </li>
         <template v-if="!isLoggedIn">
           <li><router-link to="/login">Login</router-link></li>
           <li><router-link to="/signin">Register</router-link></li>
@@ -93,7 +89,6 @@
   </nav>
 </template>
 
-
 <script setup>
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from '../composables/useRouter.js';
@@ -102,7 +97,7 @@ import userService from '../services/userService';
 
 // Import Icon component
 import Icon from './Common/Icon.vue';
-
+import DarkModeToggle from './DarkModeToggle.vue';
 
 const isLoggedIn = ref(false);
 const userAvatar = ref(null);
@@ -212,24 +207,6 @@ watch(() => route.value.fullPath, () => {
 onMounted(() => {
   checkLoginStatus();
 });
-
-
-// Dark mode toggle
-const isDarkMode = ref(localStorage.getItem('theme') === 'dark');
-
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value;
-  const theme = isDarkMode.value ? 'dark' : 'light';
-  document.documentElement.classList.toggle('dark', isDarkMode.value);
-  localStorage.setItem('theme', theme);
-};
-
-onMounted(() => {
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark');
-  }
-});
-
 </script>
 
 <style scoped>
@@ -270,15 +247,15 @@ onMounted(() => {
   list-style: none;
 }
 
-.menu ul li a,
-.connect ul li a {
-  color: var(--color-text);
+.menu ul li a {
+  color: white;
   text-decoration: none;
   font-weight: 500;
 }
 
-
-
+.menu ul li a:hover {
+  color: var(--color-primary);
+}
 
 /* Connect right */
 .connect {
@@ -296,11 +273,27 @@ onMounted(() => {
   align-items: center;
 }
 
-.menu ul li a:hover,
+.connect ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
 .connect ul li a:hover {
   color: var(--color-primary);
 }
 
+/* Dark mode toggle styling */
+.dark-mode-item,
+.dark-mode-item-mobile {
+  display: flex;
+  align-items: center;
+}
+
+.dark-mode-item-mobile {
+  justify-content: center;
+  margin: 10px 0;
+}
 
 /* Profile link */
 .profile-link {
@@ -383,7 +376,7 @@ onMounted(() => {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
-  background-color: black;
+  background-color: var(--color-bg-dark);
   padding: 0 1rem 1rem;
 }
 
@@ -460,24 +453,4 @@ onMounted(() => {
     display: none !important;
   }
 }
-
-/* drak/light mode */
-.theme-toggle-btn {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-left: 1rem;
-  transition: color 0.3s;
-}
-
-.theme-toggle-btn:hover {
-  color: var(--color-primary);
-}
-
-.theme-toggle-btn.mobile {
-  margin-top: 0.5rem;
-}
-
 </style>
