@@ -107,7 +107,6 @@ const userController = {
       const userId = req.user.id;
       const avatarUrl = req.file.path;
       
-      console.log('Avatar upload - userId:', userId, 'avatarUrl:', avatarUrl);
       
       // Update avatar URL in database
       await db.query(
