@@ -17,22 +17,17 @@ const authRoutes = require('./routes/authRoutes');
 const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
 // database route not used: const realPropertyRoutes = require('./routes/realPropertyRoutes');
 const userRoutes = require('./routes/userRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 app.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
-// Debug endpoint for avatar upload
-app.post('/test-avatar', (req, res) => {
-  console.log('=== TEST AVATAR ENDPOINT HIT ===');
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  res.json({ message: 'Test endpoint reached' });
-});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', workingPropertyRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -57,15 +52,9 @@ app.listen(PORT, () => {
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('=== UNCAUGHT EXCEPTION ===');
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
+  console.error('Uncaught Exception:', err.message);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('=== UNHANDLED PROMISE REJECTION ===');
-  console.error('Error:', err);
-  if (err && err.stack) {
-    console.error('Stack:', err.stack);
-  }
+  console.error('Unhandled Promise Rejection:', err.message || err);
 });

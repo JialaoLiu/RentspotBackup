@@ -2,29 +2,54 @@
   <div class="inspection-section">
     <h2>Book an Inspection</h2>
     
-    <div v-if="upcomingInspections.length > 0" class="upcoming-inspections">
-      <h3>Upcoming Inspections</h3>
+    <!-- Existing Booking Notice -->
+    <div v-if="existingBooking" class="existing-booking">
+      <h3>✅ You have an inspection booked</h3>
+      <div class="booking-details">
+        <div class="inspection-date">
+          <div class="calendar-icon">📅</div>
+          <div>
+            <div class="day">{{ formatDay(existingBooking.booking_datetime) }}</div>
+            <div class="date">{{ formatDate(existingBooking.booking_datetime) }}</div>
+          </div>
+        </div>
+        <div class="inspection-hours">{{ formatTime(existingBooking.booking_datetime) }}</div>
+      </div>
+    </div>
+    
+    <!-- Available Slots -->
+    <div v-else-if="availableSlots.length > 0" class="upcoming-inspections">
+      <h3>Available Inspection Times</h3>
+      <div v-if="loading" class="loading-state">
+        Loading available times...
+      </div>
       <div 
-        v-for="(inspection, index) in upcomingInspections" 
+        v-for="(slot, index) in availableSlots" 
         :key="index" 
         class="inspection-time"
       >
         <div class="inspection-date">
           <div class="calendar-icon">📅</div>
           <div>
-            <div class="day">{{ formatDay(inspection.date) }}</div>
-            <div class="date">{{ formatDate(inspection.date) }}</div>
+            <div class="day">{{ formatDay(slot.datetime) }}</div>
+            <div class="date">{{ formatDate(slot.datetime) }}</div>
           </div>
         </div>
-        <div class="inspection-hours">{{ formatTimeRange(inspection.startTime, inspection.endTime) }}</div>
+        <div class="inspection-hours">{{ formatTime(slot.datetime) }}</div>
         <button 
           class="register-button" 
-          @click="registerForInspection(inspection.id)"
-          :disabled="inspection.registered"
+          @click="bookInspection(slot)"
+          :disabled="loading"
         >
-          {{ inspection.registered ? 'Registered' : 'Register' }}
+          {{ loading ? 'Booking...' : 'Book Now' }}
         </button>
       </div>
+    </div>
+    
+    <!-- No Slots Available -->
+    <div v-else-if="!loading" class="no-slots">
+      <h3>No inspection times available</h3>
+      <p>Please check back later or request a custom inspection time below.</p>
     </div>
     
     <div class="request-inspection">
@@ -108,39 +133,24 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-// Removed the import for useAuthStore
+import { ref, computed, onMounted } from 'vue'
+import bookingService from '../../services/bookingService'
+import { useNotification } from '../../composables/useNotification'
+import { useRouter } from '../../composables/useRouter'
 
 const props = defineProps({
   propertyId: Number,
   address: String
 })
 
-// Replace with temporary auth store
-const authStore = {
-  isAuthenticated: ref(!!localStorage.getItem('token'))
-}
+const toast = useNotification()
+const { push } = useRouter()
 
+const isAuthenticated = computed(() => !!localStorage.getItem('token'))
 const showRequestForm = ref(false)
-const requestSubmitted = ref(false)
-
-// Sample data - would come from API in real application
-const upcomingInspections = ref([
-  {
-    id: 1,
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-    startTime: '10:00',
-    endTime: '10:30',
-    registered: false
-  },
-  {
-    id: 2,
-    date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
-    startTime: '13:00',
-    endTime: '13:30',
-    registered: false
-  }
-])
+const loading = ref(false)
+const availableSlots = ref([])
+const existingBooking = ref(null)
 
 const requestForm = ref({
   name: '',
@@ -156,50 +166,95 @@ const minDate = computed(() => {
   return today.toISOString().split('T')[0]
 })
 
+onMounted(() => {
+  loadAvailableSlots()
+  checkExistingBooking()
+})
+
+async function loadAvailableSlots() {
+  try {
+    loading.value = true
+    const response = await bookingService.getAvailableSlots(props.propertyId)
+    availableSlots.value = response.data.slots
+  } catch (error) {
+    console.error('Error loading available slots:', error)
+    toast.error('Failed to load inspection times')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function checkExistingBooking() {
+  if (!isAuthenticated.value) return
+  
+  try {
+    const response = await bookingService.getUserBookings()
+    const userBookings = response.data.bookings
+    
+    // Check if user has existing booking for this property
+    existingBooking.value = userBookings.find(
+      booking => booking.booking_property_id === props.propertyId && 
+                booking.booking_status === 1 // Confirmed
+    )
+  } catch (error) {
+    console.error('Error checking existing booking:', error)
+  }
+}
+
 function formatDay(date) {
-  return date.toLocaleDateString('en-AU', { weekday: 'short' })
+  const dateObj = new Date(date)
+  return dateObj.toLocaleDateString('en-AU', { weekday: 'short' })
 }
 
 function formatDate(date) {
-  return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+  const dateObj = new Date(date)
+  return dateObj.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
 }
 
-function formatTimeRange(start, end) {
-  return `${start} - ${end}`
+function formatTime(date) {
+  const dateObj = new Date(date)
+  return dateObj.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })
 }
 
-function registerForInspection(inspectionId) {
-  if (!authStore.isAuthenticated.value) {
-    // Redirect to login
+async function bookInspection(slot) {
+  if (!isAuthenticated.value) {
+    toast.error('Please login to book an inspection')
+    push('/login')
     return
   }
   
-  // Find and update the inspection
-  const inspection = upcomingInspections.value.find(i => i.id === inspectionId)
-  if (inspection) {
-    inspection.registered = true
-    // Would call API to register in real app
+  if (existingBooking.value) {
+    toast.error('You already have a booking for this property')
+    return
+  }
+  
+  try {
+    loading.value = true
+    
+    const bookingData = {
+      propertyId: props.propertyId,
+      datetime: slot.datetime
+    }
+    
+    await bookingService.createBooking(bookingData)
+    toast.success('Inspection booked successfully!')
+    
+    // Refresh bookings
+    await checkExistingBooking()
+    
+  } catch (error) {
+    console.error('Error booking inspection:', error)
+    const message = error.response?.data?.message || 'Failed to book inspection'
+    toast.error(message)
+  } finally {
+    loading.value = false
   }
 }
 
 function submitInspectionRequest() {
-  // In a real app, this would submit the form data to an API
-  console.log('Submitting inspection request:', requestForm.value)
-  
-  // Reset form and show confirmation
-  requestSubmitted.value = true
+  // For MVP, show simple message - can be enhanced later
+  toast.info('Inspection request feature coming soon. Please use the available time slots.')
   showRequestForm.value = false
-  requestForm.value = {
-    name: '',
-    email: '',
-    phone: '',
-    preferredDate: '',
-    preferredTime: '',
-    message: ''
-  }
-  
-  // Show success message (would be handled better in real app)
-  alert('Your inspection request has been submitted. An agent will contact you shortly.')
 }
 </script>
 
@@ -346,5 +401,48 @@ function submitInspectionRequest() {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.existing-booking {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.existing-booking h3 {
+  color: #166534;
+  margin-bottom: 12px;
+}
+
+.booking-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.no-slots {
+  text-align: center;
+  padding: 32px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.no-slots h3 {
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.no-slots p {
+  color: #94a3b8;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-style: italic;
 }
 </style>

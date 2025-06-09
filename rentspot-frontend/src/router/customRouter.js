@@ -10,6 +10,8 @@ import UserProfile from '../views/UserProfile.vue';
 import News from '../views/News.vue';
 import RentPage from '../views/RentPage.vue';
 import PropertyManagement from '../views/PropertyManagement.vue';
+import MyBookings from '../views/MyBookings.vue';
+import MyProperty from '../views/MyProperty.vue';
 
 // Routes
 const routes = {
@@ -19,6 +21,8 @@ const routes = {
   '/login': { name: 'Login', component: Login },
   '/signin': { name: 'Signin', component: Signin },
   '/userprofile': { name: 'UserProfile', component: UserProfile, requiresAuth: true },
+  '/my-bookings': { name: 'MyBookings', component: MyBookings, requiresAuth: true },
+  '/my-property': { name: 'MyProperty', component: MyProperty, requiresAuth: true, requiresLandlord: true },
   '/news': { name: 'News', component: News },
   '/property/manage': { name: 'PropertyManagement', component: PropertyManagement, requiresAuth: true, requiresLandlord: true }
 };

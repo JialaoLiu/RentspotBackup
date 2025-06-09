@@ -176,7 +176,8 @@ const Property = {
           ) AS image,
           u.user_name AS owner_name,
           u.user_email AS owner_email,
-          u.user_phone AS owner_phone
+          u.user_phone AS owner_phone,
+          COALESCE(u.user_avatar_url, 'no-avatar') AS owner_avatar
         FROM Property p
         JOIN User u ON p.property_owner_id = u.user_id
         WHERE p.property_id = ?`,
