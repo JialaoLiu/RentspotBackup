@@ -1,8 +1,7 @@
 /* Global Styles
-Please note: :root has a global impact. Do not modify it randomly. You can refer to and add comments. 
+Please note: :root has a global impact. Do not modify it randomly. You can refer to and add comments.
 If you want to change global UI styles, talk with me first.
 */
-
 
 /*  Read css before coding frontend */
 :root {
@@ -13,49 +12,104 @@ If you want to change global UI styles, talk with me first.
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  /* Color System */
+  /* Light Theme Color System */
   --color-primary: #3b82f6;        /* Primary */
   --color-primary-hover: #2563eb;  /* Primary hover */
   --color-primary-light: #e0f2fe;  /* Light backgrounds */
-  
+
   --color-danger: #d32f2f;         /* error color */
   --color-danger-hover: #b91c1c;   /* error hover */
   --color-danger-light: #fee2e2;   /* backgrounds */
-  
+
   --color-dark: #1f2937;           /* text */
-  --color-medium: #6b7280;         
-  --color-light: #9ca3af;          
-  
+  --color-medium: #6b7280;
+  --color-light: #9ca3af;
+
   --color-bg-primary: #ffffff;     /* White backgrounds */
-  --color-bg-secondary: #f3f4f6;   
-  --color-bg-dark: #111827;        
-  
+  --color-bg-secondary: #f3f4f6;
+  --color-bg-dark: #111827;
+
   --color-border: #e5e7eb;         /*  border color */
   --color-border-dark: #d1d5db;    /* more dark border */
-  
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
-  
+
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 32px;
-  
+
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
-  
+
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
-  
+
   /* Default colors */
   color: var(--color-dark);
   background-color: var(--color-bg-primary);
+}
+
+/* Dark Theme */
+html[data-theme="dark"] {
+  /* Dark Theme Color System */
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-primary-light: #1e3a8a;
+
+  --color-danger: #f87171;
+  --color-danger-hover: #ef4444;
+  --color-danger-light: #7f1d1d;
+
+  --color-dark: #f9fafb;
+  --color-medium: #d1d5db;
+  --color-light: #9ca3af;
+
+  --color-bg-primary: #111827;
+  --color-bg-secondary: #1f2937;
+  --color-bg-dark: #000000;
+
+  --color-border: #374151;
+  --color-border-dark: #4b5563;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* System preference detection */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Auto dark mode - same as [data-theme="dark"] */
+    --color-primary: #60a5fa;
+    --color-primary-hover: #3b82f6;
+    --color-primary-light: #1e3a8a;
+
+    --color-danger: #f87171;
+    --color-danger-hover: #ef4444;
+    --color-danger-light: #7f1d1d;
+
+    --color-dark: #f9fafb;
+    --color-medium: #d1d5db;
+    --color-light: #9ca3af;
+
+    --color-bg-primary: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-dark: #000000;
+
+    --color-border: #374151;
+    --color-border-dark: #4b5563;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
 }
 
 a {
@@ -71,6 +125,9 @@ body {
   margin: 0;
   width: 100%;
   min-height: 100vh;
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 h1 {
@@ -89,7 +146,9 @@ button {
 
 #app {
   width: 100%;
-  /* no text-align: center */
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
+  min-height: 100vh;
 }
 
 .main-content {
@@ -114,7 +173,7 @@ button {
 
 /* Full-width inputs */
 /* USED IN: Login.vue, Signin.vue, UserProfile.vue, FilterPopup.vue */
-input[type=text], input[type=password], input[type=email], input[type=date], input[type=file] {
+input[type=text], input[type=password], input[type=email], input[type=date], input[type=file], input[type=number], select, textarea {
   width: 100%;
   padding: 12px 20px;
   margin: var(--space-sm) 0;
@@ -124,9 +183,11 @@ input[type=text], input[type=password], input[type=email], input[type=date], inp
   border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: border-color var(--transition-fast);
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
 }
 
-input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=date]:focus {
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=date]:focus, input[type=number]:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
@@ -322,6 +383,7 @@ span.SI {
   box-shadow: var(--shadow-sm);
   padding: var(--space-lg);
   margin-bottom: var(--space-lg);
+  border: 1px solid var(--color-border);
 }
 
 .card-hover {
@@ -339,6 +401,7 @@ span.SI {
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   margin-bottom: var(--space-lg);
+  border: 1px solid var(--color-border);
 }
 
 /* Form Styles */
@@ -416,6 +479,7 @@ span.SI {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid var(--color-border);
 }
 
 .modal-header {
@@ -475,6 +539,28 @@ span.SI {
 .transition-all { transition: all var(--transition-fast); }
 .transition-colors { transition: background-color var(--transition-fast), color var(--transition-fast); }
 
+/* Dark Mode Toggle Button */
+.dark-mode-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all var(--transition-fast);
+  color: var(--color-dark);
+  background-color: var(--color-bg-primary);
+}
+
+.dark-mode-toggle:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-dark);
+}
+
 /* Toast Notification - Preserved with unique classes */
 /* USED IN: useNotification.js composable */
 .rentspot-toast {
@@ -483,14 +569,18 @@ span.SI {
   box-shadow: var(--shadow-lg);
   font-size: 14px;
   align-items: center;
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
+  border: 1px solid var(--color-border);
 }
 
 .rentspot-toast-body {
-  white-space: nowrap; 
-  word-break: keep-all; 
-  display: inline-block;  
+  white-space: nowrap;
+  word-break: keep-all;
+  display: inline-block;
   font-size: 14px;
   line-height: 1.4;
   text-align: left;
   max-width: 100%;
+  color: var(--color-dark);
 }

@@ -21,7 +21,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* These styles should not be scoped so they can apply globally */
 html, body {
   height: 100%;
   margin: 0;
@@ -35,5 +34,13 @@ html, body {
 
 .main-content {
   flex: 1; /* This makes the content area expand to fill available space */
+}
+
+
+/* Apply variables to body and html */
+html, body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 </style>
