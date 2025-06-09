@@ -1,5 +1,5 @@
 <template>
-  <span 
+  <span
     class="material-symbols-outlined icon"
     :class="sizeClass"
     :style="{ color: color || undefined }"
@@ -38,7 +38,7 @@ const iconMap = {
   'construction': 'construction',
   'house': 'home',
   'ruler': 'straighten',
-  
+
   // Actions
   'edit': 'edit',
   'delete': 'delete',
@@ -46,7 +46,7 @@ const iconMap = {
   'refresh': 'refresh',
   'plus': 'add',
   'remove': 'remove',
-  
+
   // UI/Navigation
   'heart': 'favorite',
   'heart-outline': 'favorite_border',
@@ -55,16 +55,20 @@ const iconMap = {
   'search': 'search',
   'upload': 'upload',
   'user': 'person',
-  
+
   // Status/Feedback
   'error': 'error',
   'warning': 'warning',
   'home': 'home',
   'key': 'key',
-  
+
   // Navigation arrows
   'arrow-left': 'arrow_back',
-  'arrow-right': 'arrow_forward'
+  'arrow-right': 'arrow_forward',
+
+  // Dark mode icons
+  'sun': 'light_mode',
+  'moon': 'dark_mode'
 }
 
 const iconName = computed(() => {
@@ -107,31 +111,31 @@ const sizeClass = computed(() => {
   line-height: 1;
 }
 
-.icon-xs { 
+.icon-xs {
   font-size: 12px;
   font-variation-settings: 'opsz' 12;
   line-height: 1;
 }
 
-.icon-sm { 
+.icon-sm {
   font-size: 16px;
   font-variation-settings: 'opsz' 16;
   line-height: 1;
 }
 
-.icon-md { 
+.icon-md {
   font-size: 24px;
   font-variation-settings: 'opsz' 24;
   line-height: 1;
 }
 
-.icon-lg { 
+.icon-lg {
   font-size: 32px;
   font-variation-settings: 'opsz' 32;
   line-height: 1;
 }
 
-.icon-xl { 
+.icon-xl {
   font-size: 48px;
   font-variation-settings: 'opsz' 48;
   line-height: 1;

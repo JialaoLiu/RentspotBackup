@@ -32,6 +32,10 @@
       <!-- Connect (desktop only) -->
       <li class="connect">
         <ul>
+          <!-- Dark Mode Toggle -->
+          <li class="dark-mode-item">
+            <DarkModeToggle />
+          </li>
           <template v-if="!isLoggedIn">
             <li><router-link to="/login">Login</router-link></li>
             <li><router-link to="/signin">Register</router-link></li>
@@ -65,6 +69,10 @@
         </li>
       </ul>
       <ul class="connect-mobile">
+        <!-- Dark Mode Toggle for Mobile -->
+        <li class="dark-mode-item-mobile">
+          <DarkModeToggle />
+        </li>
         <template v-if="!isLoggedIn">
           <li><router-link to="/login">Login</router-link></li>
           <li><router-link to="/signin">Register</router-link></li>
@@ -85,7 +93,6 @@
   </nav>
 </template>
 
-
 <script setup>
 import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from '../composables/useRouter.js';
@@ -94,7 +101,7 @@ import userService from '../services/userService';
 
 // Import Icon component
 import Icon from './Common/Icon.vue';
-
+import DarkModeToggle from './DarkModeToggle.vue';
 
 const isLoggedIn = ref(false);
 const userAvatar = ref(null);
@@ -280,6 +287,18 @@ onMounted(() => {
   color: var(--color-primary);
 }
 
+/* Dark mode toggle styling */
+.dark-mode-item,
+.dark-mode-item-mobile {
+  display: flex;
+  align-items: center;
+}
+
+.dark-mode-item-mobile {
+  justify-content: center;
+  margin: 10px 0;
+}
+
 /* Profile link */
 .profile-link {
   display: flex;
@@ -361,7 +380,7 @@ onMounted(() => {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
-  background-color: black;
+  background-color: var(--color-bg-dark);
   padding: 0 1rem 1rem;
 }
 
@@ -438,6 +457,4 @@ onMounted(() => {
     display: none !important;
   }
 }
-
-
 </style>

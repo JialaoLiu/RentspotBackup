@@ -5,15 +5,26 @@
 
       <label for="name"><b>Name</b></label>
       <input type="text" placeholder="Enter Name" v-model="user_name" required>
+      <div v-if="validationErrors.name" class="field-error">{{ validationErrors.name }}</div> <!-- Error message for name field -->
 
       <label for="email"><b>Email</b></label>
       <input type="email" placeholder="Enter Email" v-model="user_email" required>
+      <div v-if="validationErrors.email" class="field-error">{{ validationErrors.email }}</div> <!-- Error message for name field -->
 
       <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" v-model="user_password" required>
+      <input type="password" placeholder="Enter Password" v-model="user_password" required :class="passwordStrengthClass">
+      <ul class="password-checklist">
+        <li :class="{ passed: /[a-z]/.test(user_password) }">✔ Lowercase letter</li>
+        <li :class="{ passed: /[A-Z]/.test(user_password) }">✔ Uppercase letter</li>
+        <li :class="{ passed: /[0-9]/.test(user_password) }">✔ Number</li>
+        <li :class="{ passed: /[^A-Za-z0-9]/.test(user_password) }">✔ Symbol</li>
+        <li :class="{ passed: user_password.length >= 8 }">✔ At least 8 characters</li>
+      </ul>
+      <div v-if="validationErrors.password" class="field-error">{{ validationErrors.password }}</div> <!-- Error message for name field -->
 
       <label for="phone"><b>Phone</b></label>
       <input type="text" placeholder="Enter Phone Number" v-model="user_phone" required>
+      <div v-if="validationErrors.phone" class="field-error">{{ validationErrors.phone }}</div> <!-- Error message for name field -->
 
       <label for="role"><b>Role</b></label>
       <select v-model="user_role" required>
@@ -23,13 +34,14 @@
       </select>
 
       <!-- Cloudflare Turnstile container -->
-      <div 
-        id="cf-turnstile" 
-        class="turnstile-container" 
+      <div
+        id="cf-turnstile"
+        class="turnstile-container"
         ref="turnstileContainer"
         :style="{ display: showCaptcha ? 'flex' : 'none' }"
       ></div>
 
+      <!-- btn can be click but still need to verify -->
       <button type="submit" class="signin-form-submit">Sign Up</button>
     </div>
 
@@ -59,13 +71,105 @@ export default {
       user_role: 0,
       showCaptcha: true,
       turnstileWidget: null,
-      turnstileToken: ''
+      turnstileToken: '',
+      validationErrors: {
+        name: '',
+        email: '',
+        password: '',
+        phone: ''
+      }
     };
+  },
+  // Computed properties for password strength and form validation
+  computed: {
+    passwordStrengthClass() {
+      if (!this.user_password) return '';
+      return this.isPasswordStrong ? 'strong-password' : 'weak-password';
+    },
+    isPasswordStrong() {
+      const pwd = this.user_password;
+      const hasUpper = /[A-Z]/.test(pwd);
+      const hasLower = /[a-z]/.test(pwd);
+      const hasNumber = /[0-9]/.test(pwd);
+      const hasSymbol = /[^A-Za-z0-9]/.test(pwd);
+      const longEnough = pwd.length >= 8;
+      return hasUpper && hasLower && hasNumber && hasSymbol && longEnough;
+    },
+    isFormValid() {
+      return this.user_name.trim() !== '' &&
+             this.user_email.trim() !== '' &&
+             this.user_phone.trim() !== '' &&
+             this.isValidEmail(this.user_email) &&
+             this.isPasswordStrong;
+    }
+  },
+  watch: {
+    // Clear error messages when user starts typing
+    user_name() {
+      if (this.validationErrors.name) this.validationErrors.name = '';
+    },
+    user_email() {
+      if (this.validationErrors.email) this.validationErrors.email = '';
+    },
+    user_password() {
+      if (this.validationErrors.password) this.validationErrors.password = '';
+    },
+    user_phone() {
+      if (this.validationErrors.phone) this.validationErrors.phone = '';
+    }
   },
   mounted() {
     this.initializeTurnstile();
   },
   methods: {
+    // Validate individual field
+    validateField(fieldName) {
+      this.validationErrors[fieldName] = '';
+
+      switch (fieldName) {
+        case 'name':
+          if (!this.user_name.trim()) {
+            this.validationErrors.name = 'Name is required';
+          }
+          break;
+        case 'email':
+          if (!this.user_email.trim()) {
+            this.validationErrors.email = 'Email is required';
+          } else if (!this.isValidEmail(this.user_email)) {
+            this.validationErrors.email = 'Please enter a valid email address';
+          }
+          break;
+        case 'password':
+          if (!this.user_password) {
+            this.validationErrors.password = 'Password is required';
+          } else if (!this.isPasswordStrong) {
+            this.validationErrors.password = 'Password must meet all requirements above';
+          }
+          break;
+        case 'phone':
+          if (!this.user_phone.trim()) {
+            this.validationErrors.phone = 'Phone number is required';
+          }
+          break;
+      }
+    },
+
+    // Validate all fields
+    validateForm() {
+      this.validateField('name');
+      this.validateField('email');
+      this.validateField('password');
+      this.validateField('phone');
+
+      return this.isFormValid;
+    },
+
+    // Email format validation
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+
     // Initialize Turnstile on mount
     initializeTurnstile() {
       const script = document.createElement('script');
@@ -86,20 +190,26 @@ export default {
           }
         }
       };
-      
+
       script.onerror = () => {
         console.warn('Turnstile script failed to load');
       };
     },
 
-
-    // Form submission handler
+    // Form submission handler with validation
     async handleSignIn() {
-      // Get CAPTCHA token if available
+      // First validate the form
+      const isValid = this.validateForm();
+
+      // If validation fails, return directly without submitting
+      if (!isValid) {
+        return;
+      }
+
+      // Only proceed with submission if validation passes
       const captchaToken = this.turnstileToken || '';
 
       try {
-        // Prepare request data
         const requestData = {
           user_name: this.user_name,
           user_email: this.user_email,
@@ -108,23 +218,20 @@ export default {
           user_role: this.user_role
         };
 
-        // Add CAPTCHA token
         if (captchaToken) {
           requestData.captcha = captchaToken;
         }
 
-        // Submit registration
         const response = await api.post('/auth/register', requestData);
         this.toast.success('Registration successful');
         console.log(response.data);
 
-        // Redirect to login page
         this.$router.push('/login');
       } catch (error) {
         const errorMessage = error.response?.data?.message || "Unknown error";
         console.error(errorMessage);
         this.toast.error('Registration failed: ' + errorMessage);
-        // Reset Turnstile if available
+
         if (this.turnstileWidget && window.turnstile) {
           window.turnstile.reset(this.turnstileWidget);
           this.turnstileToken = '';
@@ -133,7 +240,6 @@ export default {
     }
   },
   beforeUnmount() {
-    // Clean up Turnstile widget
     if (this.turnstileWidget && window.turnstile) {
       window.turnstile.reset(this.turnstileWidget);
     }
@@ -147,5 +253,50 @@ export default {
   display: flex;
   justify-content: center;
   min-height: 65px;
+}
+
+/* password standard */
+.strong-password {
+  border: 2px solid green;
+  background-color: #f0fff4;
+}
+
+.weak-password {
+  border: 2px solid red;
+  background-color: #fff0f0;
+}
+
+.password-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.password-checklist li {
+  padding: 4px 8px;
+  border-radius: 5px;
+  background-color: #ffe6e6;
+  color: red;
+  white-space: nowrap;
+}
+
+.password-checklist li.passed {
+  background-color: #e6ffe6;
+  color: green;
+  font-weight: bold;
+}
+
+
+/* Field error message styles */
+.field-error {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 </style>

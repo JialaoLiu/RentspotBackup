@@ -15,7 +15,7 @@ const routes = [
   },
 
   {
-    path: '/webcomePage',
+    path: '/welcomePage',
     name: 'welcomePage',
     component: welcomePage
   },
