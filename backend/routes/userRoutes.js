@@ -15,13 +15,8 @@ router.put('/profile', userController.updateProfile);
 
 // Upload avatar - uses Cloudinary middleware with error handling
 router.post('/avatar', (req, res, next) => {
-  console.log('Avatar upload request received');
-  console.log('User:', req.user);
-  
   uploadAvatar(req, res, (err) => {
     if (err) {
-      console.error('Upload error:', err);
-      
       // Handle multer errors
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({

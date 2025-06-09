@@ -1,32 +1,32 @@
 <template>
-  <div class="agent-section">
-    <h2>Contact Agent</h2>
-    <div class="agent-details">
-      <div class="agent-photo">
+  <div class="owner-section">
+    <h2>Contact Property Owner</h2>
+    <div class="owner-details">
+      <div class="owner-photo">
         <img 
-          v-if="agentInfo.photo" 
-          :src="agentInfo.photo" 
-          :alt="agentInfo.name"
+          v-if="ownerInfo.avatar" 
+          :src="ownerInfo.avatar" 
+          :alt="ownerInfo.name"
           @error="handlePhotoError" 
         >
-        <div v-else class="agent-placeholder">👤</div>
+        <div v-else class="owner-placeholder">👤</div>
       </div>
-      <div class="agent-info">
-        <h3>{{ agentInfo.name }}</h3>
-        <p>Email: {{ agentInfo.email }}</p>
-        <p>Phone: {{ agentInfo.phone }}</p>
+      <div class="owner-info">
+        <h3>{{ ownerInfo.name }}</h3>
+        <p>Email: {{ ownerInfo.email }}</p>
+        <p v-if="ownerInfo.phone">Phone: {{ ownerInfo.phone }}</p>
       </div>
     </div>
     <div class="contact-buttons">
-      <a :href="`mailto:${agentInfo.email}`" class="email-button">Email Agent</a>
-      <a :href="`tel:${agentInfo.phone}`" class="call-button">Call Agent</a>
+      <a :href="`mailto:${ownerInfo.email}`" class="email-button">Email Owner</a>
+      <a v-if="ownerInfo.phone" :href="`tel:${ownerInfo.phone}`" class="call-button">Call Owner</a>
     </div>
   </div>
 </template>
 
 <script setup>
 defineProps({
-  agentInfo: {
+  ownerInfo: {
     type: Object,
     required: true
   }
@@ -39,7 +39,7 @@ function handlePhotoError(e) {
 </script>
 
 <style scoped>
-.agent-section {
+.owner-section {
   padding: 20px;
   background-color: #f9fafb;
   border-radius: 8px;
@@ -47,19 +47,19 @@ function handlePhotoError(e) {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.agent-section h2 {
+.owner-section h2 {
   margin-bottom: 16px;
   font-size: 1.3rem;
   color: #1f2937;
 }
 
-.agent-details {
+.owner-details {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
 }
 
-.agent-photo {
+.owner-photo {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -67,13 +67,13 @@ function handlePhotoError(e) {
   background-color: #e5e7eb;
 }
 
-.agent-photo img {
+.owner-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.agent-placeholder {
+.owner-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -83,12 +83,12 @@ function handlePhotoError(e) {
   color: #9ca3af;
 }
 
-.agent-info h3 {
+.owner-info h3 {
   margin-bottom: 8px;
   color: #1f2937;
 }
 
-.agent-info p {
+.owner-info p {
   margin-bottom: 6px;
   color: #4b5563;
 }
@@ -127,7 +127,7 @@ function handlePhotoError(e) {
 }
 
 @media (max-width: 768px) {
-  .agent-details {
+  .owner-details {
     flex-direction: row;
     align-items: center;
   }

@@ -41,6 +41,8 @@
             <li><router-link to="/signin">Register</router-link></li>
           </template>
           <template v-else>
+            <li v-if="!isLandlordOrAdmin"><router-link to="/my-bookings">My Bookings</router-link></li>
+            <li v-if="isLandlordOrAdmin"><router-link to="/my-property">My Property</router-link></li>
             <li><a href="#" @click.prevent="handleLogout">Logout</a></li>
             <li>
               <router-link to="/userprofile" class="profile-link">
@@ -76,6 +78,8 @@
           <li><router-link to="/signin">Register</router-link></li>
         </template>
         <template v-else>
+          <li v-if="!isLandlordOrAdmin"><router-link to="/my-bookings">My Bookings</router-link></li>
+          <li v-if="isLandlordOrAdmin"><router-link to="/my-property">My Property</router-link></li>
           <li><a href="#" @click.prevent="handleLogout">Logout</a></li>
           <li>
             <router-link to="/userprofile" class="profile-link">

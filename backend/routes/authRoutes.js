@@ -25,7 +25,6 @@ async function checkCaptcha(token) {
     
     return response.data.success;
   } catch (error) {
-    console.log('Captcha error:', error.message);
     return false;
   }
 }
@@ -113,7 +112,6 @@ router.post('/register', async (req, res) => {
         [user_name, user_email, hashedPassword, user_phone, user_role !== undefined ? user_role : 0, avatarUrl]
       );
     } catch (err) {
-      console.error('Insert error:', err.message);
       throw err;
     }
     
