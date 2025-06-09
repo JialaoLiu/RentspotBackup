@@ -96,13 +96,11 @@ router.post('/upload-multiple', authenticateToken, (req, res, next) => {
         
         // Insert each image into PropertyImage table
         const uploadedImages = [];
-        console.log(`Uploading ${req.files.length} images for property ${propertyId}`);
         
         for (let i = 0; i < req.files.length; i++) {
             const file = req.files[i];
             const imageUrl = file.path || file.secure_url;
             
-            console.log(`Processing image ${i + 1}: ${file.originalname}, URL: ${imageUrl}`);
             
             // Set first image as primary if no primary exists
             const [primaryExists] = await db.query(
@@ -116,7 +114,6 @@ router.post('/upload-multiple', authenticateToken, (req, res, next) => {
                 [propertyId, imageUrl, isPrimary, nextOrder + i]
             );
             
-            console.log(`Image saved to database with ID: ${result.insertId}`);
             
             uploadedImages.push({
                 id: result.insertId,
@@ -135,14 +132,12 @@ router.post('/upload-multiple', authenticateToken, (req, res, next) => {
         });
         
     } catch (error) {
-        console.error('Error uploading images:', error);
         handleDbError(res, error, 'uploading images');
     }
 });
 
 // Get all properties
 router.get('/', async (req, res) => {
-    console.log('Getting properties');
     try {
         // Execute query with LEFT JOIN to get primary image
         const [properties] = await db.query(`
@@ -276,6 +271,36 @@ router.delete('/:id/favorite', authenticateToken, async (req, res) => {
         
     } catch (error) {
         handleDbError(res, error, 'removing favorite');
+    }
+});
+
+// Get properties for logged-in landlord (MUST come before /:id route)
+router.get('/my', requireLandlord, async (req, res) => {
+    try {
+        const [properties] = await db.query(`
+            SELECT 
+                p.property_id AS id, p.property_owner_id AS owner_id, 
+                p.property_name AS title, p.property_price AS price, 
+                p.property_room AS bedrooms, p.property_bathroom AS bathrooms, 
+                p.property_garages AS garages, p.property_aircon AS aircon, 
+                p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
+                p.property_furnished AS furnished, p.property_type AS type, 
+                p.property_status AS status, p.property_latitude AS lat, 
+                p.property_longitude AS lng, 
+                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
+                COALESCE(pi.image_url, 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png') AS image
+            FROM Property p
+            LEFT JOIN PropertyImage pi ON p.property_id = pi.property_id AND pi.is_primary = 1
+            WHERE p.property_owner_id = ?
+            ORDER BY p.property_id DESC
+        `, [req.user.user_id]);
+        
+        res.json({
+            properties: properties,
+            total: properties.length
+        });
+    } catch (error) {
+        handleDbError(res, error, 'fetching user properties');
     }
 });
 
@@ -451,7 +476,6 @@ router.post('/', requireLandlord, async (req, res) => {
             ]
         );
         
-        console.log(`Property created with ID: ${result.insertId}`);
         
         res.status(201).json({
             message: 'Property created successfully',
@@ -531,36 +555,6 @@ router.get('/:id/images', async (req, res) => {
         });
     } catch (error) {
         handleDbError(res, error, 'fetching property images');
-    }
-});
-
-// Get properties for logged-in landlord
-router.get('/my', requireLandlord, async (req, res) => {
-    try {
-        const [properties] = await db.query(`
-            SELECT 
-                p.property_id AS id, p.property_owner_id AS owner_id, 
-                p.property_name AS title, p.property_price AS price, 
-                p.property_room AS bedrooms, p.property_bathroom AS bathrooms, 
-                p.property_garages AS garages, p.property_aircon AS aircon, 
-                p.property_balcony AS balcony, p.property_petsconsidered AS petsConsidered, 
-                p.property_furnished AS furnished, p.property_type AS type, 
-                p.property_status AS status, p.property_latitude AS lat, 
-                p.property_longitude AS lng, 
-                COALESCE(p.property_address, CONCAT('Adelaide SA ', p.property_id)) AS address,
-                COALESCE(pi.image_url, 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png') AS image
-            FROM Property p
-            LEFT JOIN PropertyImage pi ON p.property_id = pi.property_id AND pi.is_primary = 1
-            WHERE p.property_owner_id = ?
-            ORDER BY p.property_id DESC
-        `, [req.user.user_id]);
-        
-        res.json({
-            properties: properties,
-            total: properties.length
-        });
-    } catch (error) {
-        handleDbError(res, error, 'fetching user properties');
     }
 });
 

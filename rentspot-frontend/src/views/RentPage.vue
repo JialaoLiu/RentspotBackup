@@ -15,7 +15,7 @@
       v-else-if="property" 
       :property="property" 
       :isFavorite="isFavorite"
-      :agentInfo="agentInfo"
+      :ownerInfo="ownerInfo"
       @toggle-favorite="toggleFavorite"
     />
     
@@ -47,18 +47,31 @@ const property = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const isFavoriteState = ref(false)
-const agentInfo = ref({
-  name: 'Property Manager',
-  email: 'agent@rentspot.com.au',
-  phone: '(08) 1234 5678',
-  photo: null
-})
 
 // Auth check
 const isAuthenticated = ref(!!localStorage.getItem('token'))
 
 // Check if property is in favorites
 const isFavorite = computed(() => isFavoriteState.value)
+
+// Get owner information from property
+const ownerInfo = computed(() => {
+  if (!property.value) {
+    return {
+      name: 'Property Owner',
+      email: 'owner@example.com',
+      phone: '',
+      avatar: null
+    }
+  }
+  
+  return {
+    name: property.value.owner_name || 'Property Owner',
+    email: property.value.owner_email || 'owner@example.com',
+    phone: property.value.owner_phone || '',
+    avatar: property.value.owner_avatar || null
+  }
+})
 
 // Load property data
 onMounted(async () => {

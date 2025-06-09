@@ -30,7 +30,7 @@
       </div>
       
       <div class="property-right-column">
-        <PropertyAgent :agentInfo="agentInfo" />
+        <PropertyAgent :ownerInfo="ownerInfo" />
         <PropertyInspection :propertyId="property.id" :address="property.address" />
       </div>
     </div>
@@ -58,7 +58,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  agentInfo: {
+  ownerInfo: {
     type: Object,
     required: true
   }
