@@ -304,7 +304,7 @@ defineExpose({
 .drop-zone {
   width: 100%;
   min-height: 200px;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--border-primary);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -312,24 +312,24 @@ defineExpose({
   align-items: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: #fafafa;
+  background-color: var(--surface-secondary);
   padding: 20px;
 }
 
 .drop-zone:hover {
-  border-color: #999;
-  background-color: #f5f5f5;
+  border-color: var(--border-secondary);
+  background-color: var(--surface-elevated);
 }
 
 .drop-zone.active {
-  border-color: #007bff;
-  background-color: #e7f3ff;
+  border-color: var(--interactive-primary);
+  background-color: var(--surface-elevated);
 }
 
 .drop-zone.has-images {
   min-height: auto;
   border-style: solid;
-  border-color: #ddd;
+  border-color: var(--border-primary);
 }
 
 .drop-zone.is-uploading {
@@ -351,8 +351,8 @@ defineExpose({
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid #ddd;
-  background: white;
+  border: 2px solid var(--border-primary);
+  background: var(--surface-primary);
 }
 
 .preview-image {
@@ -366,8 +366,8 @@ defineExpose({
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(220, 38, 38, 0.9);
-  color: white;
+  background: var(--interactive-danger);
+  color: var(--surface-primary);
   border: none;
   border-radius: 50%;
   width: 24px;
@@ -380,15 +380,15 @@ defineExpose({
 }
 
 .remove-image-btn:hover {
-  background: rgba(220, 38, 38, 1);
+  background: var(--interactive-danger-hover);
 }
 
 .primary-badge {
   position: absolute;
   bottom: 5px;
   left: 5px;
-  background: rgba(59, 130, 246, 0.9);
-  color: white;
+  background: var(--interactive-primary);
+  color: var(--surface-primary);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
@@ -397,7 +397,7 @@ defineExpose({
 
 .add-more-btn {
   aspect-ratio: 1;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--border-primary);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -405,18 +405,18 @@ defineExpose({
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  background: #fafafa;
+  background: var(--surface-secondary);
 }
 
 .add-more-btn:hover {
-  border-color: #999;
-  background: #f5f5f5;
+  border-color: var(--border-secondary);
+  background: var(--surface-elevated);
 }
 
 .add-more-btn span {
   margin-top: 5px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 /* Upload Progress Styles */
@@ -441,13 +441,13 @@ defineExpose({
 
 .progress-circle-bg {
   fill: none;
-  stroke: #f0f0f0;
+  stroke: var(--border-primary);
   stroke-width: 3.8;
 }
 
 .progress-circle-fill {
   fill: none;
-  stroke: #007bff;
+  stroke: var(--interactive-primary);
   stroke-width: 3.8;
   stroke-linecap: round;
   transition: stroke-dasharray 0.2s ease;
@@ -460,7 +460,7 @@ defineExpose({
   transform: translate(-50%, -50%);
   font-weight: 600;
   font-size: 12px;
-  color: #007bff;
+  color: var(--interactive-primary);
 }
 
 /* Default Content Styles */
@@ -480,17 +480,17 @@ defineExpose({
 
 .primary-text {
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   font-size: 16px;
 }
 
 .secondary-text {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .info-text {
-  color: #888;
+  color: var(--text-tertiary);
   font-size: 12px;
   font-style: italic;
 }
@@ -499,8 +499,8 @@ defineExpose({
 .clear-all-button {
   margin-top: 15px;
   padding: 8px 16px;
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--interactive-danger);
+  color: var(--surface-primary);
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -509,24 +509,24 @@ defineExpose({
 }
 
 .clear-all-button:hover {
-  background-color: #dc2626;
+  background-color: var(--interactive-danger-hover);
 }
 
 .image-count-info {
   margin-top: 10px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
 }
 
 /* Error Message */
 .error-message {
-  color: #ef4444;
+  color: var(--interactive-danger);
   font-size: 14px;
   margin-top: 10px;
   text-align: center;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--interactive-danger);
   border-radius: 6px;
   padding: 10px;
 }

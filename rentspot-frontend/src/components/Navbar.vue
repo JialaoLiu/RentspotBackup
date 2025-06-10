@@ -116,6 +116,7 @@ const isMobileView = ref(false);
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
+  // console.log('Menu toggled:', isMenuOpen.value); // debug menu state
 };
 
 const checkMobileView = () => {
@@ -123,9 +124,11 @@ const checkMobileView = () => {
   if (!isMobileView.value) {
     isMenuOpen.value = false; // close menu when switching to desktop
   }
+  // console.log('Mobile view check:', isMobileView.value); // track responsive behavior
 };
 
 onMounted(() => {
+  // console.log('Navbar component mounted'); // track component lifecycle
   checkMobileView();
   window.addEventListener('resize', checkMobileView);
 });
@@ -146,16 +149,19 @@ watch(
 
 //=======================
 
-// Check login status
+// check login status and role
 const checkLoginStatus = () => {
-  const token = localStorage.getItem('token');
-  isLoggedIn.value = !!token; // If token exists, user is logged in
+  let token = localStorage.getItem('token');
+  isLoggedIn.value = !!token; // token exists = logged in
+  
+  // console.log('Checking login status:', isLoggedIn.value); // track auth state
+  // console.log('Token found:', token ? 'yes' : 'no'); // debug token existence
 
-  // Check user role
   if (isLoggedIn.value && token) {
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    isLandlordOrAdmin.value = userData.role >= 1; // Landlord (1) or Admin (2)
-    // Only fetch avatar if we have a valid token
+    let userData = JSON.parse(localStorage.getItem('user') || '{}');
+    // quick fix for role checking - sometimes role comes as string
+    isLandlordOrAdmin.value = userData.role >= 1 || userData.role === 'landlord' || userData.role === 'admin';
+    // console.log('User role level:', userData.role); // debug role permissions
     fetchUserAvatar();
   } else {
     userAvatar.value = null;
@@ -168,6 +174,7 @@ const fetchUserAvatar = async () => {
   try {
     const profile = await userService.getUserProfile();
     userAvatar.value = profile.avatarUrl;
+    // console.log('Avatar loaded successfully'); // track avatar loading
   } catch (error) {
     console.error('Error fetching user avatar:', error);
     // If we get a 401 or 400 error, the token might be invalid
@@ -234,7 +241,7 @@ onMounted(() => {
 .logo {
   flex: 1;
   font-weight: bold;
-  color: white;
+  color: var(--color-dark);
 }
 
 /* Desktop menu in center */
@@ -316,17 +323,18 @@ onMounted(() => {
 
 /* Management link styling */
 .management-link {
-  background: linear-gradient(45deg, #10B981, #059669);
+  background: var(--color-primary);
   border-radius: 6px;
   padding: 8px 12px;
   transition: var(--transition-fast);
   border: none;
+  color: white !important;
 }
 
 .management-link:hover {
-  background: linear-gradient(45deg, #059669, #047857);
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-md);
   color: white !important;
 }
 
@@ -356,8 +364,8 @@ onMounted(() => {
   display: block;
   width: 100%;
   height: 3px;
-  background-color: white;
-  transition: 0.3s;
+  background-color: var(--color-dark);
+  transition: var(--transition-normal);
 }
 
 .hamburger span.open:nth-child(1) {
@@ -403,7 +411,7 @@ onMounted(() => {
 
 .menu-mobile li a,
 .connect-mobile li a {
-  color: white;
+  color: var(--color-dark);
   text-decoration: none;
   font-weight: 500;
 }

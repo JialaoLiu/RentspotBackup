@@ -15,12 +15,10 @@
           <Icon name="bed" size="md" />
           {{ property.bedrooms }}
         </span>
-        <span class="feature-separator">•</span>
         <span class="feature-item">
           <Icon name="bathroom" size="md" />
           {{ property.bathrooms }}
         </span>
-        <span v-if="property.garage" class="feature-separator">•</span>
         <span v-if="property.garage" class="feature-item">
           <Icon name="car" size="md" />
           {{ property.garage }}
@@ -92,18 +90,18 @@ function getStatusClass(status) {
 
 <style scoped>
 .management-card {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  background-color: white;
-  transition: all 0.2s ease;
-  border: 1px solid #E5E7EB;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--surface-elevated);
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-primary);
 }
 
 .management-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  border-color: #374151;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-secondary);
 }
 
 .card-image-container {
@@ -158,14 +156,14 @@ function getStatusClass(status) {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 8px 0;
-  color: #1F2937;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .card-address {
-  color: #4B5563;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   margin: 0 0 8px 0;
   white-space: nowrap;
@@ -175,7 +173,7 @@ function getStatusClass(status) {
 
 .card-features {
   display: flex;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   flex-wrap: wrap;
   gap: 8px;
@@ -188,11 +186,6 @@ function getStatusClass(status) {
   gap: 4px;
 }
 
-.card-features .feature-separator {
-  margin: 0 4px;
-  margin-bottom: 12px;
-  gap: 6px;
-}
 
 .management-footer {
   display: flex;
@@ -203,13 +196,13 @@ function getStatusClass(status) {
 
 .card-price {
   font-weight: 700;
-  color: #4B5563;
+  color: var(--text-primary);
 }
 
 .per-week {
   font-size: 0.9rem;
   font-weight: 400;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .action-buttons {

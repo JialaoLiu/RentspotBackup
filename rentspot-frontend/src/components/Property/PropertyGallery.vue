@@ -111,7 +111,7 @@ function handleImageError(e) {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--surface-elevated);
   border: none;
   font-size: 1.2rem;
   display: flex;
@@ -149,7 +149,7 @@ function handleImageError(e) {
 
 .thumbnail.active {
   opacity: 1;
-  border: 2px solid #3b82f6;
+  border: 2px solid var(--interactive-primary);
 }
 
 .thumbnail img {

@@ -1,6 +1,9 @@
 /* Global Styles
 Please note: :root has a global impact. Do not modify it randomly. You can refer to and add comments.
+
 If you want to change global UI styles, talk with me first.
+
+After using styles, please add comments to tell which file uses them.
 */
 
 /*  Read css before coding frontend */
@@ -32,6 +35,23 @@ If you want to change global UI styles, talk with me first.
   --color-border: #e5e7eb;         /*  border color */
   --color-border-dark: #d1d5db;    /* more dark border */
 
+  /* Semantic Color Variables */
+  --text-primary: var(--color-dark);
+  --text-secondary: var(--color-medium);
+  --text-tertiary: var(--color-light);
+  
+  --surface-primary: var(--color-bg-primary);
+  --surface-secondary: var(--color-bg-secondary);
+  --surface-elevated: var(--color-bg-primary);
+  
+  --border-primary: var(--color-border);
+  --border-secondary: var(--color-border-dark);
+  
+  --interactive-primary: var(--color-primary);
+  --interactive-primary-hover: var(--color-primary-hover);
+  --interactive-danger: var(--color-danger);
+  --interactive-danger-hover: var(--color-danger-hover);
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -52,8 +72,8 @@ If you want to change global UI styles, talk with me first.
   --transition-normal: 0.3s ease;
 
   /* Default colors */
-  color: var(--color-dark);
-  background-color: var(--color-bg-primary);
+  color: var(--text-primary);
+  background-color: var(--surface-primary);
 }
 
 /* Dark Theme */
@@ -81,6 +101,9 @@ html[data-theme="dark"] {
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+  /* Semantic variables automatically adapt through base color changes */
+  --surface-elevated: var(--color-bg-secondary);
 }
 
 /* System preference detection */
@@ -109,24 +132,27 @@ html[data-theme="dark"] {
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+    /* Semantic variables automatically adapt through base color changes */
+    --surface-elevated: var(--color-bg-secondary);
   }
 }
 
 a {
   font-weight: 500;
-  color: var(--color-primary);
+  color: var(--interactive-primary);
   text-decoration: inherit;
 }
 a:hover {
-  color: var(--color-primary-hover);
+  color: var(--interactive-primary-hover);
 }
 
 body {
   margin: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: var(--color-bg-primary);
-  color: var(--color-dark);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
@@ -135,8 +161,8 @@ h1 {
   line-height: 1.1;
 }
 
-/* Generic button reset - specific styles use .btn classes */
-/* USED IN: All components with buttons */
+/* Generic button reset */
+/* All components with buttons */
 button {
   font-family: inherit;
   cursor: pointer;
@@ -146,8 +172,8 @@ button {
 
 #app {
   width: 100%;
-  background-color: var(--color-bg-primary);
-  color: var(--color-dark);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
   min-height: 100vh;
 }
 
@@ -157,39 +183,39 @@ button {
 
 /* Media queries for color scheme handled by CSS variables */
 
-/* Login-Signin Forms */
-/* USED IN: Login.vue, Signin.vue */
+/* Login and signin forms */
+/* Login.vue, Signin.vue */
 .login-form,
 .signin-form {
-  border: 3px solid var(--color-border);
+  border: 3px solid var(--border-primary);
   margin: 50px auto;
   padding: var(--space-lg);
   max-width: 600px;
   width: 90%;
   box-sizing: border-box;
-  background-color: var(--color-bg-primary);
+  background-color: var(--surface-elevated);
   border-radius: var(--radius-md);
 }
 
-/* Full-width inputs */
-/* USED IN: Login.vue, Signin.vue, UserProfile.vue, FilterPopup.vue */
+/* Full-width form inputs */
+/* Login.vue, Signin.vue, UserProfile.vue, FilterPopup.vue */
 input[type=text], input[type=password], input[type=email], input[type=date], input[type=file], input[type=number], select, textarea {
   width: 100%;
   padding: 12px 20px;
   margin: var(--space-sm) 0;
   display: inline-block;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-primary);
   box-sizing: border-box;
   border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: border-color var(--transition-fast);
-  background-color: var(--color-bg-primary);
-  color: var(--color-dark);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=date]:focus, input[type=number]:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: var(--interactive-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }
 
@@ -199,11 +225,11 @@ input[type=radio] {
   margin: 8px 0;
 }
 
-/* Login/Signin specific button styles - using unique class to avoid conflicts */
-/* USED IN: Login.vue, Signin.vue */
+/* Button in login and signin */
+/* Login.vue, Signin.vue */
 .login-form-submit,
 .signin-form-submit {
-  background-color: var(--color-primary);
+  background-color: var(--interactive-primary);
   color: white;
   padding: 14px 20px;
   margin: var(--space-sm) 0;
@@ -218,17 +244,17 @@ input[type=radio] {
 
 .login-form-submit:hover,
 .signin-form-submit:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--interactive-primary-hover);
   opacity: 1;
 }
 
-/* Hover opacity handled in specific button classes */
+/* Hover handled thing */
 
-/* USED IN: Login.vue, Signin.vue */
+/* Login.vue, Signin.vue */
 .cancelbtn {
   width: auto;
   padding: 10px 18px;
-  background-color: var(--color-danger);
+  background-color: var(--interactive-danger);
   color: white;
   border: none;
   border-radius: var(--radius-sm);
@@ -237,32 +263,32 @@ input[type=radio] {
 }
 
 .cancelbtn:hover {
-  background-color: var(--color-danger-hover);
+  background-color: var(--interactive-danger-hover);
   opacity: 1;
 }
 
-/* Center the avatar image inside this container */
-/* USED IN: Login.vue */
+/* Center the avatar */
+/* Login.vue */
 .imgcontainer {
   text-align: center;
   margin: 24px 0 12px 0;
 }
 
 /* Avatar image */
-/* USED IN: Login.vue */
+/* Login.vue */
 img.avatar {
   width: 40%;
   border-radius: 50%;
 }
 
 /* Add padding to containers */
-/* USED IN: Login.vue, Signin.vue, Multiple components */
+/* Login.vue, Signin.vue, Multiple components */
 .container {
   padding: 16px;
 }
 
-/* The "Forgot password" text */
-/* USED IN: Login.vue */
+/* Forgot password text */
+/* Login.vue */
 span.psw {
   float: right;
 }
@@ -308,8 +334,8 @@ span.SI {
   justify-content: center;
 }
 
-/* Button Styles */
-/* USED IN: SearchBar.vue, UserProfile.vue, PropertyDetailView.vue, test-style-refactor.html */
+/* Button styles */
+/* SearchBar.vue, UserProfile.vue, PropertyDetailView.vue */
 .btn {
   border: none;
   border-radius: var(--radius-sm);
@@ -455,8 +481,8 @@ span.SI {
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
 
-/* Modal Styles */
-/* USED IN: FilterPopup.vue (uses custom styles but could adopt these) */
+/* Modal styles */
+/* FilterPopup.vue */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -561,8 +587,8 @@ span.SI {
   border-color: var(--color-border-dark);
 }
 
-/* Toast Notification - Preserved with unique classes */
-/* USED IN: useNotification.js composable */
+/* Toast notifications */
+/* useNotification.js composable */
 .rentspot-toast {
   padding: 14px 18px;
   font-family: 'Segoe UI', sans-serif;
@@ -583,4 +609,516 @@ span.SI {
   text-align: left;
   max-width: 100%;
   color: var(--color-dark);
+}
+
+/* ============================================
+   ENHANCED UTILITY CLASSES FOR CODE REDUCTION
+   ============================================ */
+
+/* Modal overlay background */
+/* FilterPopup.vue, ConfirmDeleteModal.vue, ConfirmRestoreModal.vue, UserProfile.vue */
+.modal-overlay-base {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-overlay-high {
+  z-index: 2000;
+}
+
+.modal-container-base {
+  background-color: var(--surface-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-primary);
+  position: relative;
+}
+
+.modal-container-wide {
+  max-width: 800px;
+}
+
+.modal-container-narrow {
+  max-width: 400px;
+}
+
+.modal-header-base {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg) var(--space-lg) 0;
+  margin-bottom: var(--space-md);
+}
+
+.modal-body-base {
+  padding: 0 var(--space-lg);
+}
+
+.modal-footer-base {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+}
+
+.modal-close-base {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.modal-close-base:hover {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.modal-enter-animation {
+  animation: modalEnter 0.3s ease-out;
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Card base styling */
+/* PropertyCard.vue, BlogCard.vue, PropertyManagementCard.vue */
+.card-base {
+  background-color: var(--surface-elevated);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-primary);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.card-hoverable {
+  cursor: pointer;
+}
+
+.card-hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-secondary);
+}
+
+.card-padding {
+  padding: var(--space-lg);
+}
+
+.card-padding-sm {
+  padding: var(--space-md);
+}
+
+.card-image-base {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.card-image-sm {
+  height: 150px;
+}
+
+.card-image-lg {
+  height: 250px;
+}
+
+.card-image-hover {
+  transition: transform var(--transition-normal);
+}
+
+.card-image-hover:hover {
+  transform: scale(1.05);
+}
+
+.card-overlay {
+  position: relative;
+}
+
+.card-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+  pointer-events: none;
+}
+
+/* Button group layouts */
+/* PropertyManagementCard.vue, ConfirmDeleteModal.vue, SearchBar.vue, UserProfile.vue */
+.btn-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.btn-group-md {
+  gap: var(--space-md);
+}
+
+.btn-group-end {
+  justify-content: flex-end;
+}
+
+.btn-group-center {
+  justify-content: center;
+}
+
+.btn-group-between {
+  justify-content: space-between;
+}
+
+.btn-group-wrap {
+  flex-wrap: wrap;
+}
+
+.btn-group-vertical {
+  flex-direction: column;
+}
+
+.btn-sm-group {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Action buttons in groups */
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border-secondary);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.btn-outline:hover {
+  background-color: var(--surface-secondary);
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary);
+}
+
+.btn-outline-primary {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--interactive-primary);
+  color: white;
+}
+
+.btn-outline-danger {
+  border-color: var(--interactive-danger);
+  color: var(--interactive-danger);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--interactive-danger);
+  color: white;
+}
+
+/* Loading spinner and states */
+/* MyBookings.vue, UserProfile.vue, PropertyInspection.vue, LoadingSpinner.vue */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.loading-container-inline {
+  flex-direction: row;
+  padding: var(--space-md);
+}
+
+.loading-container-sm {
+  padding: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.spinner-base {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-primary);
+  border-left-color: var(--interactive-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-sm {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.spinner-lg {
+  width: 56px;
+  height: 56px;
+  border-width: 5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.loading-text-lg {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Property feature display */
+/* PropertyManagementCard.vue, PropertyFeatures.vue, PropertyDescription.vue */
+.feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.feature-list-inline {
+  gap: var(--space-sm);
+}
+
+.feature-list-vertical {
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+
+.feature-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Status badges and indicators */
+/* PropertyManagementCard.vue, MyBookings.vue */
+.badge-base {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badge-success {
+  background-color: #10B981;
+  color: white;
+}
+
+.badge-warning {
+  background-color: #F59E0B;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #EF4444;
+  color: white;
+}
+
+.badge-info {
+  background-color: var(--interactive-primary);
+  color: white;
+}
+
+.badge-secondary {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+}
+
+.badge-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.badge-overlay-right {
+  left: auto;
+  right: 10px;
+}
+
+/* Property preview in modals */
+/* ConfirmDeleteModal.vue, ConfirmRestoreModal.vue, UserProfile.vue */
+.property-preview {
+  display: flex;
+  background-color: var(--surface-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  border: 1px solid var(--border-primary);
+  gap: var(--space-md);
+  text-align: left;
+}
+
+.property-preview-image {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.property-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.property-preview-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.property-preview-details {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Gallery navigation arrows */
+/* PropertyGallery.vue, BlogCard.vue */
+.gallery-nav-base {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  z-index: 10;
+}
+
+.gallery-nav-base:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.gallery-nav-prev {
+  left: 10px;
+}
+
+.gallery-nav-next {
+  right: 10px;
+}
+
+/* Form row and section layouts */
+/* PropertyForm.vue, UserProfile.vue, FilterPopup.vue */
+.form-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-section {
+  margin-bottom: var(--space-xl);
+}
+
+.form-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-primary);
+  margin-top: var(--space-lg);
+}
+
+/* Content section containers */
+/* PropertyDescription.vue, PropertyFeatures.vue, PropertyLocation.vue, MyBookings.vue */
+.content-section {
+  background-color: var(--surface-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  border: 1px solid var(--border-primary);
+}
+
+.content-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.content-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
 }

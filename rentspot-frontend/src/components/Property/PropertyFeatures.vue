@@ -1,32 +1,32 @@
 <template>
   <div class="property-features">
     <div class="feature">
-      <Icon name="bed" size="lg" color="#6B7280" />
+      <Icon name="bed" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ bedrooms }}</span>
       <span class="feature-label">Bedrooms</span>
     </div>
     <div class="feature">
-      <Icon name="bathroom" size="lg" color="#6B7280" />
+      <Icon name="bathroom" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ bathrooms }}</span>
       <span class="feature-label">Bathrooms</span>
     </div>
     <div class="feature" v-if="garages !== undefined">
-      <Icon name="car" size="lg" color="#6B7280" />
+      <Icon name="car" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ garages }}</span>
       <span class="feature-label">Parking</span>
     </div>
     <div class="feature">
-      <Icon name="house" size="lg" color="#6B7280" />
+      <Icon name="house" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ propertyType }}</span>
       <span class="feature-label">Type</span>
     </div>
     <div class="feature" v-if="landSize">
-      <Icon name="ruler" size="lg" color="#6B7280" />
+      <Icon name="ruler" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ landSize }}</span>
       <span class="feature-label">Land Size</span>
     </div>
     <div class="feature" v-if="buildYear">
-      <Icon name="construction" size="lg" color="#6B7280" />
+      <Icon name="construction" size="lg" :color="'var(--text-secondary)'" />
       <span class="feature-value">{{ buildYear }}</span>
       <span class="feature-label">Built</span>
     </div>
@@ -67,9 +67,9 @@ defineProps({
   gap: 20px;
   margin-bottom: 30px;
   padding: 20px;
-  background-color: #f9fafb;
+  background-color: var(--surface-secondary);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .feature {
@@ -87,10 +87,11 @@ defineProps({
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 4px;
+  color: var(--text-primary);
 }
 
 .feature-label {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .property-amenities {
@@ -100,6 +101,7 @@ defineProps({
 .property-amenities h3 {
   font-size: 1.3rem;
   margin-bottom: 16px;
+  color: var(--text-primary);
 }
 
 .amenities-list {
@@ -113,6 +115,7 @@ defineProps({
 .amenity-item {
   display: flex;
   align-items: center;
+  color: var(--text-primary);
 }
 
 .amenity-item .icon {
