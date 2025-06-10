@@ -29,6 +29,6 @@ defineProps({
   flex-direction: column;
   gap: 16px;
   padding: 16px;
-  background: #f4f4f4;
+  background: var(--color-bg-secondary);
 }
 </style>

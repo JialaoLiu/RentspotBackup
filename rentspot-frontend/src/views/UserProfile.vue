@@ -26,6 +26,11 @@
                 <Icon name="heart" size="sm" />
                 Favorite History
             </button>
+            <!-- Admin Dashboard Link -->
+            <button v-if="profile.role === 2" type="button" @click="goToAdmin" class="admin-button">
+                <Icon name="admin_panel_settings" size="sm" />
+                Admin Dashboard
+            </button>
         </form>
 
         <!-- Modal for Popups -->
@@ -204,10 +209,16 @@ function closeModal() {
     }
 }
 
-// Handle avatar upload with resize
+/* 
+ * Handle avatar upload with resize
+ * - resizes image to max 400x400
+ * - creates preview for user
+ */
 async function handleAvatarUpload(event) {
-    const file = event.target.files[0];
+    let file = event.target.files[0];
     if (!file) return;
+    
+    // console.log('Selected file:', file.name, file.size); // debug info
 
     // Store the file for actual upload later
     avatarFile.value = file;
@@ -250,16 +261,21 @@ async function handleAvatarUpload(event) {
     reader.readAsDataURL(file);
 }
 
-// Update profile
-async function updateProfile() {
+// update profile - basic but works
+const updateProfile = async () => {
     if (loadingState.value !== 'idle') return;
+    
+    // console.log('Starting profile update...', profile.value); // keep for debugging
+    // debugger; // remove this before production
 
     loadingState.value = 'profile';
     try {
-        // If there's a new avatar file, upload it first
+        // avatar upload first if needed
         if (avatarFile.value) {
+            // console.log('Uploading avatar...'); // useful for debugging upload issues
             loadingState.value = 'avatar';
-            const uploadResult = await userService.uploadUserAvatar(avatarFile.value);
+            let uploadResult = await userService.uploadUserAvatar(avatarFile.value);
+            // console.log('Avatar upload result:', uploadResult); // keeping this for now
             profile.value.avatarUrl = uploadResult.avatarUrl;
             avatarFile.value = null; // Reset the file reference
         }
@@ -355,7 +371,9 @@ async function loadFavorites() {
     loadingState.value = 'favorites';
     try {
         favorites.value = await userService.getUserFavorites();
+        // console.log('Loaded favorites:', favorites.value.length); // helpful for debugging
     } catch (error) {
+        // console.error('Favorites loading failed:', error); // keep this for troubleshooting
         toast.error('Error loading favorites: ' + (error.response?.data?.message || error.message));
     } finally {
         loadingState.value = 'idle';
@@ -377,6 +395,11 @@ function formatDate(dateString) {
 function viewProperty(propertyId) {
     closeModal();
     router.push(`/rentpage/${propertyId}`);
+}
+
+// Navigate to admin dashboard
+function goToAdmin() {
+    router.push('/admin');
 }
 
 
@@ -418,8 +441,8 @@ onMounted(() => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid white;
-  background-color: #f0f0f0;
+  border: 3px solid var(--color-bg-primary);
+  background-color: var(--color-bg-secondary);
   object-fit: cover;
 }
 
@@ -441,7 +464,7 @@ onMounted(() => {
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
 }
 
 .avatar-uploading {
@@ -462,7 +485,7 @@ onMounted(() => {
   font-size: 24px;
   font-weight: bold;
   margin: 10px 0 0; /* Add spacing above username */
-  color: #333;
+  color: var(--color-dark);
 }
 
 /* Button container */
@@ -480,15 +503,15 @@ onMounted(() => {
   width: 100%; /* Full width on small screens */
   max-width: 300px; /* Limit width on larger screens */
   padding: 12px 24px;
-  background-color: #007BFF;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: var(--shadow-md);
+  transition: background-color var(--transition-normal), transform var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -499,6 +522,15 @@ onMounted(() => {
 .container-user-btn button:hover {
   background-color: #0056b3;
   transform: translateY(-1px);
+}
+
+/* Admin button specific styling */
+.admin-button {
+  background-color: #c2185b !important;
+}
+
+.admin-button:hover {
+  background-color: #a91648 !important;
 }
 
 

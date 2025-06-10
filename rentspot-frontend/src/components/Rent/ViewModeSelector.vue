@@ -40,23 +40,23 @@ defineEmits(['update:mode'])
 
 .view-selector button {
   padding: 8px 16px;
-  background-color: #e0e7ff;
+  background-color: var(--color-bg-secondary);
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 500;
-  color: #4b5563;
-  transition: all 0.2s ease;
+  color: var(--color-medium);
+  transition: all var(--transition-fast);
 }
 
 .view-selector button:hover {
-  background-color: #d1d5fb;
-  border-color: #6366f1;
+  background-color: var(--color-border);
+  border-color: var(--color-primary);
 }
 
 .view-selector button.active {
-  background-color: #374151;
+  background-color: var(--color-primary);
   color: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
 }
 </style>

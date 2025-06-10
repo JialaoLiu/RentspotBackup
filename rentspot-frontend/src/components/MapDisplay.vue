@@ -103,9 +103,9 @@ function addPropertyMarkers() {
       // Create custom marker
       const markerIcon = {
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor: isVisited ? '#9CA3AF' : '#EF4444', // Gray for visited, red for unvisited
+        fillColor: isVisited ? '#6B7280' : '#3B82F6', // Gray for visited, blue for unvisited
         fillOpacity: 1,
-        strokeWeight: isVisited ? 1 : 0,
+        strokeWeight: 2,
         strokeColor: '#FFFFFF',
         scale: 8
       }
@@ -202,6 +202,7 @@ watch(() => props.visitedProperties, () => {
     addPropertyMarkers()
   }
 }, { deep: true })
+
 
 // Expose methods to parent component
 defineExpose({

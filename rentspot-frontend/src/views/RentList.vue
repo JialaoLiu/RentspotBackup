@@ -54,40 +54,48 @@ import MapPropertyView from '../components/Rent/MapPropertyView.vue'
 import LoadingState from '../components/Rent/LoadingState.vue'
 import NoProperties from '../components/Rent/NoProperties.vue'
 
-const router = useRouter()
-const route = useRoute()
-const toast = useNotification()
-const viewMode = ref('grid') // Default
-const properties = ref([])
-const loading = ref(true)
-const favorites = ref([]) // Favorites
-const visitedProperties = ref([]) // Visited
-const isAuthenticated = ref(!!localStorage.getItem('token'))
+const router = useRouter();
+const route = useRoute();
+const toast = useNotification();
+let viewMode = ref('grid'); // Default view mode
+const properties = ref([]);
+const loading = ref(true);
+let favorites = ref([]); // user favorites
+let visitedProperties = ref([]); // visited property tracking
+const isAuthenticated = ref(!!localStorage.getItem('token'));
 
-// Toggle favorite
+/*
+ * Toggle favorite status for property
+ * handles authentication check and API calls
+ */
 async function toggleFavorite(propertyId) {
+  // console.log('Toggling favorite for property:', propertyId); // useful for debugging
+  
   if (!isAuthenticated.value) {
-    // Redirect to login
-    router.push('/login?redirect=' + encodeURIComponent(route.value.fullPath))
-    return
+    // redirect to login with current page as return url
+    router.push("/login?redirect=" + encodeURIComponent(route.value.fullPath));
+    return;
   }
   
   try {
-    const index = favorites.value.indexOf(propertyId)
+    let index = favorites.value.indexOf(propertyId);
     if (index === -1) {
-      // Add to favorites
-      await addFavorite(propertyId)
-      favorites.value.push(propertyId)
-      toast.success('Added to favorites')
+      // add to favorites
+      await addFavorite(propertyId);
+      favorites.value.push(propertyId);
+      toast.success('Added to favorites');
+      // console.log('Property added to favorites'); // track success
     } else {
-      // Remove from favorites
-      await removeFavorite(propertyId)
-      favorites.value.splice(index, 1)
-      toast.success('Removed from favorites')
+      // remove from favorites
+      await removeFavorite(propertyId);
+      favorites.value.splice(index, 1);
+      toast.success('Removed from favorites');
+      // console.log('Property removed from favorites'); // track success
     }
   } catch (error) {
-    console.error('Failed to update favorites:', error)
-    toast.error('Failed to update favorites. Please try again.')
+    console.error('Failed to update favorites:', error);
+    toast.error('Failed to update favorites. Please try again.');
+    // TODO: need to implement retry mechanism for failed favorite operations!
   }
 }
 
@@ -106,18 +114,24 @@ function markPropertyAsVisited(propertyId) {
   }
 }
 
-// Init
+// initialization - load data
 onMounted(async () => {
+  // console.log('RentList component mounted'); // track component lifecycle
+  // console.log('Auth status:', isAuthenticated.value); // debug auth issues
+  
   try {
     // Load favorites from backend if authenticated
     if (isAuthenticated.value) {
       try {
-        const userFavorites = await getUserFavorites()
+        const userFavorites = await getUserFavorites();
         // Extract property IDs from the favorites array
-        favorites.value = userFavorites.map(fav => fav.id)
+        favorites.value = userFavorites.map(fav => fav.id);
+        // console.log('Loaded favorites:', favorites.value.length); // track favorites count
+        // console.log('Favorites data:', userFavorites); // keeping this for debugging
       } catch (error) {
-        console.error('Failed to load favorites:', error)
+        console.error('Failed to load favorites:', error);
         // Don't show error, just use empty array
+        // FIXME: should we show a warning to user about favorites not loading?
       }
     }
     
@@ -133,9 +147,9 @@ onMounted(async () => {
     }
     
     // Fetch
-    console.log("Getting properties...")
+    console.log("Getting properties...") // keep this for now, useful for debugging
     const fetchedData = await fetchProperties()
-    console.log("Properties:", fetchedData)
+    console.log("Properties:", fetchedData) // keep this too
     
     // Process
     if (fetchedData && fetchedData.length > 0) {
@@ -213,6 +227,6 @@ watch(viewMode, (newMode) => {
   right: 0;
   bottom: 0;
   z-index: 10; /* Lower than navbar z-index */
-  background-color: white;
+  background-color: var(--surface-primary);
 }
 </style>

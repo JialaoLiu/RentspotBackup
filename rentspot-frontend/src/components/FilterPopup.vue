@@ -376,9 +376,9 @@
   }
 
   .filter-popup {
-    background-color: white;
+    background-color: var(--surface-primary);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
     width: 90%;
     max-width: 500px;
     max-height: 80vh;
@@ -391,10 +391,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-primary);
     padding: 1rem;
     position: relative;
-    background-color: white;
+    background-color: var(--surface-primary);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -411,7 +411,7 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--text-secondary);
     position: absolute;
     right: 1rem;
     top: 1rem;
@@ -425,7 +425,7 @@
   .filter-section {
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-primary);
   }
 
   .filter-section:last-child {
@@ -436,7 +436,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: #111827;
+    color: var(--text-primary);
   }
 
   .filter-option {
@@ -463,17 +463,17 @@
 
   .price-field label {
     font-weight: 500;
-    color: #4b5563;
+    color: var(--text-secondary);
   }
 
   .custom-select {
     position: relative;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-secondary);
     border-radius: 0.375rem;
     padding: 0.5rem 1rem;
     cursor: pointer;
     user-select: none;
-    background-color: white;
+    background-color: var(--surface-primary);
   }
 
   .selected-option {
@@ -486,7 +486,7 @@
     top: 50%;
     transform: translateY(-50%);
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-secondary);
   }
 
   .dropdown-menu {
@@ -496,8 +496,8 @@
     width: 100%;
     max-height: 300px;
     overflow-y: auto;
-    background-color: white;
-    border: 1px solid #d1d5db;
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-secondary);
     border-radius: 0.375rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 10;
@@ -509,7 +509,7 @@
   }
 
   .dropdown-item:hover {
-    background-color: #f3f4f6;
+    background-color: var(--surface-secondary);
   }
 
   .property-requirements {
@@ -527,12 +527,12 @@
   .features-search {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-secondary);
     border-radius: 0.375rem;
   }
 
   .features-hint {
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.875rem;
     margin: 0;
   }
@@ -542,8 +542,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-top: 1px solid #e5e7eb;
-    background-color: white;
+    border-top: 1px solid var(--border-primary);
+    background-color: var(--surface-primary);
     position: sticky;
     bottom: 0;
     z-index: 10;
@@ -552,14 +552,14 @@
   .clear-button {
     background: none;
     border: none;
-    color: #6b7280;
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 1rem;
   }
 
   .search-button {
-    background-color: #d32f2f;
-    color: white;
+    background-color: var(--interactive-primary);
+    color: var(--surface-primary);
     border: none;
     border-radius: 0.375rem;
     padding: 0.75rem 2rem;

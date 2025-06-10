@@ -235,32 +235,39 @@ const form = ref({
 
 // Watch for property changes (edit mode)
 watch(() => props.property, (newProperty) => {
+  console.log('Property watcher triggered with:', newProperty); // debug watcher
   if (newProperty && props.mode === 'edit') {
     populateForm(newProperty)
   }
 }, { immediate: true })
 
-// Initialize form and map
+// form and map initialization
 onMounted(() => {
+  console.log('PropertyForm mounted in mode:', props.mode, 'with property:', props.property); // track form usage
+  
   if (props.mode === 'edit' && props.property) {
-    populateForm(props.property)
+    populateForm(props.property);
   } else {
-    // Set default coordinates for new properties
-    form.value.lat = -34.9285
-    form.value.lng = 138.6007
-    // Get initial address for default coordinates
-    updateAddressFromCoordinates(-34.9285, 138.6007)
+    // default coordinates for new properties (Adelaide CBD)
+    form.value.lat = -34.9285;
+    form.value.lng = 138.6007;
+    // get initial address for default coordinates
+    updateAddressFromCoordinates(-34.9285, 138.6007);
   }
   
   // Initialize map automatically
+  // FIXME: this timeout is hacky but... DOM timing issues are annoying...
   setTimeout(() => {
-    initMap()
-  }, 100)
-})
+    initMap();
+  }, 100);
+});
 
-// Methods
+// populate form with property data - this function is getting long but works for now
 function populateForm(property) {
-  // set form values
+  // form population logic - should be refactored into smaller functions
+  
+  console.log('Populating form with property:', property); // debug property data
+  console.log('Property coordinates:', property.lat, property.lng); // debug coordinates
   
   form.value = {
     title: property.title || '',
@@ -273,32 +280,37 @@ function populateForm(property) {
     balcony: Boolean(property.balcony),
     petsConsidered: Boolean(property.petsConsidered),
     furnished: property.furnished || 1,
-    lat: property.lat || -34.9285,
-    lng: property.lng || 138.6007,
+    lat: parseFloat(property.lat) || -34.9285,  // default to Adelaide if no coords
+    lng: parseFloat(property.lng) || 138.6007,
     address: property.address || '',
     images: (property.images || []).map(url => ({ url }))
-  }
+  };
   
-  // Set form values
+  console.log('Form coordinates after populate:', form.value.lat, form.value.lng); // debug form data
+  // NOTE: make sure to update this when API changes
 }
 
-async function handleFilesSelected(files) {
-  if (!files || files.length === 0) return
+// handle file selection for property images
+const handleFilesSelected = async (files) => {
+  if (!files || files.length === 0) return;
   
-  // For edit mode with existing property, upload immediately
+  // console.log('Files selected for upload:', files.length); // track file selection
+  
+  // edit mode - upload immediately
   if (props.mode === 'edit' && props.property?.id) {
-    await uploadImagesForProperty(files, props.property.id)
+    await uploadImagesForProperty(files, props.property.id);
   } else {
-    // For add mode, just store files for later upload
-    pendingImageFiles.value = files
+    // add mode - store files for later upload
+    pendingImageFiles.value = files;
     form.value.images = files.map(file => ({ 
       url: URL.createObjectURL(file), 
       isPending: true,
       file: file
-    }))
-    toast.info(`${files.length} image(s) selected. Will upload after property creation.`)
+    }));
+    toast.info(`${files.length} image(s) selected. Will upload after property creation.`);
+    // TODO: need to show preview thumbnails of selected images!
   }
-}
+};
 
 async function uploadImagesForProperty(files, propertyId) {
   imageUploading.value = true
@@ -353,11 +365,15 @@ function initMap() {
     return
   }
   
+  console.log('Initializing map with form coordinates:', form.value.lat, form.value.lng); // debug map init
+  
   // Initialize map with current coordinates or default Adelaide location
   const initialPosition = {
     lat: (typeof form.value.lat === 'number' && !isNaN(form.value.lat)) ? form.value.lat : -34.9285,
     lng: (typeof form.value.lng === 'number' && !isNaN(form.value.lng)) ? form.value.lng : 138.6007
-  }
+  };
+  
+  console.log('Map initial position:', initialPosition); // debug initial position
   
   map = new google.maps.Map(mapContainer.value, {
     center: initialPosition,
@@ -539,13 +555,13 @@ async function handleSubmit() {
 }
 
 .property-form-container {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 12px;
   max-width: 800px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .form-header {
@@ -553,14 +569,14 @@ async function handleSubmit() {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #E5E7EB;
-  background-color: #F9FAFB;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-secondary);
   border-radius: 12px 12px 0 0;
 }
 
 .form-header h2 {
   margin: 0;
-  color: #1F2937;
+  color: var(--color-dark);
   font-weight: 600;
 }
 
@@ -569,19 +585,19 @@ async function handleSubmit() {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #6B7280;
+  color: var(--color-medium);
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .modal-close:hover {
-  background-color: #F3F4F6;
-  color: #374151;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-dark);
 }
 
 .property-form {
@@ -594,10 +610,10 @@ async function handleSubmit() {
 
 .form-section h3 {
   margin: 0 0 16px 0;
-  color: #374151;
+  color: var(--color-dark);
   font-weight: 600;
   font-size: 18px;
-  border-bottom: 2px solid #E5E7EB;
+  border-bottom: 2px solid var(--color-border);
   padding-bottom: 8px;
 }
 
@@ -608,7 +624,7 @@ async function handleSubmit() {
 .form-group label {
   display: block;
   margin-bottom: 6px;
-  color: #374151;
+  color: var(--color-dark);
   font-weight: 500;
 }
 
@@ -616,16 +632,18 @@ async function handleSubmit() {
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #D1D5DB;
+  border: 1px solid var(--color-border-dark);
   border-radius: 6px;
   font-size: 14px;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-fast);
+  background-color: var(--color-bg-primary);
+  color: var(--color-dark);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3B82F6;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -647,8 +665,8 @@ async function handleSubmit() {
 }
 
 .form-hint {
-  background-color: #F0F9FF;
-  border: 1px solid #BAE6FD;
+  background-color: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 12px;
   margin-top: 8px;
@@ -656,12 +674,12 @@ async function handleSubmit() {
 
 .form-hint p {
   margin: 0;
-  color: #0369A1;
+  color: var(--color-primary);
   font-size: 14px;
 }
 
 .form-hint a {
-  color: #2563EB;
+  color: var(--color-primary-hover);
   text-decoration: none;
 }
 
@@ -678,24 +696,24 @@ async function handleSubmit() {
   max-width: 200px;
   max-height: 150px;
   border-radius: 6px;
-  border: 1px solid #D1D5DB;
+  border: 1px solid var(--color-border-dark);
 }
 
 .remove-image-btn {
   display: block;
   margin: 8px auto 0;
-  background-color: #EF4444;
+  background-color: var(--color-danger);
   color: white;
   border: none;
   border-radius: 4px;
   padding: 6px 12px;
   font-size: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .remove-image-btn:hover {
-  background-color: #DC2626;
+  background-color: var(--color-danger-hover);
 }
 
 .form-actions {
@@ -703,7 +721,7 @@ async function handleSubmit() {
   gap: 12px;
   justify-content: flex-end;
   padding-top: 24px;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid var(--color-border);
   margin-top: 32px;
 }
 
@@ -718,27 +736,27 @@ async function handleSubmit() {
 }
 
 .btn-primary {
-  background-color: #3B82F6;
+  background-color: var(--color-primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #2563EB;
+  background-color: var(--color-primary-hover);
 }
 
 .btn-primary:disabled {
-  background-color: #9CA3AF;
+  background-color: var(--color-light);
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background-color: #F3F4F6;
-  color: #374151;
-  border: 1px solid #D1D5DB;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-dark);
+  border: 1px solid var(--color-border-dark);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #E5E7EB;
+  background-color: var(--color-border);
 }
 
 /* Responsive design */
@@ -768,19 +786,19 @@ async function handleSubmit() {
 .image-urls-info {
   margin-top: 8px;
   padding: 8px;
-  background-color: #f3f4f6;
+  background-color: var(--color-bg-secondary);
   border-radius: 4px;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-medium);
   text-align: center;
 }
 
 /* Map container styles */
 .map-container {
-  border: 1px solid #D1D5DB;
+  border: 1px solid var(--color-border-dark);
   border-radius: 8px;
   overflow: hidden;
-  background-color: #F9FAFB;
+  background-color: var(--color-bg-secondary);
 }
 
 .map-wrapper {
@@ -791,20 +809,20 @@ async function handleSubmit() {
 
 .map-instructions {
   padding: 12px;
-  background-color: #EBF8FF;
-  border-bottom: 1px solid #BAE6FD;
+  background-color: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border);
   text-align: center;
 }
 
 .map-instructions p {
   margin: 0;
-  color: #0369A1;
+  color: var(--color-primary);
   font-size: 14px;
   font-weight: 500;
 }
 
 .location-warning {
-  color: #DC2626 !important;
+  color: var(--color-danger) !important;
   font-weight: 600 !important;
   margin-top: 4px !important;
 }
@@ -812,7 +830,7 @@ async function handleSubmit() {
 .map-display {
   width: 100%;
   height: 100%;
-  background-color: #E5E7EB;
+  background-color: var(--color-border);
 }
 
 /* Center marker styles */
@@ -828,8 +846,8 @@ async function handleSubmit() {
 .marker-pin {
   width: 20px;
   height: 20px;
-  background-color: #3B82F6;
-  border: 3px solid #FFFFFF;
+  background-color: var(--color-primary);
+  border: 3px solid var(--color-bg-primary);
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -843,7 +861,7 @@ async function handleSubmit() {
   transform: translate(-50%, -50%);
   width: 8px;
   height: 8px;
-  background-color: #1E40AF;
+  background-color: var(--color-primary-hover);
   border-radius: 50%;
 }
 
@@ -858,14 +876,14 @@ async function handleSubmit() {
 .detected-address {
   margin-bottom: 16px;
   padding: 12px;
-  background-color: #F0F9FF;
-  border: 1px solid #BAE6FD;
+  background-color: var(--color-primary-light);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
 }
 
 .detected-address p {
   margin: 0;
-  color: #0369A1;
+  color: var(--color-primary);
   font-size: 14px;
 }
 </style>

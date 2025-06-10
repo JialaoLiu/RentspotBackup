@@ -158,16 +158,16 @@ function handleBoundsChanged(bounds) {
   top: 0;
   left: 0;
   right: 0;
-  background-color: white;
+  background-color: var(--surface-elevated);
   padding: 10px 16px;
   z-index: 10;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border-primary);
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
   gap: 12px;
   height: 60px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .map-search-area {
@@ -177,14 +177,16 @@ function handleBoundsChanged(bounds) {
 .area-search {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #D1D5DB;
-  border-radius: 4px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 .property-counter {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-secondary);
   white-space: nowrap;
   margin-left: auto;
 }
@@ -197,8 +199,8 @@ function handleBoundsChanged(bounds) {
 
 .filter-button, .list-view-button {
   padding: 8px 12px;
-  background-color: white;
-  border: 1px solid #D1D5DB;
+  background-color: var(--surface-primary);
+  border: 1px solid var(--border-secondary);
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
@@ -207,11 +209,11 @@ function handleBoundsChanged(bounds) {
   align-items: center;
   gap: 5px;
   height: 36px;
-  color: #616771;
+  color: var(--text-secondary);
 }
 
 .filter-button:hover, .list-view-button:hover {
-  background-color: #F3F4F6;
+  background-color: var(--surface-secondary);
 }
 
 .update-map-toggle {
@@ -220,6 +222,7 @@ function handleBoundsChanged(bounds) {
   gap: 8px;
   white-space: nowrap;
   font-size: 14px;
+  color: var(--text-primary);
 }
 
 .update-map-toggle input {
@@ -241,11 +244,12 @@ function handleBoundsChanged(bounds) {
   right: 50px;
   transform: translateY(-50%);
   width: 350px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  background-color: var(--surface-elevated);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   z-index: 20;
+  border: 1px solid var(--border-primary);
 }
 
 .popup-carousel {
@@ -272,8 +276,8 @@ function handleBoundsChanged(bounds) {
 }
 
 .carousel-prev, .carousel-next {
-  background-color: rgba(255, 255, 255, 0.7);
-  border: none;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-primary);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -282,6 +286,7 @@ function handleBoundsChanged(bounds) {
   justify-content: center;
   cursor: pointer;
   font-size: 16px;
+  opacity: 0.9;
 }
 
 .popup-content {
@@ -291,7 +296,7 @@ function handleBoundsChanged(bounds) {
 .popup-type {
   font-size: 12px;
   font-weight: 600;
-  color: #6B7280;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-bottom: 5px;
 }
@@ -299,13 +304,13 @@ function handleBoundsChanged(bounds) {
 .popup-price {
   font-size: 24px;
   font-weight: 700;
-  color: #4B5563;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .popup-address {
   font-size: 15px;
-  color: #4B5563;
+  color: var(--text-secondary);
   margin-bottom: 12px;
 }
 
@@ -313,7 +318,7 @@ function handleBoundsChanged(bounds) {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .popup-features .feature {
@@ -329,23 +334,23 @@ function handleBoundsChanged(bounds) {
 .feature-value {
   font-size: 16px;
   font-weight: 500;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .view-details-btn {
   width: 100%;
   padding: 8px 16px;
-  background-color: #374151;
+  background-color: var(--interactive-primary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .view-details-btn:hover {
-  background-color: #1F2937;
+  background-color: var(--interactive-primary-hover);
 }
 
 @media (max-width: 768px) {

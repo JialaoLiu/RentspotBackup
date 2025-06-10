@@ -41,16 +41,16 @@ function handlePhotoError(e) {
 <style scoped>
 .owner-section {
   padding: 20px;
-  background-color: #f9fafb;
+  background-color: var(--surface-secondary);
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .owner-section h2 {
   margin-bottom: 16px;
   font-size: 1.3rem;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .owner-details {
@@ -64,7 +64,7 @@ function handlePhotoError(e) {
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
-  background-color: #e5e7eb;
+  background-color: var(--surface-elevated);
 }
 
 .owner-photo img {
@@ -80,17 +80,17 @@ function handlePhotoError(e) {
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .owner-info h3 {
   margin-bottom: 8px;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .owner-info p {
   margin-bottom: 6px;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .contact-buttons {
@@ -109,21 +109,22 @@ function handlePhotoError(e) {
 }
 
 .email-button {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background-color: var(--surface-elevated);
+  color: var(--text-primary);
 }
 
 .email-button:hover {
-  background-color: #e5e7eb;
+  background-color: var(--interactive-primary);
+  color: white;
 }
 
 .call-button {
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: var(--interactive-primary);
+  color: white;
 }
 
 .call-button:hover {
-  background-color: #bae6fd;
+  background-color: var(--interactive-primary-hover);
 }
 
 @media (max-width: 768px) {

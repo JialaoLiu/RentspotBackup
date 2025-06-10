@@ -1,5 +1,8 @@
 const db = require('../config/db');
 
+// Booking model handles inspection scheduling and availability
+// Complex queries needed to join user, property, and booking data for comprehensive views
+
 const Booking = {
   /**
    * Get all bookings for a user
@@ -7,6 +10,13 @@ const Booking = {
    * @returns {Promise<Array>} Array of bookings
    */
   getByUserId: async (userId) => {
+    // const query = `
+    //   SELECT b.*, p.property_name as title, p.property_address as address
+    //   FROM Booking b
+    //   JOIN Property p ON b.booking_property_id = p.property_id
+    //   WHERE b.booking_user_id = ?
+    // `;
+    
     const query = `
       SELECT 
         b.*,
