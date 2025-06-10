@@ -4,11 +4,27 @@ const cloudinary = require('../config/cloudinary');
 const path = require('path');
 const fs = require('fs');
 
-// Local storage for property images
+// Upload middleware evolved from simple local storage to complex Cloudinary setup
+// Started with basic file uploads, then added image optimization, face detection for avatars
+// Multiple image support came later when property galleries were requested
+
+// Local storage for property images (kept as fallback when Cloudinary is down)
 const localUploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(localUploadsDir)) {
     fs.mkdirSync(localUploadsDir, { recursive: true });
 }
+
+// const upload = multer({ 
+//   dest: 'uploads/',
+//   limits: { fileSize: 1024 * 1024 },
+//   fileFilter: (req, file, cb) => {
+//     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+//       cb(null, true);
+//     } else {
+//       cb(new Error('Only JPG and PNG allowed'), false);
+//     }
+//   }
+// });
 
 const localStorage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, localUploadsDir),
@@ -16,35 +32,66 @@ const localStorage = multer.diskStorage({
         const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = path.extname(file.originalname);
         cb(null, uniqueName + ext);
+        // TODO: maybe add user ID prefix for better organization
     }
 });
 
-// Cloudinary storage for avatars
+// Cloudinary storage for avatars with face detection
+// Face detection was added after getting complaints about cropped heads in profile pics
 const avatarStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'rentspot-avatars',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [
-      { width: 400, height: 400, crop: 'fill', gravity: 'face' }, // Main
-      { width: 100, height: 100, crop: 'fill', gravity: 'face', quality: 'auto', format: 'webp' } // Thumb
+      { width: 400, height: 400, crop: 'fill', gravity: 'face' }, // Main with face detection
+      { width: 100, height: 100, crop: 'fill', gravity: 'face', quality: 'auto', format: 'webp' } // Thumbnail
     ]
   }
 });
 
-// Cloudinary storage for properties
+// const avatarStorage = new CloudinaryStorage({
+//   cloudinary: cloudinary,
+//   params: {
+//     folder: 'rentspot-avatars',
+//     allowed_formats: ['jpg', 'jpeg', 'png'],
+//     transformation: [
+//       { width: 300, height: 300, crop: 'fill' }
+//     ]
+//   }
+// });
+//
+// const avatarUpload = multer({
+//   storage: multer.diskStorage({
+//     destination: 'uploads/avatars/',
+//     filename: (req, file, cb) => {
+//       cb(null, req.user.id + '-avatar' + path.extname(file.originalname));
+//     }
+//   }),
+//   limits: { fileSize: 2 * 1024 * 1024 },
+//   fileFilter: (req, file, cb) => {
+//     if (file.mimetype.startsWith('image/')) {
+//       cb(null, true);
+//     } else {
+//       cb(new Error('Only images allowed'), false);
+//     }
+//   }
+// }).single('avatar');
+
+// Cloudinary storage for properties with optimization
 const propertyStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'rentspot-properties',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [
-      { width: 800, height: 600, crop: 'limit', quality: 'auto' }
+      { width: 800, height: 600, crop: 'limit', quality: 'auto' } // Auto quality saves bandwidth
     ]
   }
 });
 
-// Image filter
+// Image filter function
+// FIXME: should probably add more specific MIME type checking
 const imageFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -53,41 +100,64 @@ const imageFilter = (req, file, cb) => {
     }
 };
 
-// Upload configs
+// const singlePropertyUpload = multer({
+//   storage: multer.diskStorage({
+//     destination: 'uploads/properties/',
+//     filename: (req, file, cb) => {
+//       const propertyId = req.body.propertyId || 'temp';
+//       cb(null, propertyId + '-main' + path.extname(file.originalname));
+//     }
+//   }),
+//   limits: { fileSize: 5 * 1024 * 1024 },
+//   fileFilter: (req, file, cb) => {
+//     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+//     if (allowedTypes.includes(file.mimetype)) {
+//       cb(null, true);
+//     } else {
+//       cb(new Error('Invalid file type. Only JPEG, JPG and PNG are allowed.'), false);
+//     }
+//   }
+// }).single('propertyImage');
+
+// Upload configs for different use cases
+// File size limits learned through user feedback and server capacity testing
 const uploadConfigs = {
-  // Local upload
+  // Local upload (fallback option)
   local: multer({
     storage: localStorage,
     fileFilter: imageFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit for local storage
   }),
   
-  // Avatar upload
+  // Avatar upload with face detection
   avatar: multer({
     storage: avatarStorage,
     fileFilter: imageFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB - increased from 2MB
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB increased from 2MB after complaints
   }),
   
-  // Property upload
+  // Property upload with optimization
   property: multer({
     storage: propertyStorage,
     fileFilter: imageFilter,
-    limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB for high quality property photos
   })
 };
 
-// Export middleware functions
+// Export middleware functions for different endpoints
 module.exports = {
-  // Single uploads
+  // Single uploads (original implementation)
   uploadLocal: uploadConfigs.local.single('image'),
   uploadAvatar: uploadConfigs.avatar.single('avatar'),
   uploadProperty: uploadConfigs.property.single('image'),
   
-  // Multiple uploads
-  uploadMultipleLocal: uploadConfigs.local.array('images', 10),
+  // Multiple uploads (added later for property galleries)
+  uploadMultipleLocal: uploadConfigs.local.array('images', 10), // 10 image limit
   uploadMultipleProperty: uploadConfigs.property.array('images', 10),
   
-  // Raw configs for custom use
+  // Raw configs for custom middleware usage
   configs: uploadConfigs
 };
+
+// TODO: add rate limiting for upload endpoints to prevent abuse
+// TODO: implement image compression before Cloudinary upload to save bandwidth

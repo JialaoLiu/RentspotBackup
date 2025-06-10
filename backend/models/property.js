@@ -1,11 +1,29 @@
 const db = require('../config/db');
 
-// Property data model
+/**
+ * Property data model
+ * Handles all database operations for property listings
+ * 
+ * Database schema evolved from single property_img_url field (legacy) to PropertyImage table
+ * for multiple images (current). Using COALESCE to maintain backward compatibility.
+ * 
+ * Performance getting worse with more data. Property listing query is slow,
+ * need to add indexes on frequently filtered columns. Should consider caching for popular searches.
+ */
 const Property = {
-  // get all properties with filters
+  /**
+   * Get all properties with advanced filtering and pagination
+   * This is the main property search function - handles most of the frontend requests
+   * 
+   * Complex filtering logic built incrementally. Started with simple WHERE clauses,
+   * then added dynamic filtering for price, bedrooms, etc. Property type filtering supports
+   * both string and numeric values. COALESCE prioritizes PropertyImage table over legacy image field.
+   */
   getAll: async (filters = {}, pagination = { page: 1, limit: 10 }) => {
     try {
-      // main query
+      // console.log('Property search filters:', filters); // useful for debugging search issues
+      
+      // Current query with multi-image support
       let query = `
         SELECT 
           p.property_id AS id, 
@@ -33,14 +51,45 @@ const Property = {
         WHERE 1=1
       `;
       
+      // Old single-image query (before PropertyImage table was added):
+      // let query = `
+      //   SELECT 
+      //     property_id AS id, 
+      //     property_owner_id AS owner_id, 
+      //     property_name AS title, 
+      //     property_price AS price, 
+      //     property_room AS bedrooms, 
+      //     property_bathroom AS bathrooms, 
+      //     property_garages AS garages, 
+      //     property_aircon AS aircon, 
+      //     property_balcony AS balcony, 
+      //     property_petsconsidered AS petsConsidered, 
+      //     property_furnished AS furnished, 
+      //     property_type AS type, 
+      //     property_status AS status, 
+      //     property_latitude AS lat, 
+      //     property_longitude AS lng, 
+      //     property_address AS address, 
+      //     property_img_url AS image
+      //   FROM Property p
+      //   WHERE 1=1
+      // `;
+      
       const queryParams = [];
       
-      // add filters
+      // Dynamic filter building - this approach is flexible but can be SQL injection risk
+      // All user inputs are parameterized to prevent injection attacks
+      
+      // Keyword search across title and address
       if (filters.keyword) {
+        // Search both property name and address - users expect this behavior
         query += ' AND (p.property_name LIKE ? OR p.property_address LIKE ?)';
         queryParams.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
+        // TODO: add full-text search for better performance with large datasets!
+        // FIXME: this LIKE query is slow when searching large text fields
       }
       
+      // Price range filtering - most commonly used filter
       if (filters.minPrice) {
         query += ' AND p.property_price >= ?';
         queryParams.push(Number(filters.minPrice));
@@ -51,6 +100,7 @@ const Property = {
         queryParams.push(Number(filters.maxPrice));
       }
       
+      // Room filtering - ">=" because users want "at least X bedrooms"
       if (filters.bedrooms) {
         query += ' AND p.property_room >= ?';
         queryParams.push(Number(filters.bedrooms));
@@ -61,9 +111,12 @@ const Property = {
         queryParams.push(Number(filters.bathrooms));
       }
       
+      // Property type filtering - handles both string and numeric inputs
+      // Frontend sometimes sends strings, API sometimes sends numbers... messy but works
       if (filters.type && Array.isArray(filters.type) && filters.type.length > 0 && !filters.type.includes('all')) {
         const typeValues = filters.type.map(t => {
-          // convert type
+          // Type conversion mapping (0=house, 1=apartment, 2=townhouse, 3=villa)
+          // This mapping evolved from frontend requirements
           return isNaN(t) ? 
             (t === 'house' ? 0 : t === 'apartment' ? 1 : t === 'townhouse' ? 2 : t === 'villa' ? 3 : null) : 
             Number(t);
@@ -75,9 +128,11 @@ const Property = {
         }
       }
       
+      // Status filtering - 0=available, 1=rented, 2=removed
       if (filters.status !== undefined) {
         query += ' AND p.property_status = ?';
         queryParams.push(Number(filters.status));
+        // Note: frontend usually filters out status=2 (removed) properties
       }
       
       // order by

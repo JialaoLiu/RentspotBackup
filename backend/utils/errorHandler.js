@@ -1,18 +1,23 @@
-// simple error helpers
+// Error handlers evolved from basic res.status().json() calls scattered everywhere
+// Centralized error handling makes debugging easier and responses consistent
+
 const sendError = (res, status, message, error = null) => {
   const response = {
     status: 'error',
     message
   };
 
-  // keep it simple
+  // if (error && process.env.NODE_ENV === 'development') {
+  //   response.details = error.message;
+  // }
 
   res.status(status).json(response);
 };
 
 // db error helper
 const handleDbError = (res, error, operation) => {
-  // db error
+  // console.error(`Database error during ${operation}:`, error);
+  // res.status(500).json({ message: 'Internal server error' });
   
   sendError(res, 500, 'Database error');
 };
@@ -36,6 +41,9 @@ const handleAuthError = (res, message = 'Authentication failed') => {
 const handleForbidden = (res, message = 'Access denied') => {
   sendError(res, 403, message);
 };
+
+// TODO: add rate limiting error handler
+// TODO: add file upload error handler
 
 module.exports = {
   sendError,

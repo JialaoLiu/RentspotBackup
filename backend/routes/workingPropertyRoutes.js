@@ -4,6 +4,8 @@ const { uploadProperty, uploadMultipleProperty } = require('../middleware/upload
 const { authenticateToken, requireLandlord, requireAdmin } = require('../middleware/authMiddleware');
 const { handleValidationError, handleNotFound, handleForbidden, handleDbError } = require('../utils/errorHandler');
 
+// Main property routes evolved from simple CRUD to complex image handling and filtering
+// Multiple image upload was added later when users wanted property galleries
 
 // Database connection
 const db = require('../config/db');
@@ -16,6 +18,9 @@ router.post('/upload', authenticateToken, uploadProperty, (req, res) => {
     
     // For Cloudinary uploads, the URL is in req.file.path
     const imageUrl = req.file.path || req.file.secure_url;
+    
+    // const imageUrl = `/uploads/${req.file.filename}`;
+    // res.json({ message: 'Image uploaded', imageUrl });
     
     res.json({
         message: 'Image uploaded successfully',

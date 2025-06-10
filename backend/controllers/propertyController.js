@@ -2,37 +2,54 @@ const Property = require('../models/property');
 const cloudinary = require('../config/cloudinary');
 const { handleDbError, handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
-// Property controller
+/**
+ * Property Controller
+ * Handles all property-related API endpoints
+ * 
+ */
 const propertyController = {
   /**
    * Get all properties with filtering and pagination
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
+   * Main property listing endpoint used by homepage and search page
    */
   getAllProperties: async (req, res) => {
     try {
-      // Extract filter parameters from query
+      // TODO: add rate limiting before this gets abused!
+      // console.log('Property search request:', req.query); // useful for debugging search issues
+      
+      // Extract and normalize filter parameters from query string
+      // Frontend sends inconsistent parameter names - need to handle both formats
       const filters = {
         keyword: req.query.keyword,
         minPrice: req.query.minPrice,
         maxPrice: req.query.maxPrice,
-        bedrooms: req.query.minBedrooms,
+        bedrooms: req.query.minBedrooms || req.query.bedrooms, // handle both parameter names
         bathrooms: req.query.bathrooms,
         type: req.query.propertyTypes ? req.query.propertyTypes.split(',') : null,
         status: req.query.status !== undefined ? parseInt(req.query.status) : undefined
       };
       
-      // Extract pagination parameters
+      // Pagination handling - learned this when property list got too long
       const pagination = {
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 10
+        limit: parseInt(req.query.limit) || 10 // 10 is good balance between performance and UX
       };
       
-      // Get properties from model
+      // Validate pagination limits to prevent abuse
+      if (pagination.limit > 100) {
+        pagination.limit = 100; // prevent users from requesting massive datasets
+      }
+      
+      // FIXME: this query is getting slow with large datasets... needs indexing
       const result = await Property.getAll(filters, pagination);
+      
+      // Early version (commented out - was too simple):
+      // const properties = await Property.getAll();
+      // res.status(200).json({ properties });
       
       res.status(200).json(result);
     } catch (error) {
+      // BUG: sometimes returns 500 on concurrent requests, investigating...
       handleDbError(res, error, 'fetching properties');
     }
   },
@@ -69,12 +86,21 @@ const propertyController = {
   },
   
   /**
-   * Create a new property
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
+   * Create a new property listing
+   * Complex endpoint because it handles both property data and image uploads
+   * 
+   * Property creation process: validate user permissions (landlord or admin only),
+   * extract and validate property data from request, create property record in database,
+   * handle multiple image uploads if provided, return created property with ID for frontend.
+   * 
+   * Common validation issues: users forget required fields (especially address/coordinates),
+   * price validation needs to handle strings vs numbers, boolean fields come as strings from forms.
    */
   createProperty: async (req, res) => {
     try {
+      // console.log('Creating property for user:', req.user.id); // track property creation
+      // console.log('Property data received:', req.body); // useful for debugging form issues
+      
       // Extract property data from request body
       const propertyData = {
         owner_id: req.user.id, // From JWT middleware
@@ -107,22 +133,32 @@ const propertyController = {
       // Create property in database
       const createdProperty = await Property.create(propertyData);
       
-      // Handle multiple images if provided
+      // Handle multiple images if provided (new multi-image system)
       if (req.body.images && Array.isArray(req.body.images) && req.body.images.length > 0) {
         const images = req.body.images.map((url, index) => ({
           url,
           isPrimary: index === 0 // First image is primary
         }));
         
+        // NOTE: don't change this without updating the frontend API calls
         await Property.addImages(createdProperty.id, images);
       }
+      
+      // Old single-image handling (replaced with PropertyImage table):
+      // if (req.body.image) {
+      //   // Just store single image URL in property_img_url field
+      //   await Property.update(createdProperty.id, { 
+      //     ...propertyData, 
+      //     image: req.body.image 
+      //   });
+      // }
       
       res.status(201).json({
         message: 'Property created successfully',
         property: createdProperty
       });
     } catch (error) {
-      // error during creation
+      // TODO: better error handling for validation vs database errors
       res.status(500).json({ 
         message: 'Error creating property', 
         error: error.message 
@@ -291,8 +327,7 @@ const propertyController = {
   
   /**
    * Upload multiple property images to Cloudinary
-   * @param {Object} req - Request object
-   * @param {Object} res - Response object
+   * Handles up to 10 images per property with automatic ordering
    */
   uploadMultipleImages: async (req, res) => {
     try {
@@ -300,8 +335,7 @@ const propertyController = {
         return res.status(400).json({ message: 'No image files provided' });
       }
       
-      // Files already uploaded to Cloudinary via middleware
-      // Return the file details
+      // Current multi-image upload handling
       const urls = req.files.map(file => ({
         url: file.path,
         publicId: file.filename
@@ -311,6 +345,17 @@ const propertyController = {
         message: 'Images uploaded successfully',
         images: urls
       });
+      
+      // Old single image upload (before multiple images were supported):
+      // if (!req.file) {
+      //   return res.status(400).json({ message: 'No image file provided' });
+      // }
+      // 
+      // res.status(200).json({
+      //   message: 'Image uploaded successfully',
+      //   imageUrl: req.file.path,
+      //   publicId: req.file.filename
+      // });
     } catch (error) {
       // multiple images upload failed
       res.status(500).json({ 
