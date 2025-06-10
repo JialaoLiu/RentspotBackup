@@ -4,6 +4,9 @@ const userController = require('../controllers/userController');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
 const { uploadAvatar } = require('../middleware/uploadMiddleware');
 
+// User routes evolved from basic profile management to include avatar uploads and admin functions
+// Admin functions were later moved to separate adminRoutes.js for better organization
+
 // All routes require authentication
 router.use(authenticateToken);
 
@@ -40,13 +43,20 @@ router.post('/avatar', (req, res, next) => {
   });
 }, userController.uploadAvatar);
 
+// router.post('/avatar', uploadAvatar, (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).json({ message: 'No file uploaded' });
+//   }
+//   res.json({ message: 'Avatar uploaded', avatarUrl: req.file.path });
+// });
+
 // Change password
 router.post('/change-password', userController.changePassword);
 
 // Get favorite properties
 router.get('/favorites', userController.getFavoriteProperties);
 
-// Admin-only routes
+// Admin-only routes (kept for backward compatibility)
 // Get all users - Admin only
 router.get('/all', requireAdmin, userController.getAllUsers);
 
@@ -58,6 +68,9 @@ router.put('/:userId/role', requireAdmin, userController.updateUserRole);
 
 // Delete user - Admin only
 router.delete('/:userId', requireAdmin, userController.deleteUser);
+
+// TODO: move admin routes to /api/admin/ endpoints
+// TODO: add user preferences endpoint
 
 
 module.exports = router;

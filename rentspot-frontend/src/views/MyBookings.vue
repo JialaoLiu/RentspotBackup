@@ -271,6 +271,8 @@ function handleImageError(event) {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background-color: var(--surface-primary);
+  min-height: 100vh;
 }
 
 .bookings-header {
@@ -280,12 +282,12 @@ function handleImageError(event) {
 
 .bookings-header h1 {
   font-size: 2.5rem;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .bookings-header p {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }
 
@@ -297,8 +299,8 @@ function handleImageError(event) {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #3b82f6;
+  border: 4px solid var(--surface-secondary);
+  border-top: 4px solid var(--interactive-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
@@ -321,12 +323,12 @@ function handleImageError(event) {
 
 .empty-state h3 {
   font-size: 1.5rem;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .empty-state p {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 24px;
 }
 
@@ -334,43 +336,43 @@ function handleImageError(event) {
   display: inline-flex;
   align-items: center;
   padding: 12px 24px;
-  background-color: #3b82f6;
+  background-color: var(--interactive-primary);
   color: white;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 }
 
 .btn-browse:hover {
-  background-color: #2563eb;
+  background-color: var(--interactive-primary-hover);
 }
 
 .filter-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .tab {
   padding: 12px 16px;
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--text-secondary);
   cursor: pointer;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   border-bottom: 2px solid transparent;
 }
 
 .tab:hover {
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: var(--interactive-primary);
+  border-bottom-color: var(--interactive-primary);
 }
 
 .booking-cards {
@@ -382,17 +384,17 @@ function handleImageError(event) {
   display: grid;
   grid-template-columns: 200px 1fr auto;
   gap: 20px;
-  background: white;
+  background: var(--surface-elevated);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #e5e7eb;
-  transition: all 0.2s;
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--border-primary);
+  transition: all var(--transition-fast);
 }
 
 .booking-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .booking-card.upcoming {
@@ -432,12 +434,12 @@ function handleImageError(event) {
 .property-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .property-address {
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 16px;
 }
 
@@ -459,11 +461,11 @@ function handleImageError(event) {
 
 .date {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .time {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -506,11 +508,11 @@ function handleImageError(event) {
 
 .owner-name {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .owner-details {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -524,11 +526,11 @@ function handleImageError(event) {
 
 .btn-cancel, .btn-view {
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   text-align: center;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   border: none;
   cursor: pointer;
 }
@@ -548,12 +550,12 @@ function handleImageError(event) {
 }
 
 .btn-view {
-  background-color: #dbeafe;
-  color: #1d4ed8;
+  background-color: var(--color-primary-light);
+  color: var(--interactive-primary);
 }
 
 .btn-view:hover {
-  background-color: #bfdbfe;
+  background-color: var(--surface-secondary);
 }
 
 @media (max-width: 768px) {

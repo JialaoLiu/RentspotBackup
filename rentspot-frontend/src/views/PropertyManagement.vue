@@ -410,6 +410,8 @@ async function handleRestore() {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  background-color: var(--surface-primary);
+  min-height: 100vh;
 }
 
 /* Header Section */
@@ -498,13 +500,13 @@ async function handleRestore() {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface-elevated);
   border-radius: 12px;
   padding: 24px;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  border: 1px solid #E5E7EB;
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-primary);
+  transition: all var(--transition-normal);
 }
 
 .stat-card.clickable {
@@ -513,8 +515,8 @@ async function handleRestore() {
 
 .stat-card.clickable:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-color: #9CA3AF;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-secondary);
 }
 
 .stat-card.active {
@@ -535,23 +537,23 @@ async function handleRestore() {
 .stat-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1F2937;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .stat-label {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 /* Filters Section */
 .filters-section {
-  background: white;
+  background: var(--surface-elevated);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #E5E7EB;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-primary);
 }
 
 .search-container {
@@ -561,15 +563,17 @@ async function handleRestore() {
 .search-input {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #D1D5DB;
-  border-radius: 8px;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
   font-size: 16px;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-fast);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3B82F6;
+  border-color: var(--interactive-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -581,9 +585,10 @@ async function handleRestore() {
 
 .filter-select {
   padding: 8px 12px;
-  border: 1px solid #D1D5DB;
-  border-radius: 6px;
-  background: white;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-sm);
+  background: var(--surface-primary);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -604,9 +609,9 @@ async function handleRestore() {
 .empty-state {
   text-align: center;
   padding: 64px 32px;
-  background: white;
+  background: var(--surface-elevated);
   border-radius: 12px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-primary);
 }
 
 .empty-content {
@@ -618,14 +623,14 @@ async function handleRestore() {
   width: 64px;
   height: 64px;
   margin-bottom: 16px;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
 }
 
 .error-icon {
   width: 20px;
   height: 20px;
   margin-right: 8px;
-  color: #DC2626;
+  color: var(--interactive-danger);
 }
 
 .icon {
@@ -645,26 +650,26 @@ async function handleRestore() {
 
 .empty-state h3 {
   margin: 0 0 16px 0;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .empty-state p {
-  color: #6B7280;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .btn-retry {
-  background-color: #3B82F6;
+  background-color: var(--interactive-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 8px 16px;
   cursor: pointer;
   margin-top: 16px;
 }
 
 .btn-retry:hover {
-  background-color: #2563EB;
+  background-color: var(--interactive-primary-hover);
 }
 
 /* Pagination */
@@ -678,15 +683,16 @@ async function handleRestore() {
 
 .pagination-btn {
   padding: 8px 16px;
-  border: 1px solid #D1D5DB;
-  background: white;
-  border-radius: 6px;
+  border: 1px solid var(--border-secondary);
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #F3F4F6;
+  background-color: var(--surface-secondary);
 }
 
 .pagination-btn:disabled {
@@ -695,7 +701,7 @@ async function handleRestore() {
 }
 
 .pagination-info {
-  color: #6B7280;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 

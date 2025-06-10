@@ -12,6 +12,7 @@ import RentPage from '../views/RentPage.vue';
 import PropertyManagement from '../views/PropertyManagement.vue';
 import MyBookings from '../views/MyBookings.vue';
 import MyProperty from '../views/MyProperty.vue';
+import AdminDashboard from '../views/AdminDashboard.vue';
 
 // Routes
 const routes = {
@@ -23,6 +24,7 @@ const routes = {
   '/userprofile': { name: 'UserProfile', component: UserProfile, requiresAuth: true },
   '/my-bookings': { name: 'MyBookings', component: MyBookings, requiresAuth: true },
   '/my-property': { name: 'MyProperty', component: MyProperty, requiresAuth: true, requiresLandlord: true },
+  '/admin': { name: 'AdminDashboard', component: AdminDashboard, requiresAuth: true, requiresAdmin: true },
   '/news': { name: 'News', component: News },
   '/property/manage': { name: 'PropertyManagement', component: PropertyManagement, requiresAuth: true, requiresLandlord: true }
 };

@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
+// Property routes started as mock data for frontend testing
+// Eventually replaced by workingPropertyRoutes.js with full database integration
+
 // Mock data for testing
 const mockProperties = [
     {
@@ -50,6 +53,8 @@ const mockProperties = [
 
 // GET all properties
 router.get('/', (req, res) => {
+    // res.json({ properties: mockProperties });
+    
     res.json({
         properties: mockProperties,
         pagination: {
@@ -81,5 +86,13 @@ router.get('/:id', (req, res) => {
 // All other routes will be added incrementally
 // POST, PUT, DELETE routes will be added later
 
+// router.post('/', (req, res) => {
+//   const newProperty = { id: Date.now(), ...req.body };
+//   mockProperties.push(newProperty);
+//   res.json(newProperty);
+// });
+
+// TODO: replace with database integration
+// TODO: add authentication middleware
 
 module.exports = router;

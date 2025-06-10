@@ -100,12 +100,12 @@ function addComment() {
 .post-card {
   width: 100%;
   max-width: 600px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
   margin: 16px auto;
   padding: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   font-family: Arial, sans-serif;
 }
 
@@ -133,18 +133,19 @@ function addComment() {
   font-size: 1rem;
   font-weight: bold;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .post-time {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .post-caption {
   margin-bottom: 16px;
   font-size: 1rem;
-  color: #333;
+  color: var(--text-primary);
   text-align: left;
 }
 
@@ -164,7 +165,7 @@ function addComment() {
 
 .post-interactions {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-secondary);
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
@@ -183,13 +184,13 @@ function addComment() {
   border: none;
   font-size: 1rem;
   cursor: pointer;
-  color: #007bff;
+  color: var(--interactive-primary);
 }
 
 .action-buttons button:hover {
   opacity: 0.8;
-  transition: background-color 0.3s ease;
-  background-color: #f0f0f0;
+  transition: background-color var(--transition-normal);
+  background-color: var(--surface-secondary);
 }
 
 /* Comment Modal Styles */
@@ -203,15 +204,16 @@ function addComment() {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--surface-elevated);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   text-align: left;
 }
 
@@ -226,10 +228,12 @@ function addComment() {
 .comment-author {
   font-weight: bold;
   margin-bottom: 4px;
+  color: var(--text-primary);
 }
 
 .comment-text {
   margin: 0;
+  color: var(--text-primary);
 }
 
 .add-comment {
@@ -244,35 +248,39 @@ function addComment() {
   margin-bottom: 8px;
   padding: 8px;
   font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
 }
 
 .add-comment button {
   align-self: flex-end;
-  background: #007bff;
-  color: #fff;
+  background: var(--interactive-primary);
+  color: var(--surface-primary);
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .add-comment button:hover {
-  background: #0056b3;
+  background: var(--interactive-primary-hover);
 }
 
 .close-button {
   margin-top: 16px;
-  background: #ff4d4d;
-  color: #fff;
+  background: var(--interactive-danger);
+  color: var(--surface-primary);
   border: none;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .close-button:hover {
-  background: #cc0000;
+  background: var(--interactive-danger-hover);
 }
 </style>

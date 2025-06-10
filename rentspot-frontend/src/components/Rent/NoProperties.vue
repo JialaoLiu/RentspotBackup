@@ -10,7 +10,7 @@
 .no-properties {
   text-align: center;
   padding: 60px 0;
-  color: #6B7280;
+  color: var(--color-medium);
 }
 
 .no-properties-icon {

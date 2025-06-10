@@ -20,17 +20,19 @@ defineProps({
   address: String,
   price: Number,
   image: String
-})
+});
 
-function handleImageError(e) {
-  // load cloudinary default image
-  e.target.src = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png'
-}
+const handleImageError = (e) => {
+  // console.log('Image failed to load, using fallback'); // debug image loading issues
+  // fallback to cloudinary default - reliable CDN
+  e.target.src = "https://res.cloudinary.com/dzxrmtus9/image/upload/v1747542177/defaultProperty_totbni.png";
+  // TODO: should add a loading placeholder instead of immediately showing default!
+};
 </script>
 
 <style scoped>
 .property-card {
-  background-color: var(--color-bg-primary);
+  background-color: var(--surface-elevated);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-md);
@@ -41,7 +43,7 @@ function handleImageError(e) {
 .property-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-border-dark);
+  border: 1px solid var(--border-secondary);
 }
 
 .property-image {
@@ -57,20 +59,20 @@ function handleImageError(e) {
 .property-title {
   font-size: 18px;
   font-weight: bold;
-  color: var(--color-dark);
+  color: var(--text-primary);
   margin-bottom: var(--space-xs);
 }
 
 .property-address {
   font-size: 14px;
-  color: var(--color-medium);
+  color: var(--text-secondary);
   margin-bottom: var(--space-sm);
 }
 
 .property-price {
   font-size: 16px;
   font-weight: bold;
-  color: var(--color-primary);
+  color: var(--interactive-primary);
   margin-top: var(--space-sm);
 }
 </style>
