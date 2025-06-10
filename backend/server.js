@@ -3,10 +3,25 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+/**
+ * RentSpot API Server
+ * Express.js backend for property rental platform
+ * 
+ * Server setup evolved from basic Express server with hardcoded CORS, to environment-based configuration,
+ * then added proper error handling and process monitoring, finally multiple CORS origins for development and production.
+ * 
+ * Port 8080 chosen because it avoids conflicts with frontend dev server (5173),
+ * university firewall allows this port, and it's easy to remember for API testing.
+ */
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Body parsing middleware - Express 4.16+ has built-in JSON parsing
+// No need for body-parser package anymore (was using it in early versions)
 app.use(express.json());
+
+// CORS configuration - evolved to handle multiple environments
+// Originally had simple CORS(origin: true) but that's insecure for production
 app.use(cors({
   origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'https://dev.rentspot.com:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],

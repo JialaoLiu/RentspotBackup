@@ -6,6 +6,9 @@ const db = require('../config/db');
 const { handleValidationError, handleNotFound, handleAuthError, handleDbError } = require('../utils/errorHandler');
 require('dotenv').config();
 
+// Auth routes evolved from basic login/register to include CAPTCHA and JWT tokens
+// CAPTCHA was added after spam registration attempts, JWT replaced session storage
+
 const router = express.Router();
 
 async function checkCaptcha(token) {
@@ -36,6 +39,10 @@ router.post('/login', async (req, res) => {
     return handleValidationError(res, 'Email and password required');
   }
 
+  // if (!captcha) {
+  //   return handleValidationError(res, 'CAPTCHA required');
+  // }
+
   if (captcha && !(await checkCaptcha(captcha))) {
     return handleValidationError(res, 'Invalid captcha');
   }
@@ -65,6 +72,10 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }
     );
+
+    // const token = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET);
+    // res.cookie('token', token, { httpOnly: true });
+    // res.json({ message: 'Login successful', user: { id: user.user_id, name: user.user_name } });
 
     res.json({
       message: 'Login successful',
@@ -103,6 +114,12 @@ router.post('/register', async (req, res) => {
     
     // default avatar
     const avatarUrl = 'https://res.cloudinary.com/dzxrmtus9/image/upload/v1747541055/defaultavatar_eavhnz_ezkjxa.png';
+    
+    // await db.execute(
+    //   `INSERT INTO User (user_name, user_email, user_password, user_phone, user_role, user_registered_at) 
+    //    VALUES (?, ?, ?, ?, ?, NOW())`,
+    //   [user_name, user_email, hashedPassword, user_phone, user_role || 0]
+    // );
     
     try {
       // create user

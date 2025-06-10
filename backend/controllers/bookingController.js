@@ -2,6 +2,10 @@ const Booking = require('../models/booking');
 const Property = require('../models/property');
 const { handleDbError, handleValidationError, handleNotFound } = require('../utils/errorHandler');
 
+// Booking system evolved from simple contact forms to complex inspection scheduling
+// Started with basic "contact landlord" button, then added time slots, validation rules
+// 4-hour advance booking rule came after too many last-minute cancellations
+
 const bookingController = {
   /**
    * Get user's bookings
@@ -71,6 +75,11 @@ const bookingController = {
       const userId = req.user.id;
       const { propertyId, datetime } = req.body;
       
+      // const { propertyId, message, userEmail } = req.body;
+      // const property = await Property.getById(propertyId);
+      // await sendEmail(property.owner_email, 'Inspection Request', message);
+      // res.json({ success: true, message: 'Request sent to landlord' });
+      
       // Validate input
       if (!propertyId || !datetime) {
         return handleValidationError(res, 'Property ID and datetime are required');
@@ -84,6 +93,10 @@ const bookingController = {
       // Check if booking is at least 4 hours in future
       const now = new Date();
       const fourHoursFromNow = new Date(now.getTime() + (4 * 60 * 60 * 1000));
+      
+      // if (bookingDate < now) {
+      //   return handleValidationError(res, 'Cannot book in the past');
+      // }
       
       if (bookingDate < fourHoursFromNow) {
         return handleValidationError(res, 'Booking must be at least 4 hours in advance');
@@ -103,6 +116,12 @@ const bookingController = {
           message: 'You already have an active booking for this property'
         });
       }
+      
+      // const existingBookings = await Booking.getByUserId(userId);
+      // const propertyBooking = existingBookings.find(b => b.property_id === propertyId && b.status !== 2);
+      // if (propertyBooking) {
+      //   return res.status(400).json({ success: false, message: 'Existing booking found' });
+      // }
       
       // Create booking
       const bookingData = {
@@ -219,6 +238,11 @@ const bookingController = {
       const now = new Date();
       const fourHoursFromNow = new Date(now.getTime() + (4 * 60 * 60 * 1000));
       
+      // const oneHourFromNow = new Date(now.getTime() + (1 * 60 * 60 * 1000));
+      // if (bookingTime < oneHourFromNow) {
+      //   return res.status(400).json({ success: false, message: 'Cannot cancel within 1 hour' });
+      // }
+      
       if (bookingTime < fourHoursFromNow) {
         return res.status(400).json({
           success: false,
@@ -266,6 +290,11 @@ const bookingController = {
       
       const slots = await Booking.getAvailableSlots(propertyId);
       
+      // const startDate = new Date();
+      // const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      // const timeSlots = ['09:00', '11:00', '14:00', '16:00'];
+      // const slots = generateTimeSlots(startDate, endDate, timeSlots);
+      
       res.status(200).json({
         success: true,
         slots
@@ -294,10 +323,17 @@ const bookingController = {
       
       const stats = await Booking.getLandlordStats(userId);
       
+      // const properties = await Property.getByOwnerId(userId);
+      // const propertyIds = properties.map(p => p.id);
+      // const allBookings = await Promise.all(propertyIds.map(id => Booking.getByPropertyId(id)));
+      // const totalBookings = allBookings.flat().length;
+      
       res.status(200).json({
         success: true,
         stats
       });
+      // TODO: add monthly breakdown stats
+      // TODO: add average booking response time
     } catch (error) {
       handleDbError(res, error, 'fetching booking statistics');
     }

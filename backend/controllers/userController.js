@@ -3,12 +3,20 @@ const cloudinary = require('../config/cloudinary');
 const bcrypt = require('bcrypt');
 const { handleDbError, handleValidationError, handleNotFound, handleForbidden, handleAuthError } = require('../utils/errorHandler');
 
-// User controller with simplified functions
+/**
+ * User Controller
+ * Handles user profile management, authentication, and admin functions
+
+ */
 const userController = {
-  // Get user profile
+  /**
+   * Get user profile
+   * Returns current user's profile information excluding password
+   * Used by frontend to populate profile page
+   */
   getProfile: async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.id; // from JWT middleware
       
       if (!userId) {
         return handleValidationError(res, 'Invalid user ID');
@@ -40,12 +48,16 @@ const userController = {
     }
   },
   
-  // Update user profile
+  /**
+   * Update user profile
+   * update their name, phone, avatar, and date of birth
+
+   */
   updateProfile: async (req, res) => {
     try {
       const userId = req.user.id;
       
-      // Check if user exists
+      // Check if user exists - important security check
       const [users] = await db.query('SELECT * FROM User WHERE user_id = ?', [userId]);
       
       if (users.length === 0) {
@@ -96,16 +108,25 @@ const userController = {
     }
   },
   
-  // Upload user avatar
+  /**
+   * Upload user avatar to Cloudinary
+   * Handles profile picture uploads with automatic resizing and face detection
+   * 
+   * Upload process: Multer middleware processes file upload, Cloudinary middleware uploads to cloud storage,
+   * face detection transformation applied automatically, database updated with new avatar URL.
+   * 
+   * Error handling covers no file provided, Cloudinary upload failures, database update errors,
+   * and file size/type validation (handled by middleware).
+   */
   uploadAvatar: async (req, res) => {
     try {
-      // Check if file was uploaded
+      // Check if file was uploaded - multer handles file processing
       if (!req.file) {
         return handleValidationError(res, 'No image uploaded');
       }
       
       const userId = req.user.id;
-      const avatarUrl = req.file.path;
+      const avatarUrl = req.file.path; // Cloudinary URL from upload middleware
       
       
       // Update avatar URL in database
