@@ -5,7 +5,7 @@
     :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
     aria-label="Toggle dark mode"
   >
-    <Icon :name="isDark ? 'sun' : 'moon'" size="md" />
+    <Icon :name="isDark ? 'moon' : 'sun'" size="md" />
   </button>
 </template>
 
@@ -81,7 +81,7 @@ function setTheme(theme) {
 <style scoped>
 .dark-mode-toggle {
   background: none;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-full);
   padding: 8px;
   cursor: pointer;
@@ -91,13 +91,13 @@ function setTheme(theme) {
   width: 40px;
   height: 40px;
   transition: all var(--transition-fast);
-  color: var(--color-dark);
-  background-color: var(--color-bg-primary);
+  color: var(--text-primary);
+  background-color: var(--surface-primary);
 }
 
 .dark-mode-toggle:hover {
-  background-color: var(--color-bg-secondary);
-  border-color: var(--color-border-dark);
+  background-color: var(--surface-secondary);
+  border-color: var(--border-secondary);
   transform: scale(1.05);
 }
 

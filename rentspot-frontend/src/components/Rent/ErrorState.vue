@@ -25,22 +25,23 @@ defineEmits(['retry', 'back'])
 .error-container {
   text-align: center;
   padding: 100px 0;
-  color: #d32f2f;
+  color: var(--color-danger);
 }
 
 .retry-button, .back-button {
-  background-color: #374151;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   margin-top: 20px;
   margin-left: 10px;
   margin-right: 10px;
+  transition: background-color var(--transition-fast);
 }
 
 .retry-button:hover, .back-button:hover {
-  background-color: #1F2937;
+  background-color: var(--color-primary-hover);
 }
 </style>

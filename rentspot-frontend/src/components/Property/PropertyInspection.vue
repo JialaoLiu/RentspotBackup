@@ -261,7 +261,7 @@ function submitInspectionRequest() {
 <style scoped>
 .inspection-section {
   padding: 20px;
-  background-color: #f9fafb;
+  background-color: var(--surface-secondary);
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -270,13 +270,13 @@ function submitInspectionRequest() {
 .inspection-section h2 {
   margin-bottom: 16px;
   font-size: 1.3rem;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .upcoming-inspections h3, .request-inspection h3 {
   font-size: 1.1rem;
   margin-bottom: 12px;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .inspection-time {
@@ -284,7 +284,7 @@ function submitInspectionRequest() {
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  background-color: white;
+  background-color: var(--surface-primary);
   border-radius: 6px;
   margin-bottom: 10px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -302,22 +302,22 @@ function submitInspectionRequest() {
 
 .day {
   font-weight: bold;
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .date {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .inspection-hours {
   font-weight: 500;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .register-button {
   padding: 8px 16px;
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--interactive-primary);
+  color: var(--surface-primary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -326,11 +326,11 @@ function submitInspectionRequest() {
 }
 
 .register-button:hover {
-  background-color: #2563eb;
+  background-color: var(--interactive-primary-hover);
 }
 
 .register-button:disabled {
-  background-color: #93c5fd;
+  background-color: var(--surface-secondary);
   cursor: default;
 }
 
@@ -342,7 +342,7 @@ function submitInspectionRequest() {
   width: 100%;
   padding: 12px;
   background-color: #f3f4f6;
-  color: #1f2937;
+  color: var(--text-primary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -366,7 +366,7 @@ function submitInspectionRequest() {
   display: block;
   margin-bottom: 6px;
   font-size: 0.9rem;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .form-group input, .form-group select, .form-group textarea {
@@ -386,8 +386,8 @@ function submitInspectionRequest() {
 .submit-button {
   flex: 1;
   padding: 12px;
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--interactive-primary);
+  color: var(--surface-primary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -397,7 +397,7 @@ function submitInspectionRequest() {
 .cancel-button {
   padding: 12px;
   background-color: #f3f4f6;
-  color: #4b5563;
+  color: var(--text-secondary);
   border: none;
   border-radius: 4px;
   cursor: pointer;

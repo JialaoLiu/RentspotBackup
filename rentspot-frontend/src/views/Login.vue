@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="container" style="background-color:#f1f1f1">
+    <div class="container" style="background-color: var(--color-bg-secondary);">
       <router-link to="/"><button type="button" class="cancelbtn">Cancel</button></router-link>
       <span class="SI"><router-link to="/signin">Create an account</router-link></span>
     </div>
@@ -60,22 +60,25 @@ const toast = useNotification();
 const turnstileContainer = ref(null);
 let turnstileWidget = null;
 
-const user_email = ref('');
-const user_password = ref('');
+let user_email = ref('');
+let user_password = ref('');
 const turnstileToken = ref('');
-const isSubmitting = ref(false);
+let isSubmitting = ref(false);
 
 const redirectPath = computed(() => route.value.query.redirect || '/');
 
 onMounted(() => {
-  // Load Turnstile script once
-  const script = document.createElement('script');
-  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-  script.async = true;
-  script.defer = true;
+  // console.log('Login component mounted'); // useful for debugging navigation issues
+  
+  // load turnstile script - works fine
+  let script = document.createElement('script');
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  script.async = true
+  script.defer = true
   document.head.appendChild(script);
 
   script.onload = () => {
+    // console.log('Turnstile script loaded'); // debug loading issues
     // Single attempt to render Turnstile
     if (window.turnstile && turnstileContainer.value) {
       try {
@@ -83,6 +86,7 @@ onMounted(() => {
           sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
           callback: function(token) {
             turnstileToken.value = token;
+            // console.log('Turnstile token received'); // debug callback
           }
         });
       } catch (error) {
@@ -102,16 +106,20 @@ onBeforeUnmount(() => {
   }
 });
 
+// handle login form submission
 async function handleLogin() {
   if (isSubmitting.value) return;
   
+  // console.log('Login attempt for:', user_email.value); // helpful for debugging login issues
+  
   if (!user_email.value || !user_password.value) {
-    toast.error('Email and password are required');
+    toast.error("Email and password are required")
     return;
   }
 
-  // Get the Turnstile token if available
-  const captchaToken = turnstileToken.value || '';
+  // captcha token if available
+  let captchaToken = turnstileToken.value || '';
+  // console.log('Captcha token available:', !!captchaToken); // debug captcha issues
 
   isSubmitting.value = true;
   
@@ -121,6 +129,9 @@ async function handleLogin() {
       user_password: user_password.value,
       captcha: captchaToken // Send the Turnstile token
     });
+    
+    // console.log('Login response:', response.data); // useful for debugging auth flow
+    // console.log('User role from server:', response.data.user?.role); // debug role issues
 
     toast.success('Login successful!');
     localStorage.setItem('token', response.data.token);
@@ -128,14 +139,22 @@ async function handleLogin() {
     // Store user info
     if (response.data.user) {
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      // console.log('Stored user data:', response.data.user); // keeping this for debugging
     }
     
     // Reset form
     user_email.value = '';
     user_password.value = '';
     
-  
-    router.push(redirectPath.value);
+    // temporary workaround for redirect issues on mobile
+    if (window.innerWidth < 768) {
+      // mobile redirect - needs proper fix later
+      setTimeout(() => {
+        router.push(redirectPath.value);
+      }, 100);
+    } else {
+      router.push(redirectPath.value);
+    }
   } catch (error) {
     console.error(error.response?.data?.message || error.message);
     toast.error(error.response?.data?.message || "Login failed");

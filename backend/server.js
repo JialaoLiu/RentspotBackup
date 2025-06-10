@@ -18,6 +18,7 @@ const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
 // database route not used: const realPropertyRoutes = require('./routes/realPropertyRoutes');
 const userRoutes = require('./routes/userRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', workingPropertyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

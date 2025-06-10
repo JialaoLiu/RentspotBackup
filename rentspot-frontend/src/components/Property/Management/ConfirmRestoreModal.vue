@@ -83,13 +83,13 @@ function handleImageError(e) {
 }
 
 .modal-container {
-  background: white;
+  background: var(--surface-elevated);
   border-radius: 16px;
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg);
   animation: modalEnter 0.3s ease-out;
 }
 
@@ -113,7 +113,7 @@ function handleImageError(e) {
 
 .modal-header h3 {
   margin: 0;
-  color: #1F2937;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 1.25rem;
 }
@@ -123,19 +123,19 @@ function handleImageError(e) {
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: #6B7280;
+  color: var(--text-secondary);
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
 .modal-close:hover {
-  background-color: #F3F4F6;
-  color: #374151;
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
 .modal-body {
@@ -152,19 +152,19 @@ function handleImageError(e) {
 
 .restore-text {
   font-size: 1.1rem;
-  color: #374151;
+  color: var(--text-primary);
   margin: 0 0 24px 0;
   font-weight: 500;
 }
 
 .property-preview {
   display: flex;
-  background-color: #F9FAFB;
-  border-radius: 12px;
+  background-color: var(--surface-secondary);
+  border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 24px;
   text-align: left;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-primary);
 }
 
 .property-preview img {
@@ -178,7 +178,7 @@ function handleImageError(e) {
 
 .property-info h4 {
   margin: 0 0 8px 0;
-  color: #1F2937;
+  color: var(--text-primary);
   font-weight: 600;
   font-size: 1rem;
 }
@@ -192,13 +192,13 @@ function handleImageError(e) {
 
 .property-details {
   margin: 0 0 4px 0;
-  color: #6B7280;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
 .property-address {
   margin: 0;
-  color: #9CA3AF;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
 }
 
@@ -246,13 +246,13 @@ function handleImageError(e) {
 }
 
 .btn-cancel {
-  background-color: #F3F4F6;
-  color: #374151;
-  border: 1px solid #D1D5DB;
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
 }
 
 .btn-cancel:hover {
-  background-color: #E5E7EB;
+  background-color: var(--border-primary);
 }
 
 .btn-restore {

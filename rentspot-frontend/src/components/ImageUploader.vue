@@ -239,7 +239,7 @@ function clearSelection() {
 .drop-zone {
   width: 100%;
   height: 200px;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--border-primary);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -249,12 +249,12 @@ function clearSelection() {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  background-color: #f9f9f9;
+  background-color: var(--surface-secondary);
 }
 
 .drop-zone.active {
-  border-color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.05);
+  border-color: var(--interactive-primary);
+  background-color: var(--surface-elevated);
 }
 
 .drop-zone.has-preview {
@@ -292,12 +292,12 @@ function clearSelection() {
 
 .primary-text {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
 .secondary-text {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .error-message {
@@ -305,8 +305,8 @@ function clearSelection() {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(239, 68, 68, 0.9);
-  color: white;
+  background-color: var(--interactive-danger);
+  color: var(--surface-primary);
   padding: 8px;
   text-align: center;
   font-size: 0.875rem;
@@ -315,9 +315,9 @@ function clearSelection() {
 .clear-button {
   margin-top: 10px;
   padding: 6px 12px;
-  background-color: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
+  background-color: var(--surface-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem;
@@ -325,7 +325,7 @@ function clearSelection() {
 }
 
 .clear-button:hover {
-  background-color: #e5e7eb;
+  background-color: var(--surface-elevated);
 }
 
 /* Upload Progress Styles */
@@ -355,13 +355,13 @@ function clearSelection() {
 
 .progress-circle-bg {
   fill: none;
-  stroke: #e5e7eb;
+  stroke: var(--border-primary);
   stroke-width: 2.8;
 }
 
 .progress-circle-fill {
   fill: none;
-  stroke: #3b82f6;
+  stroke: var(--interactive-primary);
   stroke-width: 2.8;
   stroke-linecap: round;
   transition: stroke-dasharray 0.3s ease;
@@ -374,7 +374,7 @@ function clearSelection() {
   transform: translate(-50%, -50%);
   font-size: 16px;
   font-weight: 500;
-  color: #3b82f6;
+  color: var(--interactive-primary);
 }
 
 /* Responsive adjustments */

@@ -45,7 +45,7 @@
       <button type="submit" class="signin-form-submit">Sign Up</button>
     </div>
 
-    <div class="container" style="background-color:#f1f1f1">
+    <div class="container" style="background-color: var(--color-bg-secondary);">
       <router-link to="/"><button type="button" class="cancelbtn">Cancel</button></router-link>
       <span class="LI"><router-link to="/login">Already have an account? Log in</router-link></span>
     </div>

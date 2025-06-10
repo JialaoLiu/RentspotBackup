@@ -73,28 +73,32 @@ async function loadProperties() {
 }
 */
 
-async function loadBlogs() {
-  loadingBlogs.value = true
-  errorBlogs.value = null
+// load blog articles for home page
+function loadBlogs() {
+  loadingBlogs.value = true;
+  errorBlogs.value = null;
+  
+  // console.log('Loading blog articles...'); // track blog loading
 
-  try {
-    blogs.value = await fetchBlogs()
-  } catch (err) {
-    errorBlogs.value = 'Failed to load blogs. Please try again later.'
-    console.error(err)
-  } finally {
-    loadingBlogs.value = false
-  }
+  fetchBlogs().then(data => {
+    blogs.value = data;
+  }).catch(err => {
+    errorBlogs.value = "Failed to load blogs. Please try again later.";
+    console.error(err);
+  }).finally(() => {
+    loadingBlogs.value = false;
+  });
 }
 
-async function handleSearch(searchParams) {
-  console.log('Search params:', searchParams)
-  // Redirect
-  await router.push({
-    path: '/rentlist',
+// search redirect handler
+const handleSearch = (searchParams) => {
+  console.log('Search params:', searchParams); // useful for debugging search functionality
+  // redirect to property listings with search parameters
+  router.push({
+    path: "/rentlist",
     query: searchParams
-  })
-}
+  });
+};
 
 // Unused
 /*
@@ -111,15 +115,18 @@ function handleFocusMap(property) {
 */
 
 onMounted(() => {
-  // Skip properties
-  // loadProperties()
+  // console.log('Home page mounted'); // track page loads
   
-  // Blogs
-  loadBlogs()
+  // skip properties loading here since they're loaded in RentList
+  // loadProperties() // commented out when we moved property list to separate page
   
-  // Map init
+  // BUG: sometimes blog loading fails on slow connections, investigating
+  loadBlogs();
+  
+  // map initialization happens automatically in MapDisplay component
+  // copied from old implementation - don't touch unless broken
   if (mapRef.value) {
-    // Default location
+    // default location (Adelaide CBD)
   }
-})
+});
 </script>

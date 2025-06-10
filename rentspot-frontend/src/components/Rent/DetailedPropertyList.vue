@@ -91,19 +91,20 @@ function isFavorite(propertyId) {
 
 .detailed-property {
   display: flex;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   position: relative;
+  background-color: var(--surface-elevated);
 }
 
 .detailed-property:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-color: #374151;
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-secondary);
 }
 
 .property-image {
@@ -149,11 +150,11 @@ function isFavorite(propertyId) {
   font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #1F2937;
+  color: var(--text-primary);
 }
 
 .address {
-  color: #4B5563;
+  color: var(--text-secondary);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -171,7 +172,7 @@ function isFavorite(propertyId) {
   flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 12px;
-  color: #4B5563;
+  color: var(--text-secondary);
 }
 
 .property-features span {
@@ -183,7 +184,7 @@ function isFavorite(propertyId) {
 
 .description {
   margin-bottom: 16px;
-  color: #6B7280;
+  color: var(--text-secondary);
   line-height: 1.5;
   flex-grow: 1;
 }
@@ -198,29 +199,29 @@ function isFavorite(propertyId) {
 .price {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #4B5563;
+  color: var(--text-primary);
 }
 
 .per-week {
   font-size: 0.9rem;
   font-weight: 400;
-  color: #6B7280;
+  color: var(--text-secondary);
 }
 
 .view-details-btn {
   padding: 8px 16px;
-  background-color: #374151;
+  background-color: var(--interactive-primary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
   min-width: 100px;
 }
 
 .view-details-btn:hover {
-  background-color: #1F2937;
+  background-color: var(--interactive-primary-hover);
 }
 
 /* Corner favorite button */
@@ -228,8 +229,8 @@ function isFavorite(propertyId) {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-primary);
   cursor: pointer;
   padding: 8px;
   width: 40px;
@@ -238,19 +239,19 @@ function isFavorite(propertyId) {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
   z-index: 10;
 }
 
 .favorite-btn-corner:hover {
-  background: rgba(255, 255, 255, 1);
+  background: var(--surface-secondary);
   transform: scale(1.1);
 }
 
 .favorite-btn-corner.is-favorited {
-  background: rgba(255, 255, 255, 1);
+  background: var(--surface-secondary);
 }
 
 

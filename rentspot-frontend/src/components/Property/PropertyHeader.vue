@@ -67,18 +67,18 @@ function shareProperty() {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: 16px;
 }
 
 .header-content h1 {
   font-size: 2rem;
   margin-bottom: 8px;
-  color: #1f2937;
+  color: var(--color-dark);
 }
 
 .property-address {
-  color: #6b7280;
+  color: var(--color-medium);
   font-size: 1.1rem;
   margin-bottom: 8px;
 }
@@ -86,16 +86,16 @@ function shareProperty() {
 .property-price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #3b82f6;
+  color: var(--color-primary);
   margin-bottom: 4px;
 }
 
 .property-type {
   display: inline-block;
-  background-color: #e0f2fe;
-  color: #0369a1;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.9rem;
   margin-top: 8px;
 }
@@ -110,23 +110,23 @@ function shareProperty() {
   height: 48px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid #e5e7eb;
-  background: white;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   box-sizing: border-box;
 }
 
 .favorite-button:hover, .share-button:hover {
-  background-color: #f9fafb;
+  background-color: var(--color-bg-secondary);
 }
 
 .favorite-button.is-favorite {
-  background-color: #fee2e2;
-  border-color: #fecaca;
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
 }
 
 @media (max-width: 640px) {
