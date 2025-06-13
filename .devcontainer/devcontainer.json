@@ -5,7 +5,9 @@
   // Features to add to the dev container
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers-contrib/features/mysql-homebrew:1": {}
+    "ghcr.io/devcontainers/features/mysql:1": {
+      "version": "8.0"
+    }
   },
 
   // Forward ports
@@ -16,7 +18,7 @@
       "onAutoForward": "notify"
     },
     "5173": {
-      "label": "Frontend Dev Server",
+      "label": "Frontend Dev Server", 
       "onAutoForward": "openBrowser"
     },
     "3306": {
@@ -30,11 +32,12 @@
     "vscode": {
       "extensions": [
         "Vue.volar",
-        "dbaeumer.vscode-eslint",
+        "dbaeumer.vscode-eslint", 
         "esbenp.prettier-vscode",
         "octref.vetur",
         "cweijan.vscode-database-client2",
-        "rangav.vscode-thunder-client"
+        "rangav.vscode-thunder-client",
+        "ms-vscode.vscode-json"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
@@ -42,20 +45,38 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "[vue]": {
           "editor.defaultFormatter": "Vue.volar"
-        }
+        },
+        "sqltools.connections": [
+          {
+            "name": "RentSpot MySQL",
+            "driver": "MySQL",
+            "server": "localhost",
+            "port": 3306,
+            "username": "root",
+            "password": "",
+            "database": "Rent_database"
+          }
+        ]
       }
     }
   },
 
   // Environment variables
   "containerEnv": {
-    "NODE_ENV": "development"
+    "NODE_ENV": "development",
+    "MYSQL_ROOT_PASSWORD": "",
+    "MYSQL_ALLOW_EMPTY_PASSWORD": "yes"
   },
 
-  // Run commands after container is created
-  "postCreateCommand": "bash .devcontainer/setup.sh",
+  // Commands to run in sequence after container creation
+  "postCreateCommand": "bash -c 'echo \"Starting RentSpot setup...\" && sudo service mysql start && sleep 5 && mysql -u root -e \"CREATE DATABASE IF NOT EXISTS Rent_database;\" && if [ -f \"backend/Rent_database_updated.sql\" ]; then mysql -u root Rent_database < backend/Rent_database_updated.sql; echo \"Database imported successfully\"; fi && cd backend && npm install && if [ ! -f \".env\" ]; then cat > .env << \"EOF\"\nDB_HOST=localhost\nDB_USER=root\nDB_PASSWORD=\nDB_NAME=Rent_database\nDB_PORT=3306\nJWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf\nPORT=8080\nCLOUDINARY_CLOUD_NAME=dzxrmtus9\nCLOUDINARY_API_KEY=138993529279886\nCLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8\nTURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nTURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ\nNEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3\nEOF\necho \"Backend .env created\"; fi && cd ../rentspot-frontend && rm -rf node_modules package-lock.json && npm install && if [ ! -f \".env\" ]; then cat > .env << \"EOF\"\nVUE_APP_API_BASE_URL=http://localhost:8080/api\nVUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9\nVUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned\nVUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nVUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA\nEOF\necho \"Frontend .env created\"; fi && echo \"✅ RentSpot setup complete! Run: cd backend && npm start (Terminal 1) | cd rentspot-frontend && npm run serve (Terminal 2)\"'",
 
-  // Uncomment to connect as root instead
-  // "remoteUser": "root"
-  "remoteUser": "node"
+  // Run on every container start
+  "postStartCommand": "sudo service mysql start",
+
+  // Use node user for security
+  "remoteUser": "node",
+
+  // Wait for MySQL to be ready
+  "waitFor": "postCreateCommand"
 }
