@@ -7,7 +7,7 @@
 
             <!-- Avatar and Username Section -->
             <div class="avatar-container">
-                <img :src="profile.avatarUrl || '../assets/vue.svg'" alt="Avatar" id="avatar-preview">
+                <img :src="profile.avatarUrl || '/profile.png'" alt="Avatar" id="avatar-preview">
                 <h2>{{ profile.name || 'User Name' }}</h2>
             </div>
         </form>
