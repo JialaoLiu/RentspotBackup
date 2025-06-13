@@ -16,7 +16,9 @@ We recommend using the 'Shared Repository Model (Branch & Pull)' to collaborate 
 
 RentSpot is a web-based property rental application developed for COMP SCI 2207/7207 Web & Database Computing. The platform connects property seekers with landlords, allowing users to search for rental properties, book inspections, and manage property listings across Australia.
 
-This project demonstrates full-stack web development using modern technologies including Vue.js, Node.js, and MySQL, with integration of third-party APIs for enhanced functionality.
+This project demonstrates full-stack web development using modern technologies including Vue.js (with Vue CLI), Node.js, and MySQL, with integration of third-party APIs for enhanced functionality.
+
+**Note**: This project uses Vue CLI instead of Vite to comply with course requirements. All environment variables use the `VUE_APP_` prefix.
 
 ## Setup Instructions
 
@@ -93,9 +95,9 @@ NODE_ENV=development
 
 Create `.env` file in the frontend directory (`rentspot-frontend/.env`):
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_CLOUDINARY_CLOUD_NAME=dzxrmtus9
-VITE_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
+VUE_APP_API_BASE_URL=http://localhost:8080/api
+VUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9
+VUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
 ```
 
 **Note for Codespaces**: Set `DB_PASSWORD=` (empty) in the backend .env file.
@@ -113,7 +115,7 @@ Start the frontend server:
 ```bash
 cd rentspot-frontend
 npm install
-npm run dev
+npm run serve
 ```
 Frontend runs at: `http://localhost:5173`
 
@@ -408,15 +410,12 @@ npm install
 
 2. Start the local development server
 ```bash
-npm run dev
+npm run serve
 ```
 The project will automatically run at:
 http://localhost:5173/
 
-If you want to allow other devices on your local network to access it, you can run:
-```bash
-npm run dev -- --host
-```
+If you want to allow other devices on your local network to access it, the host is already enabled by default.
 
 ## Code Standards
 
