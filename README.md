@@ -1,4 +1,4 @@
-# Group Repository for COMP SCI 2207/7207 Web & Database Computing Web Application Project (2023 Semester 1)
+# 1. Group Repository for COMP SCI 2207/7207 Web & Database Computing Web Application Project (2023 Semester 1)
 
 Your group's shared repository for the WDC 2023 Web App Project.
 
@@ -10,9 +10,10 @@ See [HERE](https://myuni.adelaide.edu.au/courses/85266/pages/2023-web-applicatio
 We recommend using the 'Shared Repository Model (Branch & Pull)' to collaborate on your work in this single repostory.
 - You can read more about collaborating on GitHub repositories [HERE](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests)
 - When working on the same file at the same time, the 'Live Share' feature in VSCode can also help.
-# RentSpot - Property Rental Platform
 
-## Project Description
+# 2. RentSpot - Property Rental Platform
+
+## 2.1 Project Description
 
 RentSpot is a web-based property rental application developed for COMP SCI 2207/7207 Web & Database Computing. The platform connects property seekers with landlords, allowing users to search for rental properties, book inspections, and manage property listings across Australia.
 
@@ -20,7 +21,7 @@ This project demonstrates full-stack web development using modern technologies i
 
 **Note**: This project uses Vue CLI instead of Vite to comply with course requirements. All environment variables use the `VUE_APP_` prefix.
 
-## Setup Instructions
+## 2.2 Setup Instructions
 
 ### Prerequisites
 - Node.js (v16.0 or higher)
@@ -138,7 +139,7 @@ Pre-configured test accounts (password: `11111111` for all):
 | Jarvis@example.com | Renter | Property search, booking creation |
 | admin@example.com | Admin | Full system access |
 
-## Features and Functionality
+## 2.3 Features and Functionality
 
 ### Core Features
 - **User Authentication**: Registration, login, and profile management with JWT tokens
@@ -179,7 +180,7 @@ Pre-configured test accounts (password: `11111111` for all):
 - Change user roles
 - Delete accounts and properties
 
-## API Documentation
+## 2.4 API Documentation
 
 ### Authentication
 ```
@@ -223,7 +224,7 @@ GET    /api/admin/stats       - Get system statistics
 DELETE /api/admin/users/:id   - Delete user
 ```
 
-## Database Structure
+## 2.5 Database Structure
 
 The database follows Third Normal Form (3NF) principles with the following main tables:
 
@@ -236,7 +237,13 @@ The database follows Third Normal Form (3NF) principles with the following main 
 
 Key relationships include foreign key constraints and indexes for optimal query performance.
 
-## Known Issues
+## 2.6 Database Diagram
+
+![Database Schema Diagram](https://res.cloudinary.com/dzxrmtus9/image/upload/v1749745482/RSF1_bysids.png)
+
+The diagram above illustrates the complete database schema with table relationships, primary keys, foreign keys, and data types for all fields.
+
+## 2.7 Known Issues
 
 ### Current Bugs
 1. **Map View Marker Overlap**: When properties have the same location, map markers overlap and only one property can be viewed
@@ -251,7 +258,9 @@ Key relationships include foreign key constraints and indexes for optimal query 
 
 
 
-## What we get through
+
+## 2.8 What we get through
+
 
 Through this project, we gained hands-on experience with:
 - Full-stack web development using modern JavaScript frameworks
@@ -262,7 +271,7 @@ Through this project, we gained hands-on experience with:
 - Team collaboration using Git branching strategies
 - Responsive web design and mobile optimization
 
-## Contributors
+## 2.9 Contributors
 
 | Name | Role | Primary Responsibilities |
 |------|------|-------------------------|
@@ -270,7 +279,7 @@ Through this project, we gained hands-on experience with:
 | **Nhat Tan (Trey)** | Frontend Lead | UI/UX design, Vue.js components, responsive layouts, user interface development |
 | **Deze Yang** | Frontend Assistant | frontend contributions on mock data in news.vue|
 
-## Development Notes
+## 2.10 Development Notes
 
 - The project uses a custom Vue.js router implementation instead of Vue Router
 - All API endpoints follow RESTful conventions
@@ -279,7 +288,7 @@ Through this project, we gained hands-on experience with:
 - The application supports both light and dark themes
 - Mobile-first responsive design approach was used throughout
 
-## Running Tests
+## 2.11 Running Tests
 
 To test the application functionality:
 
@@ -289,7 +298,8 @@ To test the application functionality:
 4. **Admin Functions**: Manage users and view statistics as an admin
 5. **Responsive Testing**: Test on different screen sizes and devices
 
-## Environment-Specific Features
+
+## 2.12 Environment-Specific Features
 
 ### Registration and Login:
 - **Local Development**: Full functionality including Cloudflare Turnstile CAPTCHA protection
@@ -299,7 +309,8 @@ To test the application functionality:
 - **Local Development**: Uses mock data (NewsAPI now requires paid subscription) 
 - **GitHub Codespaces**: Uses same mock data with realistic Australian property news
 
-## Testing Recommendations:
+## 2.13 Testing Recommendations
+
 
 - **Local Testing**: Test CAPTCHA functionality during registration
 - **Codespaces Testing**: Focus on core features since CAPTCHA is automatically handled
@@ -307,15 +318,20 @@ To test the application functionality:
 - **Responsive Testing**: Verify functionality across desktop and mobile viewports
 - **API Testing**: All property, user, and booking APIs work in both environments
 
-The application includes comprehensive error handling and user feedback through toast notifications.
+
+
 
 ## Development Notes
 
 - All team members must work on their assigned branches (see below)
 - Code reviews required for all pull requests
 - Follow JavaScript semicolon conventions for consistency
+
+
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-# RentSpot AU - Git Branch Usage Guide
+
+# 3. RentSpot AU - Git Branch Usage Guide
+
 
 To ensure clean collaboration, **each team member must work on their own branch**.
 **Never commit directly to the `main` branch.** All changes must go through pull requests (PRs).
