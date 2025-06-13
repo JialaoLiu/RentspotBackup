@@ -79,8 +79,8 @@ onMounted(() => {
   
   // Use test sitekey only for Codespaces (works on any domain)
   const siteKey = isCodespaces 
-    ? (import.meta.env.VITE_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
-    : (import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
+    ? (process.env.VUE_APP_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
+    : (process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
   
   // load turnstile script - works fine
   let script = document.createElement('script');

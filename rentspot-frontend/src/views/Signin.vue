@@ -181,8 +181,8 @@ export default {
       
       // Use test sitekey only for Codespaces (works on any domain)
       const siteKey = isCodespaces 
-        ? (import.meta.env.VITE_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
-        : (import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
+        ? (process.env.VUE_APP_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
+        : (process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
       
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -194,7 +194,7 @@ export default {
         if (window.turnstile && this.$refs.turnstileContainer) {
           try {
             this.turnstileWidget = window.turnstile.render('#cf-turnstile', {
-              // sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0', // Original env-based approach
+              // sitekey: process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0', // Original env-based approach
               sitekey: siteKey, // Dynamic key selection for dev/prod environments
               callback: token => this.turnstileToken = token
             });

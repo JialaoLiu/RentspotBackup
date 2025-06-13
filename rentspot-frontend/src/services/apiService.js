@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+  baseURL: process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080/api'
 });
 
 // Add request interceptor to include auth token
