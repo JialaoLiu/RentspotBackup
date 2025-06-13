@@ -21,7 +21,7 @@
       <!-- Cloudflare Turnstile (disabled in Codespaces) -->
       <div v-if="!isCodespaces" id="cf-turnstile" class="turnstile-container" ref="turnstileContainer"></div>
       <div v-else class="codespaces-notice">
-        <p>✅ CAPTCHA verification skipped (Codespaces environment detected)</p>
+        <p>CAPTCHA verification skipped (Codespaces environment)</p>
       </div>
 
       <button type="submit" class="login-form-submit" :disabled="isSubmitting">
@@ -79,7 +79,7 @@ const redirectPath = computed(() => route.value.query.redirect || '/');
 onMounted(() => {
   // Skip CAPTCHA initialization in Codespaces
   if (isCodespaces) {
-    console.log('Codespaces environment detected - CAPTCHA disabled');
+    console.log('Codespaces environment - CAPTCHA disabled');
     return;
   }
   
