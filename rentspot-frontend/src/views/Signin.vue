@@ -1,5 +1,4 @@
-<!-- TODO: Fix cloudflare turnstile in codespace environment for presentation!! -->
-<!-- How to skip cloudflare turnstile when running in codespace??? Random URL  -->
+<!-- CAPTCHA automatically skipped in GitHub Codespaces environment -->
 <template>
   <form @submit.prevent="handleSignIn" class="signin-form">
     <div class="container">
@@ -35,13 +34,17 @@
         <option value="2">Admin</option>
       </select>
 
-      <!-- Cloudflare Turnstile container -->
+      <!-- Cloudflare Turnstile container (disabled in Codespaces) -->
       <div
+        v-if="!isCodespaces"
         id="cf-turnstile"
         class="turnstile-container"
         ref="turnstileContainer"
         :style="{ display: showCaptcha ? 'flex' : 'none' }"
       ></div>
+      <div v-else class="codespaces-notice">
+        <p>✅ CAPTCHA verification skipped (Codespaces environment detected)</p>
+      </div>
 
       <!-- btn can be click but still need to verify -->
       <button type="submit" class="signin-form-submit">Sign Up</button>
@@ -74,6 +77,9 @@ export default {
       showCaptcha: true,
       turnstileWidget: null,
       turnstileToken: '',
+      isCodespaces: window.location.hostname.includes('github.dev') || 
+                    window.location.hostname.includes('app.github.dev') ||
+                    window.location.hostname.includes('githubpreview.dev'),
       validationErrors: {
         name: '',
         email: '',
@@ -174,15 +180,14 @@ export default {
 
     // Initialize Turnstile on mount
     initializeTurnstile() {
-      // Detect Codespaces environment specifically (not localhost)
-      const isCodespaces = window.location.hostname.includes('github.dev') || 
-                          window.location.hostname.includes('app.github.dev') ||
-                          window.location.hostname.includes('githubpreview.dev');
+      // Skip CAPTCHA initialization in Codespaces
+      if (this.isCodespaces) {
+        console.log('Codespaces environment detected - CAPTCHA disabled');
+        return;
+      }
       
-      // Use test sitekey only for Codespaces (works on any domain)
-      const siteKey = isCodespaces 
-        ? (process.env.VUE_APP_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
-        : (process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
+      // Use production sitekey for non-Codespaces environments
+      const siteKey = process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0';
       
       const script = document.createElement('script');
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -194,8 +199,7 @@ export default {
         if (window.turnstile && this.$refs.turnstileContainer) {
           try {
             this.turnstileWidget = window.turnstile.render('#cf-turnstile', {
-              // sitekey: process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0', // Original env-based approach
-              sitekey: siteKey, // Dynamic key selection for dev/prod environments
+              sitekey: siteKey,
               callback: token => this.turnstileToken = token
             });
           } catch (error) {
@@ -311,5 +315,16 @@ export default {
   margin-top: 0.25rem;
   margin-bottom: 1rem;
   font-weight: 500;
+}
+
+.codespaces-notice {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #e8f5e8;
+  border: 1px solid #4caf50;
+  border-radius: 5px;
+  text-align: center;
+  color: #2e7d32;
+  font-size: 0.9rem;
 }
 </style>
