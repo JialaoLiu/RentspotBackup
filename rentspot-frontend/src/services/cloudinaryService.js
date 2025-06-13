@@ -54,7 +54,7 @@ export const getTransformedUrl = (publicId, options = {}) => {
   const transformOptions = { ...defaultOptions, ...options };
   
   // Base URL
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dzxrmtus9';
+  const cloudName = process.env.VUE_APP_CLOUDINARY_CLOUD_NAME || 'dzxrmtus9';
   let url = `https://res.cloudinary.com/${cloudName}/image/upload`;
   
   // Add transformations
