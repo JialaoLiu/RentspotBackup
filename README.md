@@ -28,12 +28,18 @@ This project demonstrates full-stack web development using modern technologies i
 - Git
 - Modern web browser
 
-### Quick Setup for GitHub Codespaces
-Run this command from the project root to set up everything:
+### GitHub Codespaces Setup
+**Fully Automatic Setup** - No manual configuration required!
 
-```bash
-bash -c "sudo apt update && sudo apt install -y mysql-server && sudo service mysql start && sudo mysql -e 'ALTER USER \"root\"@\"localhost\" IDENTIFIED WITH mysql_native_password BY \"\"; FLUSH PRIVILEGES;' && mysql -u root -e 'CREATE DATABASE Rent_database;' && mysql -u root Rent_database < backend/Rent_database_updated.sql && cd backend && npm install && cd ../rentspot-frontend && npm install"
-```
+When you create a new Codespace, everything will be automatically configured:
+- MySQL database installation and setup
+- Database schema import with sample data
+- Backend dependencies installation
+- Frontend dependencies installation
+- Environment files creation
+- API URL configuration for Codespaces
+
+Simply create a Codespace and wait for the setup to complete, then start the application.
 
 ### 1. Database Setup
 
@@ -46,23 +52,11 @@ SOURCE backend/Rent_database_updated.sql;
 ```
 
 #### For GitHub Codespaces:
-```bash
-# Install and start MySQL
-sudo apt update
-sudo apt install -y mysql-server
-sudo service mysql start
-
-# Configure MySQL
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';"
-sudo mysql -e "FLUSH PRIVILEGES;"
-
-# Create database
-mysql -u root -e "CREATE DATABASE Rent_database;"
-mysql -u root Rent_database < backend/Rent_database_updated.sql
-```
+**No setup required** - Database is automatically configured during Codespace creation.
 
 ### 2. Backend Configuration
 
+#### For Local Development:
 ```bash
 cd backend
 npm install
@@ -72,7 +66,7 @@ Create `.env` file in the backend directory:
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=Ljl12345!  # Leave empty for Codespaces: DB_PASSWORD=
+DB_PASSWORD=Ljl12345!  # Your MySQL password
 DB_NAME=Rent_database
 DB_PORT=3306
 
@@ -98,12 +92,16 @@ Create `.env` file in the frontend directory (`rentspot-frontend/.env`):
 VUE_APP_API_BASE_URL=http://localhost:8080/api
 VUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9
 VUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
+VUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
+VUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA
 ```
 
-**Note for Codespaces**: Set `DB_PASSWORD=` (empty) in the backend .env file.
+#### For GitHub Codespaces:
+**No setup required** - All configuration files are automatically created during Codespace setup.
 
 ### 3. Start the Application
 
+#### For Local Development:
 Start the backend server:
 ```bash
 cd backend
@@ -118,6 +116,17 @@ npm install
 npm run serve
 ```
 Frontend runs at: `http://localhost:5173`
+
+#### For GitHub Codespaces:
+After the automatic setup completes, simply run:
+```bash
+# Terminal 1 - Backend
+cd backend && npm start
+
+# Terminal 2 - Frontend  
+cd rentspot-frontend && npm run serve
+```
+The application will be accessible via the forwarded ports (8080 for API, 5173 for frontend).
 
 ### 4. Test Accounts
 
@@ -242,7 +251,7 @@ Key relationships include foreign key constraints and indexes for optimal query 
 
 
 
-## What We Learned
+## What we get through
 
 Through this project, we gained hands-on experience with:
 - Full-stack web development using modern JavaScript frameworks
@@ -280,18 +289,23 @@ To test the application functionality:
 4. **Admin Functions**: Manage users and view statistics as an admin
 5. **Responsive Testing**: Test on different screen sizes and devices
 
-Environment-Specific Testing Notes
-Registration and Login Differences:
+## Environment-Specific Features
 
-Local Development (localhost:5173): Full functionality including Cloudflare Turnstile CAPTCHA protection during registration
-GitHub Codespaces: CAPTCHA functionality is disabled due to Cloudflare Turnstile API domain restrictions. Registration will work without CAPTCHA verification
+### Registration and Login:
+- **Local Development**: Full functionality including Cloudflare Turnstile CAPTCHA protection
+- **GitHub Codespaces**: CAPTCHA automatically disabled with user-friendly notice message
 
-Testing Recommendations:
+### News Section:
+- **Local Development**: Uses mock data (NewsAPI now requires paid subscription) 
+- **GitHub Codespaces**: Uses same mock data with realistic Australian property news
 
-For localhost testing: Test both successful and failed CAPTCHA scenarios during registration
-For Codespaces testing: Focus on other functionality since CAPTCHA is bypassed
-Use the provided test accounts for immediate access to different user roles
-Test responsive design on both desktop and mobile viewports
+## Testing Recommendations:
+
+- **Local Testing**: Test CAPTCHA functionality during registration
+- **Codespaces Testing**: Focus on core features since CAPTCHA is automatically handled
+- **Use Test Accounts**: Pre-configured accounts for testing different user roles
+- **Responsive Testing**: Verify functionality across desktop and mobile viewports
+- **API Testing**: All property, user, and booking APIs work in both environments
 
 The application includes comprehensive error handling and user feedback through toast notifications.
 
@@ -300,7 +314,7 @@ The application includes comprehensive error handling and user feedback through 
 - All team members must work on their assigned branches (see below)
 - Code reviews required for all pull requests
 - Follow JavaScript semicolon conventions for consistency
-
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 # RentSpot AU - Git Branch Usage Guide
 
 To ensure clean collaboration, **each team member must work on their own branch**.
