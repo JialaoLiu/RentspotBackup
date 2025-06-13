@@ -1,79 +1,73 @@
 {
-  "name": "RentSpot Development Container",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-18-bullseye",
-  
-  // Features to add to the dev container
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {}
-  },
+    "name": "Web & Database Computing - RentSpot",
+    "image": "ghcr.io/uadelaide/wdc23:latest",
 
-  // Forward ports
-  "forwardPorts": [8080, 5173, 3306],
-  "portsAttributes": {
-    "8080": {
-      "label": "Backend API",
-      "onAutoForward": "notify"
-    },
-    "5173": {
-      "label": "Frontend Dev Server", 
-      "onAutoForward": "openBrowser"
-    },
-    "3306": {
-      "label": "MySQL Database",
-      "onAutoForward": "ignore"
-    }
-  },
-
-  // Configure tool-specific properties
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "Vue.volar",
-        "dbaeumer.vscode-eslint", 
-        "esbenp.prettier-vscode",
-        "octref.vetur",
-        "cweijan.vscode-database-client2",
-        "rangav.vscode-thunder-client",
-        "ms-vscode.vscode-json"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "[vue]": {
-          "editor.defaultFormatter": "Vue.volar"
+    // Forward ports
+    "forwardPorts": [8080, 5173],
+    "portsAttributes": {
+        "8080": {
+            "label": "Backend API",
+            "onAutoForward": "notify"
         },
-        "sqltools.connections": [
-          {
-            "name": "RentSpot MySQL",
-            "driver": "MySQL",
-            "server": "localhost",
-            "port": 3306,
-            "username": "root",
-            "password": "",
-            "database": "Rent_database"
-          }
-        ]
-      }
+        "5173": {
+            "label": "Frontend Dev Server",
+            "onAutoForward": "openBrowser"
+        }
+    },
+
+    // Configure tool-specific properties
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "html-validate.vscode-html-validate",
+                "dbaeumer.vscode-eslint",
+                "vsls-contrib.gitdoc",
+                "ms-vsliveshare.vsliveshare-pack",
+                "tonybaloney.vscode-pets",
+                "unjinjang.rest-api-client",
+                "Vue.volar",
+                "cweijan.vscode-database-client2"
+            ]
+        }
+    },
+
+    // Force AMD64 architecture
+    "runArgs": ["--platform=linux/amd64"],
+
+    // Auto-setup everything after container creation
+    "postCreateCommand": "bash -c 'echo \"🚀 Starting RentSpot auto-setup...\" && if ! command -v mysql &> /dev/null && ! command -v mariadb &> /dev/null; then echo \"Installing MariaDB...\" && apt update && apt install -y mariadb-server mariadb-client; fi && if ! pgrep -x \"mysqld\" > /dev/null && ! pgrep -x \"mariadbd\" > /dev/null; then echo \"Starting database...\" && service mysql start 2>/dev/null || service mariadb start; fi && sleep 3 && DB_CMD=\"mysql\" && command -v mariadb &> /dev/null && DB_CMD=\"mariadb\" && echo \"Creating database...\" && $DB_CMD -u root -e \"CREATE DATABASE IF NOT EXISTS Rent_database;\" && if [ -f \"backend/Rent_database_updated.sql\" ]; then echo \"Importing database schema...\" && $DB_CMD -u root Rent_database < backend/Rent_database_updated.sql && echo \"✅ Database imported successfully\"; fi && echo \"Installing backend dependencies...\" && cd backend && npm install && if [ ! -f \".env\" ]; then echo \"Creating backend .env...\" && cat > .env << \"EOF\"\nDB_HOST=localhost\nDB_USER=root\nDB_PASSWORD=\nDB_NAME=Rent_database\nDB_PORT=3306\nJWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf\nPORT=8080\nCLOUDINARY_CLOUD_NAME=dzxrmtus9\nCLOUDINARY_API_KEY=138993529279886\nCLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8\nTURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nTURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ\nNEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3\nEOF\necho \"✅ Backend .env created\"; fi && echo \"Installing frontend dependencies...\" && cd ../rentspot-frontend && rm -rf node_modules package-lock.json && npm install && if [ ! -f \".env\" ]; then echo \"Creating frontend .env...\" && cat > .env << \"EOF\"\nVUE_APP_API_BASE_URL=http://localhost:8080/api\nVUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9\nVUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned\nVUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nVUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA\nEOF\necho \"✅ Frontend .env created\"; fi && echo \"\" && echo \"🎉 RentSpot setup complete!\" && echo \"\" && echo \"To start the application:\" && echo \"Terminal 1: cd backend && npm start\" && echo \"Terminal 2: cd rentspot-frontend && npm run serve\"'",
+
+    // Start database on every container restart  
+    "postStartCommand": "service mysql start 2>/dev/null || service mariadb start 2>/dev/null || true",
+
+    // Use root user (as per course requirement)
+    "remoteUser": "root",
+
+    // Default settings (keeping course requirements)
+    "settings": {
+        "extension-uninstaller.uninstall": [
+            "github.copilot",
+            "github.copilot-nightly", 
+            "tabnine.tabnine-vscode",
+            "timkmecl.chatgpt"
+        ],
+        "extensions.ignoreRecommendations": true,
+        "files.autoSave": "afterDelay",
+        "files.exclude": {
+            "**/.*": true
+        },
+        "files.trimTrailingWhitespace": true,
+        "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/*/**": true
+        },
+        "git.autofetch": true,
+        "gitdoc.autoPull": "off",
+        "gitdoc.commitMessageFormat": "DD, TTT",
+        "gitdoc.commitValidationLevel": "none",
+        "gitdoc.enabled": false,
+        "gitdoc.pullOnOpen": false,
+        "terminal.integrated.defaultProfile.linux": "bash"
     }
-  },
-
-  // Environment variables
-  "containerEnv": {
-    "NODE_ENV": "development",
-    "MYSQL_ROOT_PASSWORD": "",
-    "MYSQL_ALLOW_EMPTY_PASSWORD": "yes"
-  },
-
-  // Commands to run in sequence after container creation
-  "postCreateCommand": "bash -c 'echo \"Starting RentSpot setup...\" && sudo apt update && sudo apt install -y mysql-server mysql-client && sudo service mysql start && sleep 5 && sudo mysql -e \"ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY \\\"\\\"; FLUSH PRIVILEGES;\" && mysql -u root -e \"CREATE DATABASE IF NOT EXISTS Rent_database;\" && if [ -f \"backend/Rent_database_updated.sql\" ]; then mysql -u root Rent_database < backend/Rent_database_updated.sql; echo \"Database imported successfully\"; fi && cd backend && npm install && if [ ! -f \".env\" ]; then cat > .env << \"EOF\"\nDB_HOST=localhost\nDB_USER=root\nDB_PASSWORD=\nDB_NAME=Rent_database\nDB_PORT=3306\nJWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf\nPORT=8080\nCLOUDINARY_CLOUD_NAME=dzxrmtus9\nCLOUDINARY_API_KEY=138993529279886\nCLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8\nTURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nTURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ\nNEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3\nEOF\necho \"Backend .env created\"; fi && cd ../rentspot-frontend && rm -rf node_modules package-lock.json && npm install && if [ ! -f \".env\" ]; then cat > .env << \"EOF\"\nVUE_APP_API_BASE_URL=http://localhost:8080/api\nVUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9\nVUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned\nVUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nVUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA\nEOF\necho \"Frontend .env created\"; fi && echo \"✅ RentSpot setup complete! Run: cd backend && npm start (Terminal 1) | cd rentspot-frontend && npm run serve (Terminal 2)\"'",
-
-  // Run on every container start
-  "postStartCommand": "sudo service mysql start",
-
-  // Use node user for security
-  "remoteUser": "node",
-
-  // Wait for MySQL to be ready
-  "waitFor": "postCreateCommand"
 }
