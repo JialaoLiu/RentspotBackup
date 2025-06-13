@@ -43,7 +43,7 @@
         :style="{ display: showCaptcha ? 'flex' : 'none' }"
       ></div>
       <div v-else class="codespaces-notice">
-        <p>✅ CAPTCHA verification skipped (Codespaces environment detected)</p>
+        <p>CAPTCHA verification skipped (Codespaces environment)</p>
       </div>
 
       <!-- btn can be click but still need to verify -->
@@ -182,7 +182,7 @@ export default {
     initializeTurnstile() {
       // Skip CAPTCHA initialization in Codespaces
       if (this.isCodespaces) {
-        console.log('Codespaces environment detected - CAPTCHA disabled');
+        console.log('Codespaces environment - CAPTCHA disabled');
         return;
       }
       
