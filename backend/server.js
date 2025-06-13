@@ -23,9 +23,15 @@ app.use(express.json());
 // CORS configuration - evolved to handle multiple environments
 // Originally had simple CORS(origin: true) but that's insecure for production
 app.use(cors({
-  origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'https://dev.rentspot.com:5173'],
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://dev.rentspot.com:5173',
+    /https:\/\/.*\.app\.github\.dev$/,  // Allow all GitHub Codespaces URLs
+    /https:\/\/.*\.github\.dev$/       // Allow any github.dev domain
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 const authRoutes = require('./routes/authRoutes');
