@@ -2,11 +2,10 @@
   "name": "rentspot-frontend",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
-    "preview": "vite preview"
+    "serve": "vue-cli-service serve --port 5173",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "axios": "^1.9.0",
@@ -14,8 +13,11 @@
     "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.1"
+    "@vue/cli-plugin-babel": "^5.0.0",
+    "@vue/cli-plugin-eslint": "^5.0.0",
+    "@vue/cli-service": "^5.0.0",
+    "@vue/compiler-sfc": "^3.5.13",
+    "eslint": "^8.0.0",
+    "eslint-plugin-vue": "^9.0.0"
   }
 }
