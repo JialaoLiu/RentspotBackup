@@ -31,4 +31,10 @@ router.put('/users/:id/role', adminController.updateUserRole);
 // Get dashboard statistics
 router.get('/stats', adminController.getDashboardStats);
 
+// Delete user
+router.delete('/users/:id', adminController.deleteUser);
+
+// Update user details
+router.put('/users/:id', adminController.updateUser);
+
 module.exports = router;

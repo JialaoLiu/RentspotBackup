@@ -99,6 +99,15 @@ function navigate(path, replace = false) {
     }
   }
   
+  // Admin permission check
+  if (route.requiresAdmin) {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!userData.role || userData.role !== 2) {
+      navigate('/userprofile'); // Redirect if not admin
+      return;
+    }
+  }
+  
   currentRoute.value = route.component;
   
   if (replace) {

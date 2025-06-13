@@ -23,7 +23,7 @@ const adminController = {
       // res.json({ success: true, users });
 
       const [users] = await db.query(
-        `SELECT user_id, user_name, user_email, user_role, user_registered_at, 
+        `SELECT user_id, user_name, user_email, user_phone, user_role, user_registered_at, 
                 COALESCE(user_avatar_url, '/images/profile.png') as avatar
          FROM User 
          ORDER BY user_registered_at DESC 
@@ -130,6 +130,64 @@ const adminController = {
       // TODO: add property status breakdown (available/rented/removed)
     } catch (error) {
       handleDbError(res, error, 'Failed to fetch dashboard stats');
+    }
+  },
+
+  // Delete user (admin only)
+  deleteUser: async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Prevent self-deletion
+      if (parseInt(id) === req.user.user_id) {
+        return sendError(res, 'Cannot delete your own account', 403);
+      }
+
+      // Check if user exists
+      const [userExists] = await db.query('SELECT user_id FROM User WHERE user_id = ?', [id]);
+      if (userExists.length === 0) {
+        return sendError(res, 'User not found', 404);
+      }
+
+      // Delete related records first (maintain referential integrity)
+      await db.query('DELETE FROM Favorite WHERE user_id = ?', [id]);
+      await db.query('DELETE FROM Booking WHERE user_id = ?', [id]);
+      await db.query('DELETE FROM Property WHERE owner_id = ?', [id]);
+      await db.query('DELETE FROM User WHERE user_id = ?', [id]);
+
+      res.json({
+        success: true,
+        message: 'User deleted successfully'
+      });
+    } catch (error) {
+      handleDbError(res, error, 'Failed to delete user');
+    }
+  },
+
+  // Update user details (admin only)
+  updateUser: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { user_name, user_phone } = req.body;
+
+      // Check if user exists
+      const [userExists] = await db.query('SELECT user_id FROM User WHERE user_id = ?', [id]);
+      if (userExists.length === 0) {
+        return sendError(res, 'User not found', 404);
+      }
+
+      // Update user details
+      await db.query(
+        'UPDATE User SET user_name = ?, user_phone = ? WHERE user_id = ?',
+        [user_name, user_phone, id]
+      );
+
+      res.json({
+        success: true,
+        message: 'User updated successfully'
+      });
+    } catch (error) {
+      handleDbError(res, error, 'Failed to update user');
     }
   }
 };
