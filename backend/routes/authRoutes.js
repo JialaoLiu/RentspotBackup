@@ -16,11 +16,19 @@ async function checkCaptcha(token) {
     return process.env.NODE_ENV === 'development';
   }
 
+  // Use test keys only for Codespaces environment
+  const isCodespaces = process.env.CODESPACE_NAME;
+  
+  const secretKey = isCodespaces 
+    ? (process.env.TURNSTILE_TEST_SECRET_KEY || '1x0000000000000000000000000000000AA')
+    : process.env.TURNSTILE_SECRET_KEY;
+
   try {
     const response = await axios.post(
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
       new URLSearchParams({
-        secret: process.env.TURNSTILE_SECRET_KEY,
+        // secret: process.env.TURNSTILE_SECRET_KEY, // Original production-only approach
+        secret: secretKey, // Dynamic key selection for dev/prod
         response: token
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
