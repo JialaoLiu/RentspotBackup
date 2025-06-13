@@ -1,3 +1,5 @@
+<!-- TODO: Fix cloudflare turnstile in codespace environment for presentation!! -->
+<!-- How to skip cloudflare turnstile when running in codespace??? Random URL  -->
 <template>
   <form @submit.prevent="handleLogin" class="login-form">
     <div class="imgcontainer">
@@ -70,6 +72,16 @@ const redirectPath = computed(() => route.value.query.redirect || '/');
 onMounted(() => {
   // console.log('Login component mounted'); // useful for debugging navigation issues
   
+  // Detect Codespaces environment specifically (not localhost)
+  const isCodespaces = window.location.hostname.includes('github.dev') || 
+                      window.location.hostname.includes('app.github.dev') ||
+                      window.location.hostname.includes('githubpreview.dev');
+  
+  // Use test sitekey only for Codespaces (works on any domain)
+  const siteKey = isCodespaces 
+    ? (import.meta.env.VITE_TURNSTILE_TEST_SITE_KEY || '1x00000000000000000000AA')
+    : (import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0');
+  
   // load turnstile script - works fine
   let script = document.createElement('script');
   script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -83,7 +95,8 @@ onMounted(() => {
     if (window.turnstile && turnstileContainer.value) {
       try {
         turnstileWidget = window.turnstile.render('#cf-turnstile', {
-          sitekey: '0x4AAAAAABdkinnD2a45uxc0', 
+          // sitekey: '0x4AAAAAABdkinnD2a45uxc0', // Original hardcoded production key
+          sitekey: siteKey, // Dynamic key selection for dev/prod environments
           callback: function(token) {
             turnstileToken.value = token;
             // console.log('Turnstile token received'); // debug callback

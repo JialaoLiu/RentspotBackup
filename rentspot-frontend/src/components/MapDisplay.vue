@@ -103,7 +103,7 @@ function addPropertyMarkers() {
       // Create custom marker
       const markerIcon = {
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor: isVisited ? '#6B7280' : '#3B82F6', // Gray for visited, blue for unvisited
+        fillColor: isVisited ? '#6B7280' : '#EF4444', // Gray for visited, red for unvisited
         fillOpacity: 1,
         strokeWeight: 2,
         strokeColor: '#FFFFFF',
