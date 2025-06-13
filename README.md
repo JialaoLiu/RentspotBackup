@@ -258,7 +258,9 @@ The diagram above illustrates the complete database schema with table relationsh
 
 
 
-## 2.8 What We Learned
+
+## 2.8 What we get through
+
 
 Through this project, we gained hands-on experience with:
 - Full-stack web development using modern JavaScript frameworks
@@ -296,6 +298,7 @@ To test the application functionality:
 4. **Admin Functions**: Manage users and view statistics as an admin
 5. **Responsive Testing**: Test on different screen sizes and devices
 
+
 ## 2.12 Environment-Specific Features
 
 ### Registration and Login:
@@ -308,15 +311,27 @@ To test the application functionality:
 
 ## 2.13 Testing Recommendations
 
+
 - **Local Testing**: Test CAPTCHA functionality during registration
 - **Codespaces Testing**: Focus on core features since CAPTCHA is automatically handled
 - **Use Test Accounts**: Pre-configured accounts for testing different user roles
 - **Responsive Testing**: Verify functionality across desktop and mobile viewports
 - **API Testing**: All property, user, and booking APIs work in both environments
 
-The application includes comprehensive error handling and user feedback through toast notifications.
+
+
+
+## Development Notes
+
+- All team members must work on their assigned branches (see below)
+- Code reviews required for all pull requests
+- Follow JavaScript semicolon conventions for consistency
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
 # 3. RentSpot AU - Git Branch Usage Guide
+
 
 To ensure clean collaboration, **each team member must work on their own branch**.
 **Never commit directly to the `main` branch.** All changes must go through pull requests (PRs).
