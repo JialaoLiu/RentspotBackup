@@ -55,6 +55,8 @@ const iconMap = {
   'search': 'search',
   'upload': 'upload',
   'user': 'person',
+  'person_add': 'person_add',
+  'admin_panel_settings': 'admin_panel_settings',
 
   // Status/Feedback
   'error': 'error',

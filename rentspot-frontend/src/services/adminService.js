@@ -14,6 +14,16 @@ const adminService = {
   // Get dashboard statistics
   getStats: async () => {
     return apiService.get('/admin/stats');
+  },
+
+  // Delete user
+  deleteUser: async (userId) => {
+    return apiService.delete(`/admin/users/${userId}`);
+  },
+
+  // Update user details
+  updateUser: async (userId, userData) => {
+    return apiService.put(`/admin/users/${userId}`, userData);
   }
 };
 
