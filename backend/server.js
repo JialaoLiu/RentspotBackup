@@ -16,98 +16,23 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// FIXME: Database connection fails when switching between local and Codespace environments
-// TODO: Need to implement automatic environment detection for database credentials
-// Local environment requires DB_PASSWORD=Ljl12345! but Codespace uses empty password
-// Current workaround: manually update .env files when switching environments
-
 // Body parsing middleware - Express 4.16+ has built-in JSON parsing
 // No need for body-parser package anymore (was using it in early versions)
 app.use(express.json());
 
-// Debug: Log all incoming requests in Codespaces
-if (process.env.CODESPACE_NAME) {
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
-    next();
-  });
-}
-
 // CORS configuration - evolved to handle multiple environments
 // Originally had simple CORS(origin: true) but that's insecure for production
-
-// CORS configuration - handles both local, private Codespaces, and public Codespaces
 app.use(cors({
   origin: [
-    'http://localhost:5173',                    // Local development
-    'http://localhost:8080',                    // Local backend
-    process.env.FRONTEND_URL,                   // Environment variable override
-    /https:\/\/.*\.app\.github\.dev$/,          // GitHub Codespaces URLs (public)
-    /https:\/\/.*\.github\.dev$/,               // Alternative Codespaces domains
-    /https:\/\/.*\.githubpreview\.dev$/,        // GitHub Codespaces private URLs
-    /https:\/\/.*-5173\.preview\.app\.github\.dev$/  // Codespaces preview URLs (private)
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://dev.rentspot.com:5173',
+    /https:\/\/.*\.app\.github\.dev$/,  // Allow all GitHub Codespaces URLs
+    /https:\/\/.*\.github\.dev$/       // Allow any github.dev domain
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true
 }));
-
-// FIXME: Previous complex CORS implementation - commented out but kept for reference
-// Original array-based CORS - worked for most cases but had issues with dynamic Codespaces URLs
-// app.use(cors({
-//   origin: [
-//     process.env.FRONTEND_URL || 'http://localhost:5173',
-//     'https://dev.rentspot.com:5173',
-//     /https:\/\/.*\.app\.github\.dev$/,  // Allow all GitHub Codespaces URLs
-//     /https:\/\/.*\.github\.dev$/       // Allow any github.dev domain
-//   ],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: true
-// }));
-
-// FIXME: Previous conditional CORS - commented out due to reliability issues
-// Temporary fix - allow all origins in Codespaces to debug CORS issues
-// if (process.env.CODESPACE_NAME) {
-//   console.log('CODESPACES MODE: Using permissive CORS for development');
-//   app.use(cors({
-//     origin: true,
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization']
-//   }));
-// } else {
-//   // TODO: Production CORS with function-based origin checking
-//   app.use(cors({
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin (like mobile apps or curl requests)
-//       if (!origin) return callback(null, true);
-//       
-//       const allowedOrigins = [
-//         'http://localhost:5173',
-//         process.env.FRONTEND_URL,
-//         'https://dev.rentspot.com:5173'
-//       ];
-//       
-//       // Allow GitHub Codespaces URLs - needed for deployment compatibility
-//       if (origin.match(/https:\/\/.*\.app\.github\.dev$/) || 
-//           origin.match(/https:\/\/.*\.github\.dev$/)) {
-//         return callback(null, true);
-//       }
-//       
-//       if (allowedOrigins.indexOf(origin) !== -1) {
-//         return callback(null, true);
-//       }
-//       
-//       return callback(new Error('Not allowed by CORS'));
-//     },
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization'],
-//     credentials: true,
-//     optionsSuccessStatus: 200
-//   }));
-// }
 
 const authRoutes = require('./routes/authRoutes');
 const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
