@@ -20,8 +20,31 @@ const PORT = process.env.PORT || 8080;
 // No need for body-parser package anymore (was using it in early versions)
 app.use(express.json());
 
+// Debug: Log all incoming requests in Codespaces
+if (process.env.CODESPACE_NAME) {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+    next();
+  });
+}
+
 // CORS configuration - evolved to handle multiple environments
 // Originally had simple CORS(origin: true) but that's insecure for production
+
+// Original array-based CORS - worked for most cases but had issues with dynamic Codespaces URLs
+// app.use(cors({
+//   origin: [
+//     process.env.FRONTEND_URL || 'http://localhost:5173',
+//     'https://dev.rentspot.com:5173',
+//     /https:\/\/.*\.app\.github\.dev$/,  // Allow all GitHub Codespaces URLs
+//     /https:\/\/.*\.github\.dev$/       // Allow any github.dev domain
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true
+// }));
+
+// FIXME: Updated to function-based CORS to handle dynamic Codespaces URLs properly
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -33,7 +56,7 @@ app.use(cors({
       'https://dev.rentspot.com:5173'
     ];
     
-    // Allow GitHub Codespaces URLs
+    // Allow GitHub Codespaces URLs - needed for deployment compatibility
     if (origin.match(/https:\/\/.*\.app\.github\.dev$/) || 
         origin.match(/https:\/\/.*\.github\.dev$/)) {
       return callback(null, true);
