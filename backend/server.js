@@ -16,16 +16,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Auto-detect environment and set database credentials
-if (process.env.CODESPACE_NAME) {
-  // Running in Codespace - use empty password (from devcontainer setup)
-  process.env.DB_PASSWORD = process.env.DB_PASSWORD || '';
-  console.log('CODESPACE MODE: Using devcontainer database config');
-} else {
-  // Running locally - use your local password
-  process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'Ljl12345!';
-  console.log('LOCAL MODE: Using local database config');
-}
+// FIXME: Database connection fails when switching between local and Codespace environments
+// TODO: Need to implement automatic environment detection for database credentials
+// Local environment requires DB_PASSWORD=Ljl12345! but Codespace uses empty password
+// Current workaround: manually update .env files when switching environments
 
 // Body parsing middleware - Express 4.16+ has built-in JSON parsing
 // No need for body-parser package anymore (was using it in early versions)
