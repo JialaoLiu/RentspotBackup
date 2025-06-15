@@ -4,7 +4,6 @@ const { handleDbError, handleValidationError, handleNotFound } = require('../uti
 
 // Booking system evolved from simple contact forms to complex inspection scheduling
 // Started with basic "contact landlord" button, then added time slots, validation rules
-// 4-hour advance booking rule came after too many last-minute cancellations
 
 const bookingController = {
   /**

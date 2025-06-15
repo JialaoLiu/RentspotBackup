@@ -4,11 +4,9 @@ const db = require('../config/db');
  * Property data model
  * Handles all database operations for property listings
  * 
- * Database schema evolved from single property_img_url field (legacy) to PropertyImage table
+ * Database schema evolved from single property_img_url field to PropertyImage table
  * for multiple images (current). Using COALESCE to maintain backward compatibility.
  * 
- * Performance getting worse with more data. Property listing query is slow,
- * need to add indexes on frequently filtered columns. Should consider caching for popular searches.
  */
 const Property = {
   /**
@@ -77,16 +75,16 @@ const Property = {
       
       const queryParams = [];
       
-      // Dynamic filter building - this approach is flexible but can be SQL injection risk
+      // Dynamic filter building - this approach is flexible but can be SQL injection risk(From lecture wk 10? or 11?)
       // All user inputs are parameterized to prevent injection attacks
       
       // Keyword search across title and address
       if (filters.keyword) {
-        // Search both property name and address - users expect this behavior
+        // Search both property name and address
         query += ' AND (p.property_name LIKE ? OR p.property_address LIKE ?)';
         queryParams.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
         // TODO: add full-text search for better performance with large datasets!
-        // FIXME: this LIKE query is slow when searching large text fields
+        // FIXME: 
       }
       
       // Price range filtering - most commonly used filter
@@ -100,7 +98,7 @@ const Property = {
         queryParams.push(Number(filters.maxPrice));
       }
       
-      // Room filtering - ">=" because users want "at least X bedrooms"
+      // Room filtering - ">=" 
       if (filters.bedrooms) {
         query += ' AND p.property_room >= ?';
         queryParams.push(Number(filters.bedrooms));

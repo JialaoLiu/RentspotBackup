@@ -186,7 +186,7 @@ export default {
         return;
       }
       
-      // Use production sitekey for non-Codespaces environments
+      // Use standard sitekey for non-Codespaces environments
       const siteKey = process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0';
       
       const script = document.createElement('script');

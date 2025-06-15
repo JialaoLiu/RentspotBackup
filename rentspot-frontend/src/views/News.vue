@@ -197,104 +197,141 @@ const fetchNews = async () => {
 
 // TODO: Added NewsAPI integration for real property news
 const fetchFromNewsAPI = async () => {
-  const API_KEY = process.env.VUE_APP_NEWS_API_KEY || 'd9b129de2e5e432e8315073b3e294fc3'
-  
-  if (!API_KEY) {
-    console.warn('NewsAPI key not configured')
-    return null
-  }
+  // Original direct NewsAPI implementation - worked locally but had CORS issues in Codespaces
+  // const API_KEY = process.env.VUE_APP_NEWS_API_KEY || 'd9b129de2e5e432e8315073b3e294fc3'
+  // 
+  // if (!API_KEY) {
+  //   console.warn('NewsAPI key not configured')
+  //   return null
+  // }
+  // 
+  // try {
+  //   // FIXME: Targeting Australian property news specifically
+  //   const params = new URLSearchParams({
+  //     q: 'real estate OR property OR housing OR rental market Australia',
+  //     domains: 'realestate.com.au,domain.com.au,news.com.au,abc.net.au,smh.com.au,theaustralian.com.au',
+  //     language: 'en',
+  //     sortBy: 'publishedAt',
+  //     pageSize: '15',
+  //     from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  //   })
+  // 
+  //   console.log('Fetching from NewsAPI...')
+  //   
+  //   // Direct NewsAPI call - worked locally but blocked by CORS in codespaces
+  //   const response = await fetch(`https://newsapi.org/v2/everything?${params}`, {
+  //     headers: {
+  //       'X-API-Key': API_KEY,
+  //       'Accept': 'application/json'
+  //     },
+  //     mode: 'cors'
+  //   })
+  // 
+  //   if (!response.ok) {
+  //     throw new Error(`NewsAPI HTTP error: ${response.status} ${response.statusText}`)
+  //   }
+  // 
+  //   const data = await response.json()
+  //   
+  //   if (data.status === 'error') {
+  //     throw new Error(`NewsAPI error: ${data.message}`)
+  //   }
+  //   
+  //   if (data.articles && Array.isArray(data.articles)) {
+  //     console.log(`Received ${data.articles.length} articles from NewsAPI`)
+  //     
+  //     return data.articles
+  //       .filter(article => {
+  //         return article && 
+  //                article.title && 
+  //                article.title !== '[Removed]' &&
+  //                article.description && 
+  //                article.description !== '[Removed]' &&
+  //                article.url &&
+  //                article.publishedAt
+  //       })
+  //       .slice(0, 12)
+  //       .map((article, index) => {
+  //         return {
+  //           title: article.title || 'No Title Available',
+  //           description: article.description || 'No description available',
+  //           publishedAt: article.publishedAt,
+  //           source: {
+  //             id: article.source?.id || null,
+  //             name: article.source?.name || 'Unknown Source'
+  //           },
+  //           author: article.author || null,
+  //           urlToImage: article.urlToImage || `https://picsum.photos/400/200?random=${Date.now() + index}`,
+  //           url: article.url,
+  //           content: article.content || null
+  //         }
+  //       })
+  //   }
+  // 
+  //   console.warn('NewsAPI returned no articles')
+  //   return null
+  // 
+  // } catch (err) {
+  //   console.error('NewsAPI fetch failed:', err.message)
+  //   
+  //   if (err.message.includes('401')) {
+  //     console.error('NewsAPI authentication failed - check API key')
+  //   } else if (err.message.includes('429')) {
+  //     console.error('NewsAPI rate limit exceeded')
+  //   } else if (err.message.includes('CORS')) {
+  //     console.error('CORS error - may need proxy server for codespaces')
+  //   }
+  //   
+  //   return null
+  // }
 
+  // FIXME: Updated to use backend proxy to solve CORS issues in Codespaces
   try {
-    // FIXME: Targeting Australian property news specifically
-    const params = new URLSearchParams({
-      q: 'real estate OR property OR housing OR rental market Australia',
-      domains: 'realestate.com.au,domain.com.au,news.com.au,abc.net.au,smh.com.au,theaustralian.com.au',
-      language: 'en',
-      sortBy: 'publishedAt',
-      pageSize: '15',
-      from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // Last 7 days
-    })
-
-    console.log('Fetching from NewsAPI...')
+    console.log('Fetching from NewsAPI via backend proxy...')
     
-    // TODO: Direct NewsAPI call - may need backend proxy for production due to CORS
-    const response = await fetch(`https://newsapi.org/v2/everything?${params}`, {
+    // TODO: Backend proxy approach - avoids CORS restrictions
+    const apiBaseUrl = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080/api'
+    const response = await fetch(`${apiBaseUrl}/news/property-news`, {
+      method: 'GET',
       headers: {
-        'X-API-Key': API_KEY,
         'Accept': 'application/json'
-      },
-      // FIXME: Add mode for CORS handling in Codespaces
-      mode: 'cors'
+      }
     })
 
     if (!response.ok) {
-      throw new Error(`NewsAPI HTTP error: ${response.status} ${response.statusText}`)
+      throw new Error(`Backend proxy error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
     
-    // Handle NewsAPI error responses
-    if (data.status === 'error') {
-      throw new Error(`NewsAPI error: ${data.message}`)
+    // Handle backend proxy response format
+    if (!data.success) {
+      if (data.fallback) {
+        console.warn('Backend proxy fallback mode:', data.message || 'NewsAPI unavailable')
+        return null
+      }
+      throw new Error(`Backend proxy error: ${data.error || 'Unknown error'}`)
     }
     
-    // TODO: Process complex nested API response with variability handling
+    // TODO: Process articles from backend proxy (same format as direct API)
     if (data.articles && Array.isArray(data.articles)) {
-      console.log(`Received ${data.articles.length} articles from NewsAPI`)
-      
+      console.log(`Received ${data.articles.length} articles from backend proxy`)
       return data.articles
-        .filter(article => {
-          // FIXME: Filter out removed/null content due to API variability
-          return article && 
-                 article.title && 
-                 article.title !== '[Removed]' &&
-                 article.description && 
-                 article.description !== '[Removed]' &&
-                 article.url &&
-                 article.publishedAt
-        })
-        .slice(0, 12)
-        .map((article, index) => {
-          // TODO: Complex nested data extraction with null safety for API compliance
-          return {
-            title: article.title || 'No Title Available',
-            description: article.description || 'No description available',
-            publishedAt: article.publishedAt,
-            
-            // FIXME: Handle nested source object with optional fields (API variability)
-            source: {
-              id: article.source?.id || null,
-              name: article.source?.name || 'Unknown Source'
-            },
-            
-            // Handle optional author field (common API variability)
-            author: article.author || null,
-            
-            // TODO: Handle optional image with fallback for missing images
-            urlToImage: article.urlToImage || `https://picsum.photos/400/200?random=${Date.now() + index}`,
-            
-            // Original URL for external linking
-            url: article.url,
-            
-            // FIXME: Handle optional content field (often truncated by NewsAPI)
-            content: article.content || null
-          }
-        })
     }
 
-    console.warn('NewsAPI returned no articles')
+    console.warn('Backend proxy returned no articles')
     return null
 
   } catch (err) {
-    console.error('NewsAPI fetch failed:', err.message)
+    console.error('Backend NewsAPI proxy failed:', err.message)
     
-    // TODO: Log specific error types for debugging
+    // TODO: Enhanced error logging for backend integration
     if (err.message.includes('401')) {
-      console.error('NewsAPI authentication failed - check API key')
+      console.error('Backend authentication failed')
     } else if (err.message.includes('429')) {
-      console.error('NewsAPI rate limit exceeded')
-    } else if (err.message.includes('CORS')) {
-      console.error('CORS error - may need proxy server for production')
+      console.error('NewsAPI rate limit exceeded (via backend)')
+    } else if (err.message.includes('Failed to fetch')) {
+      console.error('Backend server unreachable - check if backend is running')
     }
     
     return null

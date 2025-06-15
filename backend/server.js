@@ -24,14 +24,16 @@ app.use(express.json());
 // Originally had simple CORS(origin: true) but that's insecure for production
 app.use(cors({
   origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:5173',
+    process.env.FRONTEND_URL,
     'https://dev.rentspot.com:5173',
     /https:\/\/.*\.app\.github\.dev$/,  // Allow all GitHub Codespaces URLs
     /https:\/\/.*\.github\.dev$/       // Allow any github.dev domain
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 const authRoutes = require('./routes/authRoutes');
@@ -40,6 +42,8 @@ const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
 const userRoutes = require('./routes/userRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+// FIXME: Added NewsAPI proxy routes to handle CORS issues in Codespaces deployment
+const newsRoutes = require('./routes/newsRoutes');
 
 app.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
@@ -51,6 +55,8 @@ app.use('/api/properties', workingPropertyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+// TODO: Added NewsAPI proxy to handle external API integration complexity requirements
+app.use('/api/news', newsRoutes);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
