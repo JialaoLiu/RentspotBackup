@@ -1,3 +1,6 @@
+// TODO: Replace JWT with session-based authentication for codespaces deployment
+// FIXME: Current use of jsonwebtoken not course submission requirements.
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,8 +9,8 @@ const db = require('../config/db');
 const { handleValidationError, handleNotFound, handleAuthError, handleDbError } = require('../utils/errorHandler');
 require('dotenv').config();
 
-// Auth routes evolved from basic login/register to include CAPTCHA and JWT tokens
-// CAPTCHA was added after spam registration attempts, JWT replaced session storage
+// Auth routes with CAPTCHA and JWT tokens
+// CAPTCHA prevents spam registration, JWT handles authentication
 
 const router = express.Router();
 
@@ -27,8 +30,7 @@ async function checkCaptcha(token) {
     const response = await axios.post(
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
       new URLSearchParams({
-        // secret: process.env.TURNSTILE_SECRET_KEY, // Original production-only approach
-        secret: secretKey, // Dynamic key selection for dev/prod
+        secret: secretKey, // Dynamic key selection for codespaces/local
         response: token
       }),
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }

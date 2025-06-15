@@ -3,7 +3,7 @@ const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const { authenticateToken, requireLandlord } = require('../middleware/authMiddleware');
 
-// Booking routes started as simple contact forms, evolved to complex scheduling system
+// Booking routes started as simple contact forms, evolved to complex scheduling system from milestone 1 and 2
 // Public slot checking allows users to see availability before login
 
 // Public routes (no authentication required)
