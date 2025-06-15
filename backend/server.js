@@ -44,35 +44,46 @@ if (process.env.CODESPACE_NAME) {
 //   credentials: true
 // }));
 
-// FIXME: Updated to function-based CORS to handle dynamic Codespaces URLs properly
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      process.env.FRONTEND_URL,
-      'https://dev.rentspot.com:5173'
-    ];
-    
-    // Allow GitHub Codespaces URLs - needed for deployment compatibility
-    if (origin.match(/https:\/\/.*\.app\.github\.dev$/) || 
-        origin.match(/https:\/\/.*\.github\.dev$/)) {
-      return callback(null, true);
-    }
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-    
-    return callback(new Error('Not allowed by CORS'));
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
+// FIXME: Temporary fix - allow all origins in Codespaces to debug CORS issues
+if (process.env.CODESPACE_NAME) {
+  console.log('CODESPACES MODE: Using permissive CORS for development');
+  app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+} else {
+  // TODO: Production CORS with function-based origin checking
+  app.use(cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        'http://localhost:5173',
+        process.env.FRONTEND_URL,
+        'https://dev.rentspot.com:5173'
+      ];
+      
+      // Allow GitHub Codespaces URLs - needed for deployment compatibility
+      if (origin.match(/https:\/\/.*\.app\.github\.dev$/) || 
+          origin.match(/https:\/\/.*\.github\.dev$/)) {
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
+  }));
+}
 
 const authRoutes = require('./routes/authRoutes');
 const workingPropertyRoutes = require('./routes/workingPropertyRoutes');
