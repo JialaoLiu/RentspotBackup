@@ -377,8 +377,6 @@ We’re sharing this list both to give credit where it’s due, and to help ours
         * Parse Media Files with Multer: [https://cloudinary.com/blog/guest_post/how-to-parse-media-files-with-multer](https://cloudinary.com/blog/guest_post/how-to-parse-media-files-with-multer)
         * Node.js SDK Integration: [https://cloudinary.com/documentation/node_integration](https://cloudinary.com/documentation/node_integration)
         * Upload API Reference: [https://cloudinary.com/documentation/image_upload_api_reference](https://cloudinary.com/documentation/image_upload_api_reference)
-    * **Third-Party Tutorial:**
-        * BuildWithNode.com: [https://buildwithnode.com/cloudinary-with-nodejs/](https://buildwithnode.com/cloudinary-with-nodejs/)
 
 8.  **Google Maps JavaScript API**
     * Geocoding Service: [https://developers.google.com/maps/documentation/javascript/geocoding](https://developers.google.com/maps/documentation/javascript/geocoding)
