@@ -47,6 +47,36 @@ app.get('/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
+// Debug endpoint to check database connection
+app.get('/test-db', async (req, res) => {
+  const db = require('./config/db');
+  try {
+    const [rows] = await db.query('SELECT 1 as test');
+    res.json({ 
+      success: true, 
+      message: 'Database connected',
+      env: {
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD ? 'SET' : 'EMPTY',
+        database: process.env.DB_NAME
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      code: error.code,
+      env: {
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD ? 'SET' : 'EMPTY',
+        database: process.env.DB_NAME
+      }
+    });
+  }
+});
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', workingPropertyRoutes);
