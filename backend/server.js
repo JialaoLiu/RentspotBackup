@@ -16,6 +16,17 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Auto-detect environment and set database credentials
+if (process.env.CODESPACE_NAME) {
+  // Running in Codespace - use empty password (from devcontainer setup)
+  process.env.DB_PASSWORD = process.env.DB_PASSWORD || '';
+  console.log('CODESPACE MODE: Using devcontainer database config');
+} else {
+  // Running locally - use your local password
+  process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'Ljl12345!';
+  console.log('LOCAL MODE: Using local database config');
+}
+
 // Body parsing middleware - Express 4.16+ has built-in JSON parsing
 // No need for body-parser package anymore (was using it in early versions)
 app.use(express.json());
