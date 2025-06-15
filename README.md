@@ -258,9 +258,7 @@ The diagram above illustrates the complete database schema with table relationsh
 
 
 
-
-## 2.8 What we get through
-
+## 2.8 What We Learned
 
 Through this project, we gained hands-on experience with:
 - Full-stack web development using modern JavaScript frameworks
@@ -279,7 +277,7 @@ Through this project, we gained hands-on experience with:
 | **Nhat Tan (Trey)** | Frontend Lead | UI/UX design, Vue.js components, responsive layouts, user interface development |
 | **Deze Yang** | Frontend Assistant | frontend contributions on mock data in news.vue|
 
-## 2.10 Development Notes
+## 2.9 Development Notes
 
 - The project uses a custom Vue.js router implementation instead of Vue Router
 - All API endpoints follow RESTful conventions
@@ -288,7 +286,7 @@ Through this project, we gained hands-on experience with:
 - The application supports both light and dark themes
 - Mobile-first responsive design approach was used throughout
 
-## 2.11 Running Tests
+## 2.10 Running Tests
 
 To test the application functionality:
 
@@ -298,8 +296,7 @@ To test the application functionality:
 4. **Admin Functions**: Manage users and view statistics as an admin
 5. **Responsive Testing**: Test on different screen sizes and devices
 
-
-## 2.12 Environment-Specific Features
+## 2.11 Environment-Specific Features
 
 ### Registration and Login:
 - **Local Development**: Full functionality including Cloudflare Turnstile CAPTCHA protection
@@ -309,8 +306,7 @@ To test the application functionality:
 - **Local Development**: Uses mock data (NewsAPI now requires paid subscription) 
 - **GitHub Codespaces**: Uses same mock data with realistic Australian property news
 
-## 2.13 Testing Recommendations
-
+## 2.12 Testing Recommendations
 
 - **Local Testing**: Test CAPTCHA functionality during registration
 - **Codespaces Testing**: Focus on core features since CAPTCHA is automatically handled
@@ -318,20 +314,184 @@ To test the application functionality:
 - **Responsive Testing**: Verify functionality across desktop and mobile viewports
 - **API Testing**: All property, user, and booking APIs work in both environments
 
+The application includes comprehensive error handling and user feedback through toast notifications.
 
+### 2.13 Technical References & Documentation
 
+This section lists the main technologies, tools, and frameworks we used to build RentSpot, along with the key docs and tutorials that helped guide our development. We tried to keep track of useful links as we coded, but we probably missed a few—especially after closing too many tabs once the feature was working and thought, "finally done" (which, to be honest, happened more than once).
 
-## Development Notes
+Throughout the project, we learned a lot from official docs, blog posts, guides, and example projects. That said, every feature was hand-built based on our own research and understanding—not just copied from a single source.
 
-- All team members must work on their assigned branches (see below)
-- Code reviews required for all pull requests
-- Follow JavaScript semicolon conventions for consistency
+We’re sharing this list both to give credit where it’s due, and to help ourselves if we ever need to revisit, update, or build another project in the future. But after the course ends, some of the external APIs used during development may be disabled to prevent potential data leaks or unauthorized access.
 
+---
 
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+#### FRONTEND TECHNOLOGIES & FRAMEWORKS
+
+1.  **Vue.js 3 with Composition API**
+    * Primary Documentation: [https://vuejs.org/guide/introduction.html](https://vuejs.org/guide/introduction.html)
+    * Composition API Setup: [https://vuejs.org/api/composition-api-setup.html](https://vuejs.org/api/composition-api-setup.html)
+    * Composables Guide: [https://vuejs.org/guide/reusability/composables](https://vuejs.org/guide/reusability/composables)
+    * Composition API FAQ: [https://vuejs.org/guide/extras/composition-api-faq.html](https://vuejs.org/guide/extras/composition-api-faq.html)
+    * TypeScript with Composition API: [https://vuejs.org/guide/typescript/composition-api.html](https://vuejs.org/guide/typescript/composition-api.html)
+
+2.  **Custom Router Implementation (No Vue Router)**
+    * Main Tutorial (Basic Concept): [https://vueschool.io/articles/vuejs-tutorials/creating-your-own-router/](https://vueschool.io/articles/vuejs-tutorials/creating-your-own-router/)
+    * Vue 3 Reactivity for Router State: [https://vuejs.org/guide/essentials/reactivity-fundamentals.html](https://vuejs.org/guide/essentials/reactivity-fundamentals.html)
+    * MDN History API: [https://developer.mozilla.org/en-US/docs/Web/API/History_API](https://developer.mozilla.org/en-US/docs/Web/API/History_API)
+
+3.  **Vue Toastification**
+    * GitHub Repository: [https://github.com/Maronato/vue-toastification](https://github.com/Maronato/vue-toastification)
+    * Official Documentation: [https://vue-toastification.maronato.dev/](https://vue-toastification.maronato.dev/)
+
+---
+
+#### AUTHENTICATION & SECURITY
+
+4.  **JWT Authentication**
+    * **Jason Watmore's Tutorials:**
+        * Vue 3 + Node.js JWT: [https://jasonwatmore.com/vue-3-authentication-with-nodejs-jwt-api](https://jasonwatmore.com/vue-3-authentication-with-nodejs-jwt-api)
+        * Vue 3 + Pinia JWT: [https://jasonwatmore.com/post/2022/05/26/vue-3-pinia-jwt-authentication-tutorial-example](https://jasonwatmore.com/post/2022/05/26/vue-3-pinia-jwt-authentication-tutorial-example)
+        * Vue 3 + Pinia with Refresh Tokens: [https://jasonwatmore.com/vue-3-pinia-jwt-authentication-with-refresh-tokens-example-tutorial](https://jasonwatmore.com/vue-3-pinia-jwt-authentication-with-refresh-tokens-example-tutorial)
+    * **BezKoder Tutorials:**
+        * Node.js Express + Vue.js JWT: [https://www.bezkoder.com/node-express-vue-jwt-auth/](https://www.bezkoder.com/node-express-vue-jwt-auth/)
+        * Vue 3 Authentication with JWT: [https://www.bezkoder.com/vue-3-authentication-jwt/](https://www.bezkoder.com/vue-3-authentication-jwt/)
+        * Node.js Express JWT: [https://www.bezkoder.com/node-js-jwt-authentication-mysql/](https://www.bezkoder.com/node-js-jwt-authentication-mysql/)
+
+5.  **Cloudflare Turnstile CAPTCHA**
+    * Official Documentation: [https://developers.cloudflare.com/turnstile/](https://developers.cloudflare.com/turnstile/)
+    * Turnstile Blog: [https://blog.cloudflare.com/turnstile-ga/](https://blog.cloudflare.com/turnstile-ga/)
+
+6.  **bcrypt Password Hashing**
+    * GitHub Repository: [https://github.com/kelektiv/node.bcrypt.js](https://github.com/kelektiv/node.bcrypt.js)
+    * Digital Ocean Tutorial: [https://www.digitalocean.com/community/tutorials/nodejs-password-hashing-with-bcrypt](https://www.digitalocean.com/community/tutorials/nodejs-password-hashing-with-bcrypt)
+
+---
+
+#### EXTERNAL API INTEGRATIONS
+
+7.  **Cloudinary Image Management**
+    * **Official Cloudinary Documentation:**
+        * Node.js Image Upload: [https://cloudinary.com/documentation/node_image_and_video_upload](https://cloudinary.com/documentation/node_image_and_video_upload)
+        * Upload Images with Node.js and React: [https://cloudinary.com/blog/guest_post/upload-images-to-cloudinary-with-node-js-and-react](https://cloudinary.com/blog/guest_post/upload-images-to-cloudinary-with-node-js-and-react)
+        * Parse Media Files with Multer: [https://cloudinary.com/blog/guest_post/how-to-parse-media-files-with-multer](https://cloudinary.com/blog/guest_post/how-to-parse-media-files-with-multer)
+        * Node.js SDK Integration: [https://cloudinary.com/documentation/node_integration](https://cloudinary.com/documentation/node_integration)
+        * Upload API Reference: [https://cloudinary.com/documentation/image_upload_api_reference](https://cloudinary.com/documentation/image_upload_api_reference)
+    * **Third-Party Tutorial:**
+        * BuildWithNode.com: [https://buildwithnode.com/cloudinary-with-nodejs/](https://buildwithnode.com/cloudinary-with-nodejs/)
+
+8.  **Google Maps JavaScript API**
+    * Geocoding Service: [https://developers.google.com/maps/documentation/javascript/geocoding](https://developers.google.com/maps/documentation/javascript/geocoding)
+    * Reverse Geocoding Example: [https://developers.google.com/maps/documentation/javascript/examples/geocoding-reverse](https://developers.google.com/maps/documentation/javascript/examples/geocoding-reverse)
+    * Geocoder Reference: [https://developers.google.com/maps/documentation/javascript/reference/geocoder](https://developers.google.com/maps/documentation/javascript/reference/geocoder)
+    * Geocoding API Overview: [https://developers.google.com/maps/documentation/geocoding/overview](https://developers.google.com/maps/documentation/geocoding/overview)
+
+9.  **Material Symbols Icons**
+    * Google Fonts Material Symbols: [https://fonts.google.com/icons](https://fonts.google.com/icons)
+    * Material Design Icons Guide: [https://developers.google.com/fonts/docs/material_symbols](https://developers.google.com/fonts/docs/material_symbols)
+
+---
+
+#### BACKEND API PATTERNS
+
+10. **Express.js 5.x RESTful API Design**
+    * **Express 5.x Specific Documentation:**
+        * Express 5.x API Documentation: [https://expressjs.com/en/5x/api.html](https://expressjs.com/en/5x/api.html)
+        * Express 5.x Migration Guide: [https://expressjs.com/en/guide/migrating-5.html](https://expressjs.com/en/guide/migrating-5.html)
+        * Express 5.x Changes: [https://github.com/expressjs/express/blob/5.0/History.md](https://github.com/expressjs/express/blob/5.0/History.md)
+    * **General REST API Tutorials (Concepts Apply to Express 5):**
+        * REST API Best Practices Handbook: [https://www.freecodecamp.org/news/rest-api-design-best-practices-build-a-rest-api/](https://www.freecodecamp.org/news/rest-api-design-best-practices-build-a-rest-api/)
+        * Learn REST API Principles: [https://www.freecodecamp.org/news/learn-rest-api-principles-by-building-an-express-app/](https://www.freecodecamp.org/news/learn-rest-api-principles-by-building-an-express-app/)
+        * REST API Best Practices: [https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/](https://www.freecodecamp.org/news/rest-api-best-practices-rest-endpoint-design-examples/)
+    * **LogRocket Tutorials:**
+        * Build REST API with MySQL: [https://blog.logrocket.com/build-rest-api-node-express-mysql/](https://blog.logrocket.com/build-rest-api-node-express-mysql/)
+        * CRUD REST API with PostgreSQL: [https://blog.logrocket.com/crud-rest-api-node-js-express-postgresql/](https://blog.logrocket.com/crud-rest-api-node-js-express-postgresql/)
+
+11. **MySQL with Node.js**
+    * MySQL2 GitHub: [https://github.com/sidorares/node-mysql2](https://github.com/sidorares/node-mysql2)
+    * W3Schools MySQL Tutorial: [https://www.w3schools.com/nodejs/nodejs_mysql.asp](https://www.w3schools.com/nodejs/nodejs_mysql.asp)
+    * Digital Ocean MySQL Connection Pooling: [https://www.digitalocean.com/community/tutorials/how-to-use-mysql-with-node-js-and-the-mysql-javascript-client](https://www.digitalocean.com/community/tutorials/how-to-use-mysql-with-node-js-and-the-mysql-javascript-client)
+
+12. **Multer File Upload**
+    * Multer GitHub: [https://github.com/expressjs/multer](https://github.com/expressjs/multer)
+    * multer-storage-cloudinary: [https://www.npmjs.com/package/multer-storage-cloudinary](https://www.npmjs.com/package/multer-storage-cloudinary)
+    * GeeksforGeeks Multiple Upload: [https://www.geeksforgee.org/how-to-upload-single-multiple-image-to-cloudinary-using-node-js/](https://www.geeksforgee.org/how-to-upload-single-multiple-image-to-cloudinary-using-node-js/)
+
+---
+
+#### CSS & DESIGN PATTERNS
+
+13. **CSS Variables & Design Systems**
+    * CSS-Tricks Custom Properties: [https://css-tricks.com/a-complete-guide-to-custom-properties/](https://css-tricks.com/a-complete-guide-to-custom-properties/)
+    * Smashing Magazine CSS Custom Properties: [https://www.smashingmagazine.com/2017/04/start-using-css-custom-properties/](https://www.smashingmagazine.com/2017/04/start-using-css-custom-properties/)
+
+14. **Dark Mode Implementation**
+    * CSS-Tricks Dark Mode Guide: [https://css-tricks.com/a-complete-guide-to-dark-mode-on-the-web/](https://css-tricks.com/a-complete-guide-to-dark-mode-on-the-web/)
+    * Web.dev prefers-color-scheme: [https://web.dev/prefers-color-scheme/](https://web.dev/prefers-color-scheme/)
+    * MDN prefers-color-scheme: [https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+
+15. **Responsive Grid Layouts**
+    * CSS Grid Complete Guide: [https://css-tricks.com/snippets/css/complete-guide-grid/](https://css-tricks.com/snippets/css/complete-guide-grid/)
+    * Flexbox Complete Guide: [https://css-tricks.com/snippets/css/a-guide-to-flexbox/](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
+16. **Form Validation**
+    * MDN Form Validation: [https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation](https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation)
+    * UX Planet Form Validation: [https://uxplanet.org/form-validation-best-practices-8e3b6d5e7ff8](https://uxplanet.org/form-validation-best-practices-8e3b6d5e7ff8)
+
+---
+
+#### UI/UX PATTERNS
+
+17. **Image Gallery & Lightbox**
+    * PhotoSwipe Gallery: [https://photoswipe.com/](https://photoswipe.com/)
+    * Swiper.js Examples: [https://swiperjs.com/demos](https://swiperjs.com/demos)
+    * CSS-Tricks Lightbox: [https://css-tricks.com/creating-a-lightbox-image-gallery/](https://css-tricks.com/creating-a-lightbox-image-gallery/)
+
+18. **Drag & Drop File Upload**
+    * MDN File API: [https://developer.mozilla.org/en-US/docs/Web/API/File](https://developer.mozilla.org/en-US/docs/Web/API/File)
+    * CSS-Tricks Drag and Drop: [https://css-tricks.com/drag-and-drop-file-uploading/](https://css-tricks.com/drag-and-drop-file-uploading/)
+    * Web.dev File Upload UX: [https://web.dev/file-upload-ux/](https://web.dev/file-upload-ux/)
+
+19. **Loading States & Skeletons**
+    * CSS-Tricks Skeleton Screens: [https://css-tricks.com/building-skeleton-screens-css-custom-properties/](https://css-tricks.com/building-skeleton-screens-css-custom-properties/)
+
+---
+
+#### DEVELOPMENT TOOLS
+
+20. **Vue CLI 5.0 Configuration**
+    * Vue CLI Documentation: [https://cli.vuejs.org/config/](https://cli.vuejs.org/config/)
+    * Vue CLI Environment Variables: [https://cli.vuejs.org/guide/mode-and-env.html](https://cli.vuejs.org/guide/mode-and-env.html)
+
+21. **Axios HTTP Client**
+    * Axios Documentation: [https://axios-http.com/docs/interceptors](https://axios-http.com/docs/interceptors)
+    * Axios GitHub: [https://github.com/axios/axios](https://github.com/axios/axios)
+
+---
+
+#### ADDITIONAL DEPENDENCIES
+
+22. **CORS (Cross-Origin Resource Sharing)**
+    * cors npm package: [https://www.npmjs.com/package/cors](https://www.npmjs.com/package/cors)
+    * MDN CORS Documentation: [https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+
+23. **dotenv**
+    * dotenv GitHub: [https://github.com/motdotla/dotenv](https://github.com/motdotla/dotenv)
+    * dotenv npm: [https://www.npmjs.com/package/dotenv](https://www.npmjs.com/package/dotenv)
+
+---
+
+#### DEVCONTAINER CONFIGURATION
+
+* VS Code Dev Containers: [https://code.visualstudio.com/docs/devcontainers/containers](https://code.visualstudio.com/docs/devcontainers/containers)
+* DevContainer Specification: [https://containers.dev/](https://containers.dev/)
+* GitHub Codespaces: [https://docs.github.com/en/codespaces](https://docs.github.com/en/codespaces)
+
+---
+
+> 
 
 # 3. RentSpot AU - Git Branch Usage Guide
-
 
 To ensure clean collaboration, **each team member must work on their own branch**.
 **Never commit directly to the `main` branch.** All changes must go through pull requests (PRs).
