@@ -136,19 +136,44 @@ const mockArticles = [
   }
 ]
 
-// Load mock news data with simulated delay
+// Original mock data implementation - keeping for fallback
+// const fetchNews = async () => {
+//   loading.value = true
+//   error.value = null
+//   try {
+//     await new Promise(resolve => setTimeout(resolve, 1000))
+//     console.log('Loading mock property news articles...')
+//     articles.value = mockArticles
+//     if (articles.value.length === 0) {
+//       error.value = 'No property news articles found at the moment.'
+//     }
+//   } catch (err) {
+//     console.error('Error loading news:', err)
+//     error.value = 'Failed to load news. Please try again later.'
+//     toast.error('Failed to load latest news')
+//   } finally {
+//     loading.value = false
+//   }
+// }
+
+// TODO: Upgraded to NewsAPI integration with fallback to mock data
 const fetchNews = async () => {
   loading.value = true
   error.value = null
 
   try {
-    // Simulate API delay for realistic loading experience
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // FIXME: Try real NewsAPI first, then fallback to mock
+    const realNews = await fetchFromNewsAPI()
     
-    console.log('Loading mock property news articles...')
-    
-    // Load mock articles
-    articles.value = mockArticles
+    if (realNews && realNews.length > 0) {
+      console.log('Successfully loaded real news from NewsAPI')
+      articles.value = realNews
+    } else {
+      // Keep original mock data logic as fallback
+      console.log('NewsAPI unavailable, using mock data as fallback')
+      await new Promise(resolve => setTimeout(resolve, 800))
+      articles.value = mockArticles
+    }
     
     if (articles.value.length === 0) {
       error.value = 'No property news articles found at the moment.'
@@ -156,10 +181,123 @@ const fetchNews = async () => {
 
   } catch (err) {
     console.error('Error loading news:', err)
-    error.value = 'Failed to load news. Please try again later.'
-    toast.error('Failed to load latest news')
+    
+    // Final fallback to original mock implementation
+    try {
+      console.log('Using mock data due to API error')
+      articles.value = mockArticles
+    } catch (fallbackErr) {
+      error.value = 'Failed to load news. Please try again later.'
+      toast.error('Failed to load latest news')
+    }
   } finally {
     loading.value = false
+  }
+}
+
+// TODO: Added NewsAPI integration for real property news
+const fetchFromNewsAPI = async () => {
+  const API_KEY = process.env.VUE_APP_NEWS_API_KEY || 'd9b129de2e5e432e8315073b3e294fc3'
+  
+  if (!API_KEY) {
+    console.warn('NewsAPI key not configured')
+    return null
+  }
+
+  try {
+    // FIXME: Targeting Australian property news specifically
+    const params = new URLSearchParams({
+      q: 'real estate OR property OR housing OR rental market Australia',
+      domains: 'realestate.com.au,domain.com.au,news.com.au,abc.net.au,smh.com.au,theaustralian.com.au',
+      language: 'en',
+      sortBy: 'publishedAt',
+      pageSize: '15',
+      from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // Last 7 days
+    })
+
+    console.log('Fetching from NewsAPI...')
+    
+    // TODO: Direct NewsAPI call - may need backend proxy for production due to CORS
+    const response = await fetch(`https://newsapi.org/v2/everything?${params}`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Accept': 'application/json'
+      },
+      // FIXME: Add mode for CORS handling in Codespaces
+      mode: 'cors'
+    })
+
+    if (!response.ok) {
+      throw new Error(`NewsAPI HTTP error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    
+    // Handle NewsAPI error responses
+    if (data.status === 'error') {
+      throw new Error(`NewsAPI error: ${data.message}`)
+    }
+    
+    // TODO: Process complex nested API response with variability handling
+    if (data.articles && Array.isArray(data.articles)) {
+      console.log(`Received ${data.articles.length} articles from NewsAPI`)
+      
+      return data.articles
+        .filter(article => {
+          // FIXME: Filter out removed/null content due to API variability
+          return article && 
+                 article.title && 
+                 article.title !== '[Removed]' &&
+                 article.description && 
+                 article.description !== '[Removed]' &&
+                 article.url &&
+                 article.publishedAt
+        })
+        .slice(0, 12)
+        .map((article, index) => {
+          // TODO: Complex nested data extraction with null safety for API compliance
+          return {
+            title: article.title || 'No Title Available',
+            description: article.description || 'No description available',
+            publishedAt: article.publishedAt,
+            
+            // FIXME: Handle nested source object with optional fields (API variability)
+            source: {
+              id: article.source?.id || null,
+              name: article.source?.name || 'Unknown Source'
+            },
+            
+            // Handle optional author field (common API variability)
+            author: article.author || null,
+            
+            // TODO: Handle optional image with fallback for missing images
+            urlToImage: article.urlToImage || `https://picsum.photos/400/200?random=${Date.now() + index}`,
+            
+            // Original URL for external linking
+            url: article.url,
+            
+            // FIXME: Handle optional content field (often truncated by NewsAPI)
+            content: article.content || null
+          }
+        })
+    }
+
+    console.warn('NewsAPI returned no articles')
+    return null
+
+  } catch (err) {
+    console.error('NewsAPI fetch failed:', err.message)
+    
+    // TODO: Log specific error types for debugging
+    if (err.message.includes('401')) {
+      console.error('NewsAPI authentication failed - check API key')
+    } else if (err.message.includes('429')) {
+      console.error('NewsAPI rate limit exceeded')
+    } else if (err.message.includes('CORS')) {
+      console.error('CORS error - may need proxy server for production')
+    }
+    
+    return null
   }
 }
 
