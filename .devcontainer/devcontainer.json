@@ -27,46 +27,41 @@
                 "unjinjang.rest-api-client",
                 "Vue.volar",
                 "cweijan.vscode-database-client2"
-            ]
+            ],
+            "settings": {
+                "extension-uninstaller.uninstall": [
+                    "github.copilot",
+                    "github.copilot-nightly", 
+                    "tabnine.tabnine-vscode",
+                    "timkmecl.chatgpt"
+                ],
+                "extensions.ignoreRecommendations": true,
+                "files.autoSave": "afterDelay",
+                "files.exclude": {
+                    "**/.*": true
+                },
+                "files.trimTrailingWhitespace": true,
+                "files.watcherExclude": {
+                    "**/.git/objects/**": true,
+                    "**/.git/subtree-cache/**": true,
+                    "**/node_modules/*/**": true
+                },
+                "git.autofetch": true,
+                "gitdoc.autoPull": "off",
+                "gitdoc.commitMessageFormat": "DD, TTT",
+                "gitdoc.commitValidationLevel": "none",
+                "gitdoc.enabled": false,
+                "gitdoc.pullOnOpen": false,
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
         }
     },
 
     // Force AMD64 architecture
     "runArgs": ["--platform=linux/amd64"],
 
-    // Auto-setup everything after container creation
-    "postCreateCommand": "bash setup.sh",
-    // Start database on every container restart  
-    "postStartCommand": "service mysql start",
+    // Manual setup - run ./setup.sh after container creation
 
     // Use root user (as per course requirement)
-    "remoteUser": "root",
-
-    // Default settings (keeping course requirements)
-    "settings": {
-        "extension-uninstaller.uninstall": [
-            "github.copilot",
-            "github.copilot-nightly", 
-            "tabnine.tabnine-vscode",
-            "timkmecl.chatgpt"
-        ],
-        "extensions.ignoreRecommendations": true,
-        "files.autoSave": "afterDelay",
-        "files.exclude": {
-            "**/.*": true
-        },
-        "files.trimTrailingWhitespace": true,
-        "files.watcherExclude": {
-            "**/.git/objects/**": true,
-            "**/.git/subtree-cache/**": true,
-            "**/node_modules/*/**": true
-        },
-        "git.autofetch": true,
-        "gitdoc.autoPull": "off",
-        "gitdoc.commitMessageFormat": "DD, TTT",
-        "gitdoc.commitValidationLevel": "none",
-        "gitdoc.enabled": false,
-        "gitdoc.pullOnOpen": false,
-        "terminal.integrated.defaultProfile.linux": "bash"
-    }
+    "remoteUser": "root"
 }
