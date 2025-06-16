@@ -475,6 +475,29 @@ We’re sharing this list both to give credit where it’s due, and to help ours
 19. **Loading States & Skeletons**
     * CSS-Tricks Skeleton Screens: [https://css-tricks.com/building-skeleton-screens-css-custom-properties/](https://css-tricks.com/building-skeleton-screens-css-custom-properties/)
 
+20. **Card Component Design Patterns**
+    * CSS-Tricks Card Component: https://css-tricks.com/snippets/css/complete-guide-grid/#aa-card-layouts
+    * Material Design Cards: https://material.io/components/cards
+    * Smashing Magazine Card Design: https://www.smashingmagazine.com/2016/10/designing-card-based-user-interfaces/
+
+21. **Real Estate Card Layouts (Inspiration)**
+    * Airbnb Property Cards: https://www.airbnb.com/ (Homepage property grid)
+    * Domain.com.au Card Layout: https://www.domain.com.au/
+    * RealEstate.com.au Listings: https://www.realestate.com.au/
+
+22. **CSS Card Hover Effects**
+    * CSS-Tricks Card Hover Effects: https://css-tricks.com/block-links-card-clickable-areas/
+    * Hover.css Library: https://ianlunn.github.io/Hover/ (For hover effect ideas)
+    * CodePen Card Hover Examples: https://codepen.io/tag/card-hover
+
+23. **Responsive Card Grid Layouts**
+    * CSS Grid Card Layout: https://css-tricks.com/auto-sizing-columns-css-grid-auto-fill-vs-auto-fit/
+    * Responsive Card Design Patterns: https://inclusive-components.design/cards/
+    * Kevin Powell Card Tutorial: https://www.youtube.com/watch?v=rg7Fvvl3taU
+
+24. **Image Overlay Techniques**
+    * CSS Image Overlay: https://www.w3schools.com/howto/howto_css_image_overlay.asp
+    * Image Hover Overlay Effects: https://tympanus.net/codrops/2014/10/28/overlay-effect-menu/
 ---
 
 #### DEVELOPMENT TOOLS
