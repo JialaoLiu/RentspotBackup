@@ -35,9 +35,9 @@
     "runArgs": ["--platform=linux/amd64"],
 
     // Auto-setup everything after container creation
-    "postCreateCommand": "bash -c 'service mysql start && sleep 5 && mysql -u root -e \"CREATE DATABASE IF NOT EXISTS Rent_database;\" && WORKSPACE_PATH=\"/workspaces/25S1_WDC_New_UG_Groups_1\" && SQL_FILE=\"$WORKSPACE_PATH/backend/Rent_database_updated.sql\" && if [ -f \"$SQL_FILE\" ]; then mysql -u root Rent_database < \"$SQL_FILE\"; fi && mkdir -p \"$WORKSPACE_PATH/backend\" && cat > \"$WORKSPACE_PATH/backend/.env\" << \"EOF\"\nDB_HOST=localhost\nDB_USER=root\nDB_PASSWORD=\nDB_NAME=Rent_database\nDB_PORT=3306\nJWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf\nPORT=8080\nCLOUDINARY_CLOUD_NAME=dzxrmtus9\nCLOUDINARY_API_KEY=138993529279886\nCLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8\nTURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nTURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ\nNEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3\nEOF\ncd \"$WORKSPACE_PATH/backend\" && npm install && mkdir -p \"$WORKSPACE_PATH/rentspot-frontend\" && cat > \"$WORKSPACE_PATH/rentspot-frontend/.env\" << \"EOF\"\nVUE_APP_API_BASE_URL=\nVUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9\nVUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned\nVUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0\nVUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA\nEOF\ncd \"$WORKSPACE_PATH/rentspot-frontend\" && npm install && if [ -n \"$CODESPACE_NAME\" ]; then BASE_URL=\"https://${CODESPACE_NAME}-8080.app.github.dev\" && API_URL=\"${BASE_URL}/api\" && sed -i \"s|VUE_APP_API_BASE_URL=|VUE_APP_API_BASE_URL=${API_URL}|\" \".env\"; else sed -i \"s|VUE_APP_API_BASE_URL=|VUE_APP_API_BASE_URL=http://localhost:8080/api|\" \".env\"; fi'",
+    "postCreateCommand": "bash setup.sh",
     // Start database on every container restart  
-    "postStartCommand": "service mysql start 2>/dev/null || service mariadb start 2>/dev/null || true",
+    "postStartCommand": "service mysql start",
 
     // Use root user (as per course requirement)
     "remoteUser": "root",

@@ -2,6 +2,20 @@
 
 # RentSpot Codespaces Setup
 
+# Start MySQL if not running
+service mysql start 2>/dev/null || true
+sleep 3
+
+# Create database
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS Rent_database;" 2>/dev/null || true
+
+# Import database schema
+if [ -f "backend/Rent_database_updated.sql" ]; then
+    mysql -u root Rent_database < backend/Rent_database_updated.sql 2>/dev/null || true
+elif [ -f "backend/Rent_database.sql" ]; then
+    mysql -u root Rent_database < backend/Rent_database.sql 2>/dev/null || true
+fi
+
 # Backend setup
 cd backend
 
