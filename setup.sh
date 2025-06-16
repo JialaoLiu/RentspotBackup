@@ -12,7 +12,7 @@ echo "Environment: ${CODESPACE_NAME:-Local}"
 echo "Starting MySQL service..."
 if command -v mysql &> /dev/null; then
     service mysql start 2>/dev/null || sudo service mysql start 2>/dev/null || echo "MySQL might already be running"
-    
+
     # Wait for MySQL to be ready
     echo "Waiting for MySQL to be ready..."
     for i in {1..30}; do
@@ -36,16 +36,7 @@ mysql -u root -e "CREATE DATABASE IF NOT EXISTS Rent_database;" 2>/dev/null || e
 
 # 3. Import database schema with sample data
 echo "Importing database schema and data..."
-if [ -f "backend/Rent_database_updated.sql" ]; then
-    mysql -u root Rent_database < backend/Rent_database_updated.sql 2>/dev/null && echo "Database imported successfully" || echo "Database import had warnings"
-elif [ -f "backend/Rent_database.sql" ]; then
-    mysql -u root Rent_database < backend/Rent_database.sql 2>/dev/null && echo "Basic schema imported" || echo "Schema import had warnings"
-fi
-
-# Import address migration if needed
-if [ -f "backend/migrate_address.sql" ]; then
-    mysql -u root Rent_database < backend/migrate_address.sql 2>/dev/null || true
-fi
+mysql -u root Rent_database < backend/Rent_database_updated.sql
 
 # 4. Setup backend
 echo "Configuring backend..."
@@ -115,11 +106,11 @@ npm install
 cd ..
 
 # 6. Make ports public in Codespaces
-if [ -n "$CODESPACE_NAME" ]; then
-    echo "Making ports public..."
-    gh codespace ports visibility 8080:public -c $CODESPACE_NAME 2>/dev/null || true
-    gh codespace ports visibility 5173:public -c $CODESPACE_NAME 2>/dev/null || true
-fi
+# if [ -n "$CODESPACE_NAME" ]; then
+#     echo "Making ports public..."
+#     gh codespace ports visibility 8080:public -c $CODESPACE_NAME 2>/dev/null || true
+#     gh codespace ports visibility 5173:public -c $CODESPACE_NAME 2>/dev/null || true
+# fi
 
 # 7. Verify setup
 echo "Verifying setup..."
