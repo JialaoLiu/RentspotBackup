@@ -45,14 +45,20 @@ When you create a new Codespace, everything will be automatically configured:
 If you do not see the database content correctly mapped to the backend or displayed on the frontend:
 
 1. Run the setup script manually:
+
 ```bash
 bash setup.sh
+```
+
 2.	Note that GitHub Codespaces can sometimes take up to 2 minutes to fully initialize MySQL.
 3.	After waiting, restart both the backend and frontend:
+
 ```bash
 cd backend&&npm start
+```
 ```bash
 cd rentspot-frontend&&npm run serve
+```
 
 This is not a bug — just a Codespaces delay. Apologies for any confusion; I spent significant time debugging this issue alone to ensure the system now recovers correctly with the above steps.
 
