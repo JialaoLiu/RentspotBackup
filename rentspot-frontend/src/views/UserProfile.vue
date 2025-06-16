@@ -266,7 +266,7 @@ const updateProfile = async () => {
     if (loadingState.value !== 'idle') return;
     
     // console.log('Starting profile update...', profile.value); // keep for debugging
-    // debugger; // remove this before production
+    // debugger; // remove this before codespaces deployment
 
     loadingState.value = 'profile';
     try {

@@ -5,7 +5,7 @@ const { authenticateToken, requireLandlord, requireAdmin } = require('../middlew
 const { handleValidationError, handleNotFound, handleForbidden, handleDbError } = require('../utils/errorHandler');
 
 // Main property routes evolved from simple CRUD to complex image handling and filtering
-// Multiple image upload was added later when users wanted property galleries
+// Multiple image upload was added later when wanted property galleries
 
 // Database connection
 const db = require('../config/db');

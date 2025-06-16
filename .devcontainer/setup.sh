@@ -1,54 +1,46 @@
 #!/bin/bash
-set -e
 
-echo "Starting RentSpot auto-setup..."
+# DevContainer setup script for RentSpot project
+# Fixes path resolution issues in Codespaces
 
-# Function to handle errors
-handle_error() {
-    echo "Error occurred in setup. Continuing with manual instructions..."
-    echo "Manual setup commands:"
-    echo "1. cd backend && npm install"
-    echo "2. cd ../rentspot-frontend && npm install"
-    echo "3. mysql -u root -e 'CREATE DATABASE IF NOT EXISTS Rent_database;'"
-    echo "4. mysql -u root Rent_database < backend/Rent_database_updated.sql"
-    exit 0  # Don't fail the container creation
-}
+echo "Starting RentSpot DevContainer Setup..."
 
-trap handle_error ERR
-
-# Ensure we're in the right directory
-cd /workspaces/*/
-
-# Install MySQL if needed (should already be installed in WDC image)
-if ! command -v mysql &> /dev/null; then
-    echo "Installing MySQL..."
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server mysql-client
+# Determine the correct workspace path
+WORKSPACE_PATH="/workspaces/25S1_WDC_New_UG_Groups_1"
+if [ ! -d "$WORKSPACE_PATH" ]; then
+    # Fallback to first directory in /workspaces/
+    WORKSPACE_PATH=$(find /workspaces -maxdepth 1 -type d -name "*WDC*" | head -1)
+    if [ -z "$WORKSPACE_PATH" ]; then
+        WORKSPACE_PATH="/workspaces/$(ls /workspaces | head -1)"
+    fi
 fi
 
-# Start MySQL
-echo "Starting MySQL..."
-service mysql start || service mariadb start || true
+echo "Using workspace path: $WORKSPACE_PATH"
+
+# 1. Start MySQL service
+echo "Starting MySQL service..."
+service mysql start
 sleep 5
 
-# Create database
-echo "Creating database..."
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS Rent_database;" || echo "Database creation failed, will continue..."
+# 2. Create database
+echo "Creating database if not exists..."
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS Rent_database;"
 
-# Import database if file exists
-if [ -f "backend/Rent_database_updated.sql" ]; then
-    echo "Importing database schema..."
-    mysql -u root Rent_database < backend/Rent_database_updated.sql || echo "Database import failed, will continue..."
+# 3. Import SQL file if exists
+SQL_FILE="$WORKSPACE_PATH/backend/Rent_database_updated.sql"
+if [ -f "$SQL_FILE" ]; then
+    echo "Importing Rent_database_updated.sql..."
+    mysql -u root Rent_database < "$SQL_FILE"
+else
+    echo "Rent_database_updated.sql not found at $SQL_FILE, skipping import."
 fi
 
-# Backend setup
-echo "Setting up backend..."
-cd backend
+# 4. Create backend .env file
+echo "Generating backend .env file..."
+BACKEND_DIR="$WORKSPACE_PATH/backend"
+mkdir -p "$BACKEND_DIR"
 
-# Create .env if it doesn't exist
-if [ ! -f ".env" ]; then
-    echo "Creating backend .env..."
-    cat > .env << 'EOF'
+cat > "$BACKEND_DIR/.env" << 'EOF'
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
@@ -63,40 +55,55 @@ TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
 TURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ
 NEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3
 EOF
-fi
 
-# Install backend dependencies
+echo "Backend .env created successfully"
+
+# 5. Install backend dependencies
 echo "Installing backend dependencies..."
-rm -rf node_modules package-lock.json
-npm cache clean --force
+cd "$BACKEND_DIR"
 npm install
 
-# Frontend setup
-echo "Setting up frontend..."
-cd ../rentspot-frontend
+# 6. Create frontend .env file
+echo "Generating frontend .env file..."
+FRONTEND_DIR="$WORKSPACE_PATH/rentspot-frontend"
+mkdir -p "$FRONTEND_DIR"
 
-# Create .env if it doesn't exist
-if [ ! -f ".env" ]; then
-    echo "Creating frontend .env..."
-    cat > .env << 'EOF'
-VUE_APP_API_BASE_URL=http://localhost:8080/api
+cat > "$FRONTEND_DIR/.env" << 'EOF'
+VUE_APP_API_BASE_URL=
 VUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9
 VUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
 VUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
 VUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA
 EOF
-fi
 
-# Install frontend dependencies
+echo "Frontend .env created successfully"
+
+# 7. Install frontend dependencies
 echo "Installing frontend dependencies..."
-rm -rf node_modules package-lock.json
-npm cache clean --force
+cd "$FRONTEND_DIR"
 npm install
 
+# 8. Configure API URL for Codespaces
+echo "Configuring API URL..."
+if [ -n "$CODESPACE_NAME" ]; then
+    BASE_URL="https://${CODESPACE_NAME}-8080.app.github.dev"
+    API_URL="${BASE_URL}/api"
+    echo "Detected Codespaces environment"
+    echo "Setting API URL to: $API_URL"
+    sed -i "s|VUE_APP_API_BASE_URL=|VUE_APP_API_BASE_URL=${API_URL}|" "$FRONTEND_DIR/.env"
+    echo "Frontend .env updated with Codespaces API URL"
+else
+    echo "Local development detected, using localhost API"
+    sed -i "s|VUE_APP_API_BASE_URL=|VUE_APP_API_BASE_URL=http://localhost:8080/api|" "$FRONTEND_DIR/.env"
+    echo "Frontend .env updated with localhost API URL"
+fi
+
+echo "Setup complete!"
 echo ""
-echo "RentSpot setup complete!"
+echo "Next steps:"
+echo "   Backend:  cd backend && npm start"
+echo "   Frontend: cd rentspot-frontend && npm run serve"
 echo ""
-echo "To start the application:"
-echo "Terminal 1: cd backend && npm start"
-echo "Terminal 2: cd rentspot-frontend && npm run serve"
-echo ""
+echo "Access URLs:"
+echo "   Frontend: http://localhost:5173 (local) or Codespace port 5173"
+echo "   Backend:  http://localhost:8080 (local) or Codespace port 8080"
