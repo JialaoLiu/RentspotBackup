@@ -43,14 +43,14 @@ When you create a new Codespace, everything will be automatically configured:
 ### Important: Database Not Showing Up Immediately?
 
 If you do not see the database content correctly mapped to the backend or displayed on the frontend:
+1.Manually change the ports at the frontend and the backend from "Private" to "Public"
 
-1. Run the setup script manually:
+2. Run the setup script manually:
 
 ```bash
 bash setup.sh
 ```
 
-2.	Note that GitHub Codespaces can sometimes take up to 2 minutes to fully initialize MySQL.
 3.	After waiting, restart both the backend and frontend:
 
 ```bash
