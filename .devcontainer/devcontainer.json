@@ -61,7 +61,11 @@
     "runArgs": ["--platform=linux/amd64"],
 
     // Manual setup - run ./setup.sh after container creation
-
+    "postCreateCommand": "bash setup.sh",
+    
+    // Start MySQL on container restart
+    "postStartCommand": "service mysql start",
+    
     // Use root user (as per course requirement)
     "remoteUser": "root"
 }
