@@ -1,13 +1,13 @@
+// TODO: Replace JWT with session-based authentication before final production!
+// FIXME: Current use of jsonwebtoken violates course submission requirements.
 const jwt = require('jsonwebtoken');
 const { handleAuthError, handleValidationError, handleForbidden } = require('../utils/errorHandler');
 require('dotenv').config();
 
 /**
- * JWT Authentication middleware - learned this pattern after getting hacked once...
+ * JWT Authentication middleware..
  * Validates JWT tokens and extracts user information for protected routes
- * 
- * Originally tried simpler approach but had to handle edge cases like missing Authorization header,
- * malformed Bearer token format, expired tokens (users complain about this a lot),
+
  * and invalid signatures (usually development vs production secret mismatch).
  */
 function authenticateToken(req, res, next) {

@@ -60,7 +60,7 @@ const adminController = {
         return sendError(res, 'Invalid role. Must be 0 (renter), 1 (landlord), or 2 (admin)', 400);
       }
 
-      // Security check: prevent admin from demoting themselves (learned this the hard way)
+      // Prevent admin from changing own role
       if (parseInt(id) === req.user.user_id && parseInt(role) !== 2) {
         return sendError(res, 'Cannot change your own admin role', 403);
       }

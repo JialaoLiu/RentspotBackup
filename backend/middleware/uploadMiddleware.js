@@ -5,10 +5,8 @@ const path = require('path');
 const fs = require('fs');
 
 // Upload middleware evolved from simple local storage to complex Cloudinary setup
-// Started with basic file uploads, then added image optimization, face detection for avatars
-// Multiple image support came later when property galleries were requested
 
-// Local storage for property images (kept as fallback when Cloudinary is down)
+// Local storage for property images
 const localUploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(localUploadsDir)) {
     fs.mkdirSync(localUploadsDir, { recursive: true });
@@ -36,15 +34,14 @@ const localStorage = multer.diskStorage({
     }
 });
 
-// Cloudinary storage for avatars with face detection
-// Face detection was added after getting complaints about cropped heads in profile pics
+
 const avatarStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'rentspot-avatars',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [
-      { width: 400, height: 400, crop: 'fill', gravity: 'face' }, // Main with face detection
+      { width: 400, height: 400, crop: 'fill', gravity: 'face' }, // Main with face detection(From api document)It’d be a waste not to use it.
       { width: 100, height: 100, crop: 'fill', gravity: 'face', quality: 'auto', format: 'webp' } // Thumbnail
     ]
   }
@@ -85,7 +82,7 @@ const propertyStorage = new CloudinaryStorage({
     folder: 'rentspot-properties',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     transformation: [
-      { width: 800, height: 600, crop: 'limit', quality: 'auto' } // Auto quality saves bandwidth
+      { width: 800, height: 600, crop: 'limit', quality: 'auto' } // Auto quality optimization
     ]
   }
 });
@@ -120,7 +117,7 @@ const imageFilter = (req, file, cb) => {
 // }).single('propertyImage');
 
 // Upload configs for different use cases
-// File size limits learned through user feedback and server capacity testing
+// File size limits for different use cases
 const uploadConfigs = {
   // Local upload (fallback option)
   local: multer({
@@ -133,7 +130,7 @@ const uploadConfigs = {
   avatar: multer({
     storage: avatarStorage,
     fileFilter: imageFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB increased from 2MB after complaints
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit for avatar files
   }),
   
   // Property upload with optimization
@@ -160,4 +157,4 @@ module.exports = {
 };
 
 // TODO: add rate limiting for upload endpoints to prevent abuse
-// TODO: implement image compression before Cloudinary upload to save bandwidth
+// TODO: implement image compression before Cloudinary upload

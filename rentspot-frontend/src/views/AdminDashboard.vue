@@ -496,7 +496,8 @@ async function createNewUser() {
   creatingUser.value = true;
   try {
     // Use existing auth registration endpoint
-    const response = await fetch('http://localhost:8080/api/auth/register', {
+    const apiUrl = process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080/api';
+    const response = await fetch(`${apiUrl.replace('/api', '')}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
