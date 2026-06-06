@@ -198,7 +198,7 @@ const fetchNews = async () => {
 // TODO: Added NewsAPI integration for real property news
 const fetchFromNewsAPI = async () => {
   // Original direct NewsAPI implementation - worked locally but had CORS issues in Codespaces
-  // const API_KEY = process.env.VUE_APP_NEWS_API_KEY || 'd9b129de2e5e432e8315073b3e294fc3'
+  // const API_KEY = process.env.VUE_APP_NEWS_API_KEY
   // 
   // if (!API_KEY) {
   //   console.warn('NewsAPI key not configured')

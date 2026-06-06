@@ -5,7 +5,7 @@ const router = express.Router()
 // FIXME: NewsAPI proxy endpoint - needed because direct frontend calls fail in Codespaces
 router.get('/property-news', async (req, res) => {
   try {
-    const API_KEY = process.env.NEWS_API_KEY || 'd9b129de2e5e432e8315073b3e294fc3'
+    const API_KEY = process.env.NEWS_API_KEY
     
     if (!API_KEY) {
       return res.status(500).json({ 

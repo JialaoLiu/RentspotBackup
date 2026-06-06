@@ -84,8 +84,12 @@ onMounted(() => {
   }
   
   // Use standard sitekey for non-Codespaces environments
-  const siteKey = process.env.VUE_APP_TURNSTILE_SITE_KEY || '0x4AAAAAABdkinnD2a45uxc0';
-  
+  const siteKey = process.env.VUE_APP_TURNSTILE_SITE_KEY || '';
+  if (!siteKey) {
+    console.warn('Turnstile site key not configured - CAPTCHA disabled');
+    return;
+  }
+
   // Load turnstile script
   let script = document.createElement('script');
   script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";

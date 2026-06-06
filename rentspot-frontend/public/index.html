@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <!-- Google Maps API -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=REMOVED_OLD_GOOGLE_MAPS_KEY&language=en&loading=async"
+      src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.VUE_APP_GOOGLE_MAPS_API_KEY || '' %>&language=en&loading=async"
       async
       defer>
     </script>

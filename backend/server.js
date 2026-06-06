@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 8080;
 
 // FIXME: CRITICAL - Database connection fails when switching between local and Codespace environments
 // TODO: Need to implement automatic environment detection for database credentials
-// Local environment requires DB_PASSWORD=Ljl12345! but Codespace uses empty password
+// Local environment uses DB_PASSWORD from backend/.env, while Codespaces can use an empty password.
 // Current workaround: manually update .env files when switching environments
 // 
 // FIXME: Current issue - Codespace returns {"status":"error","message":"Database error"}

@@ -42,6 +42,8 @@ mysql -u root Rent_database < backend/Rent_database_updated.sql
 echo "Configuring backend..."
 cd backend
 
+JWT_SECRET="${JWT_SECRET:-$(openssl rand -hex 64 2>/dev/null || node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")}"
+
 cat > .env << EOF
 # Database Configuration (IPv4 for Codespaces)
 DB_HOST=127.0.0.1
@@ -51,7 +53,7 @@ DB_NAME=Rent_database
 DB_PORT=3306
 
 # JWT Secret
-JWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf
+JWT_SECRET=${JWT_SECRET}
 
 # Server Port
 PORT=8080
@@ -60,16 +62,16 @@ PORT=8080
 FRONTEND_URL=https://${CODESPACE_NAME}-5173.app.github.dev
 
 # Cloudinary configuration
-CLOUDINARY_CLOUD_NAME=dzxrmtus9
-CLOUDINARY_API_KEY=138993529279886
-CLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8
+CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
+CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
+CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
 
 # Cloudflare Turnstile credentials
-TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
-TURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ
+TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
 
 # NewsAPI Configuration
-NEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3
+NEWS_API_KEY=${NEWS_API_KEY:-}
 
 # Environment
 NODE_ENV=development
@@ -89,15 +91,15 @@ cat > .env << EOF
 VUE_APP_API_BASE_URL=https://${CODESPACE_NAME}-8080.app.github.dev/api
 
 # Cloudinary configuration
-VUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9
-VUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
+VUE_APP_CLOUDINARY_CLOUD_NAME=${VUE_APP_CLOUDINARY_CLOUD_NAME:-}
+VUE_APP_CLOUDINARY_UPLOAD_PRESET=${VUE_APP_CLOUDINARY_UPLOAD_PRESET:-}
 
 # Cloudflare Turnstile configuration
-VUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
+VUE_APP_TURNSTILE_SITE_KEY=${VUE_APP_TURNSTILE_SITE_KEY:-}
 VUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA
 
-# NewsAPI configuration
-VUE_APP_NEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3
+# Google Maps configuration
+VUE_APP_GOOGLE_MAPS_API_KEY=${VUE_APP_GOOGLE_MAPS_API_KEY:-}
 EOF
 
 echo "Installing frontend dependencies..."

@@ -85,39 +85,42 @@ cd backend
 npm install
 ```
 
-Create `.env` file in the backend directory:
+Create `.env` file in the backend directory. You can copy `backend/.env.example` and fill in your own values:
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=Ljl12345!  # Your MySQL password
+DB_PASSWORD=your_mysql_password
 DB_NAME=Rent_database
 DB_PORT=3306
 
-JWT_SECRET=00ae84691b5cc7bb6ca21e11779bc0cefb5ed62d1b7331a71ea0628e7f2c98d54331b54f3c67084bc2ec0e78e9ef21473b9b575eb7e8336dc5faebdafb44dacf
+JWT_SECRET=generate_a_long_random_secret
 
 PORT=8080
 
-CLOUDINARY_CLOUD_NAME=dzxrmtus9
-CLOUDINARY_API_KEY=138993529279886
-CLOUDINARY_API_SECRET=23CK6Atf0I_PolCywakizy-PJU8
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
-TURNSTILE_SECRET_KEY=0x4AAAAAABdkii48VRRJP3Cb8Ggbml6zNyQ
+TURNSTILE_SITE_KEY=your_turnstile_site_key
+TURNSTILE_SECRET_KEY=your_turnstile_secret_key
 
-NEWS_API_KEY=d9b129de2e5e432e8315073b3e294fc3
+NEWS_API_KEY=your_newsapi_key
 
 API_BASE_URL=http://localhost:8080/api
 NODE_ENV=development
 ```
 
-Create `.env` file in the frontend directory (`rentspot-frontend/.env`):
+Create `.env` file in the frontend directory (`rentspot-frontend/.env`). You can copy `rentspot-frontend/.env.example`:
 ```env
 VUE_APP_API_BASE_URL=http://localhost:8080/api
-VUE_APP_CLOUDINARY_CLOUD_NAME=dzxrmtus9
-VUE_APP_CLOUDINARY_UPLOAD_PRESET=rentspot_unsigned
-VUE_APP_TURNSTILE_SITE_KEY=0x4AAAAAABdkinnD2a45uxc0
+VUE_APP_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+VUE_APP_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+VUE_APP_TURNSTILE_SITE_KEY=your_turnstile_site_key
 VUE_APP_TURNSTILE_TEST_SITE_KEY=1x00000000000000000000AA
+VUE_APP_GOOGLE_MAPS_API_KEY=your_google_maps_browser_key
 ```
+
+Do not commit real `.env` files. Rotate any keys that were previously committed to Git history before deploying.
 
 #### For GitHub Codespaces:
 **No setup required** - All configuration files are automatically created during Codespace setup.
